@@ -1,0 +1,711 @@
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .page {
+    padding: 0 0 1rem;
+  }
+
+  .section-lbl {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.06em;
+    margin: 1.5rem 0 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .role-pill {
+    border-radius: var(--border-radius-lg);
+    padding: 0.9rem 1rem;
+    border: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-primary);
+  }
+
+  .role-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .role-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+  }
+
+  .role-where {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+
+  .ri-blue {
+    background: #E6F1FB;
+    color: #185FA5;
+  }
+
+  .ri-purple {
+    background: #EEEDFE;
+    color: #3C3489;
+  }
+
+  .ri-coral {
+    background: #FAECE7;
+    color: #712B13;
+  }
+
+  .ri-amber {
+    background: #FAEEDA;
+    color: #633806;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--color-border-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text-secondary);
+    transition: all 0.15s;
+  }
+
+  .tab:hover {
+    background: var(--color-background-secondary);
+  }
+
+  .tab.active {
+    border: 1.5px solid currentColor;
+    font-weight: 500;
+  }
+
+  .tab.t-cust.active {
+    color: #185FA5;
+    border-color: #378ADD;
+    background: #E6F1FB;
+  }
+
+  .tab.t-driv.active {
+    color: #712B13;
+    border-color: #D85A30;
+    background: #FAECE7;
+  }
+
+  .tab.t-adm.active {
+    color: #3C3489;
+    border-color: #534AB7;
+    background: #EEEDFE;
+  }
+
+  .tab.t-biz.active {
+    color: #633806;
+    border-color: #BA7517;
+    background: #FAEEDA;
+  }
+
+  .wf-panel {
+    display: none;
+  }
+
+  .wf-panel.active {
+    display: block;
+  }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .step-line {
+    width: 2px;
+    flex: 1;
+    min-height: 20px;
+    background: var(--color-border-tertiary);
+    margin: 3px 0;
+  }
+
+  .step-body {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    flex: 1;
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 3px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .stag {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    border: 0.5px solid transparent;
+  }
+
+  .stag i {
+    font-size: 12px;
+  }
+
+  /* API Specific Tag Colors */
+  .stag.api-map {
+    background: #E1F5EE;
+    color: #0F6E56;
+    border-color: #A2E2C8;
+  }
+
+  .stag.api-auth {
+    background: #FAEEDA;
+    color: #854F0B;
+    border-color: #F0D0A0;
+  }
+
+  .stag.api-db {
+    background: #E6F1FB;
+    color: #185FA5;
+    border-color: #B4D6F6;
+  }
+
+  .stag.api-pay {
+    background: #FAECE7;
+    color: #993C1D;
+    border-color: #F0C4B4;
+  }
+
+  .stag.api-ai {
+    background: #EEEDFE;
+    color: #534AB7;
+    border-color: #C6C1F8;
+  }
+
+  .stag.api-notify {
+    background: #EAF3DE;
+    color: #3B6D11;
+    border-color: #C1DF9E;
+  }
+
+  .stag.api-sec {
+    background: #FCEBEB;
+    color: #A32D2D;
+    border-color: #F5B0B0;
+  }
+
+  .stag.api-media {
+    background: #E6F1FB;
+    color: #185FA5;
+    border-color: #B4D6F6;
+  }
+
+  .sd-blue .step-dot {
+    background: #E6F1FB;
+    color: #0C447C;
+  }
+
+  .sd-coral .step-dot {
+    background: #FAECE7;
+    color: #712B13;
+  }
+
+  .sd-purple .step-dot {
+    background: #EEEDFE;
+    color: #3C3489;
+  }
+
+  .sd-amber .step-dot {
+    background: #FAEEDA;
+    color: #633806;
+  }
+
+  .platform-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .platform-card {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px;
+  }
+
+  .platform-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .platform-list {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+  }
+
+  .event-table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+
+  .event-table th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-align: left;
+    padding: 5px 8px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .event-table td {
+    padding: 6px 8px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    color: var(--color-text-secondary);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .event-table td:first-child {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+  }
+
+  .event-table tr:last-child td {
+    border-bottom: none;
+  }
+</style>
+
+<h2 class="sr-only">CargoHub Complete API-Integrated RBAC Workflow</h2>
+<div class="page">
+
+  <div class="section-lbl">Roles — who uses CargoHub</div>
+  <div class="role-grid">
+    <div class="role-pill">
+      <div class="role-icon ri-blue"><i class="ti ti-user" aria-hidden="true"></i></div>
+      <div class="role-name">Customer</div>
+      <div class="role-where">Mobile app + Website</div>
+    </div>
+    <div class="role-pill">
+      <div class="role-icon ri-coral"><i class="ti ti-steering-wheel" aria-hidden="true"></i></div>
+      <div class="role-name">Driver</div>
+      <div class="role-where">Mobile app only</div>
+    </div>
+    <div class="role-pill">
+      <div class="role-icon ri-purple"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+      <div class="role-name">Admin</div>
+      <div class="role-where">Website only</div>
+    </div>
+    <div class="role-pill">
+      <div class="role-icon ri-amber"><i class="ti ti-building-store" aria-hidden="true"></i></div>
+      <div class="role-name">Business (B2B)</div>
+      <div class="role-where">Website only</div>
+    </div>
+  </div>
+
+  <div class="section-lbl">Workflow by role (Powered by APIs)</div>
+  <div class="tabs">
+    <button class="tab t-cust active" onclick="show('cust',this)"><i class="ti ti-user" aria-hidden="true"></i>
+      Customer</button>
+    <button class="tab t-driv" onclick="show('driv',this)"><i class="ti ti-steering-wheel" aria-hidden="true"></i>
+      Driver</button>
+    <button class="tab t-adm" onclick="show('adm',this)"><i class="ti ti-shield-check" aria-hidden="true"></i>
+      Admin</button>
+    <button class="tab t-biz" onclick="show('biz',this)"><i class="ti ti-building-store" aria-hidden="true"></i>
+      Business</button>
+  </div>
+
+  <!-- CUSTOMER -->
+  <div class="wf-panel active" id="wf-cust">
+    <div class="platform-row">
+      <div class="platform-card">
+        <div class="platform-title"><i class="ti ti-device-mobile" aria-hidden="true"></i> Mobile app screens</div>
+        <div class="platform-list">Login / OTP<br>Role select (Customer)<br>Home map (book cargo)<br>Live tracking
+          map<br>Payment screen<br>Booking history</div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-title"><i class="ti ti-world" aria-hidden="true"></i> Website screens</div>
+        <div class="platform-list">Landing page<br>Book cargo (web form)<br>Track booking<br>Order history</div>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Initial Load & Login</div>
+          <div class="step-desc">Website detects user's city. User logs in via Google or Phone. Registration triggers
+            breach check on password and phone validation. Role saved as "Customer".</div>
+          <div class="step-tags">
+            <span class="stag api-map"><i class="ti ti-world-pin"></i> IPinfo.io</span>
+            <span class="stag api-auth"><i class="ti ti-brand-firebase"></i> Firebase Auth</span>
+            <span class="stag api-sec"><i class="ti ti-lock"></i> HaveIBeenPwned</span>
+            <span class="stag api-db"><i class="ti ti-database"></i> Supabase</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Open Booking Map</div>
+          <div class="step-desc">Interactive map loads with cargo heatmap. User enters pickup/drop locations with Indian
+            address autocomplete. AI chatbot available to help pick cargo size.</div>
+          <div class="step-tags">
+            <span class="stag api-map"><i class="ti ti-map-2"></i> Mapbox GL JS</span>
+            <span class="stag api-map"><i class="ti ti-current-location"></i> OLA Maps</span>
+            <span class="stag api-ai"><i class="ti ti-brain"></i> Gemini AI</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Get Fare Estimate</div>
+          <div class="step-desc">Distance calculated. Weather checked for "Monsoon Surcharge". Fare request rate-limited
+            to prevent bot spam. Fare cached for 10 minutes.</div>
+          <div class="step-tags">
+            <span class="stag api-map"><i class="ti ti-ruler"></i> OLA Distance Matrix</span>
+            <span class="stag api-ai"><i class="ti ti-cloud-rain"></i> OpenWeatherMap</span>
+            <span class="stag api-sec"><i class="ti ti-shield-check"></i> Arcjet</span>
+            <span class="stag api-db"><i class="ti ti-bolt"></i> Upstash Redis</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Confirm & Book</div>
+          <div class="step-desc">Booking inserted securely via RLS. Nearest drivers queried. Push notification sent to
+            nearby drivers. User's view updates in real-time.</div>
+          <div class="step-tags">
+            <span class="stag api-db"><i class="ti ti-server"></i> Supabase PostGIS</span>
+            <span class="stag api-notify"><i class="ti ti-bell"></i> FCM Push</span>
+            <span class="stag api-db"><i class="ti ti-antenna"></i> Supabase Realtime</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">5</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Live Tracking</div>
+          <div class="step-desc">Driver's live coordinates stream via WebSockets. Route polyline drawn. Fallback
+            database used if WebSocket connection drops on mobile background.</div>
+          <div class="step-tags">
+            <span class="stag api-db"><i class="ti ti-radio"></i> Socket.io</span>
+            <span class="stag api-map"><i class="ti ti-map-2"></i> Mapbox Route</span>
+            <span class="stag api-db"><i class="ti ti-brand-firebase"></i> Firebase RTDB</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-blue">
+        <div class="step-left">
+          <div class="step-dot">6</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Payment & Receipt</div>
+          <div class="step-desc">Cargo delivered. Payment modal opens. Razorpay processes UPI/Card. Transaction
+            signature verified server-side. PDF receipt emailed to customer.</div>
+          <div class="step-tags">
+            <span class="stag api-pay"><i class="ti ti-credit-card"></i> Razorpay</span>
+            <span class="stag api-pay"><i class="ti ti-lock"></i> HMAC Verify</span>
+            <span class="stag api-notify"><i class="ti ti-mail"></i> Resend</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRIVER -->
+  <div class="wf-panel" id="wf-driv">
+    <div class="flow">
+      <div class="step sd-coral">
+        <div class="step-left">
+          <div class="step-dot">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Register / Login</div>
+          <div class="step-desc">Phone OTP auth. Driver number validated against telecom registry. Role stored in
+            Supabase.</div>
+          <div class="step-tags">
+            <span class="stag api-auth"><i class="ti ti-device-mobile"></i> Firebase OTP</span>
+            <span class="stag api-sec"><i class="ti ti-check"></i> Abstract API</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-coral">
+        <div class="step-left">
+          <div class="step-dot">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Complete KYC</div>
+          <div class="step-desc">Driver uploads Aadhaar, License, RC, Insurance. Images are compressed on device,
+            uploaded to CDN. Status: Pending Admin Approval.</div>
+          <div class="step-tags">
+            <span class="stag api-media"><i class="ti ti-cloud-upload"></i> Cloudinary</span>
+            <span class="stag api-db"><i class="ti ti-database"></i> Supabase</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-coral">
+        <div class="step-left">
+          <div class="step-dot">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Go Online & Background GPS</div>
+          <div class="step-desc">Driver marks online. Background location task starts fetching GPS every 3s. Location
+            cached in Redis to avoid hitting PostgreSQL too hard.</div>
+          <div class="step-tags">
+            <span class="stag api-map"><i class="ti ti-location"></i> expo-location</span>
+            <span class="stag api-db"><i class="ti ti-bolt"></i> Upstash Redis (GEOADD)</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-coral">
+        <div class="step-left">
+          <div class="step-dot">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Accept & Navigate Job</div>
+          <div class="step-desc">FCM push wakes device. Driver accepts job. Mapbox navigation SDK starts turn-by-turn.
+            Driver uploads photo of cargo before departure.</div>
+          <div class="step-tags">
+            <span class="stag api-notify"><i class="ti ti-bell"></i> FCM Push</span>
+            <span class="stag api-map"><i class="ti ti-map"></i> Mapbox Navigation</span>
+            <span class="stag api-media"><i class="ti ti-camera"></i> Cloudinary</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-coral">
+        <div class="step-left">
+          <div class="step-dot">5</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Job Complete & Payout</div>
+          <div class="step-desc">Driver taps "Delivered". Customer pays. Platform commission (15%) deducted
+            automatically, 85% payout sent instantly to Driver's bank account. SMS confirmation sent.</div>
+          <div class="step-tags">
+            <span class="stag api-pay"><i class="ti ti-arrows-split-2"></i> Razorpay Route</span>
+            <span class="stag api-auth"><i class="ti ti-message"></i> MSG91 SMS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="wf-panel" id="wf-adm">
+    <div class="flow">
+      <div class="step sd-purple">
+        <div class="step-left">
+          <div class="step-dot">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Login & Dashboard Feed</div>
+          <div class="step-desc">Admin logs in. Dashboard streams live events (bookings, payments) and funnel metrics in
+            real-time. Any crashes in the app are reported immediately.</div>
+          <div class="step-tags">
+            <span class="stag api-db"><i class="ti ti-key"></i> Firebase Email Auth</span>
+            <span class="stag api-ai"><i class="ti ti-activity"></i> LogSnag</span>
+            <span class="stag api-ai"><i class="ti ti-chart-line"></i> PostHog</span>
+            <span class="stag api-sec"><i class="ti ti-bug"></i> Sentry</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-purple">
+        <div class="step-left">
+          <div class="step-dot">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">KYC Review & Dispatch</div>
+          <div class="step-desc">Admin reviews optimized Cloudinary images of driver documents. Taps "Approve".
+            Background queue handles sending the "You are approved!" push notification.</div>
+          <div class="step-tags">
+            <span class="stag api-media"><i class="ti ti-photo"></i> Cloudinary</span>
+            <span class="stag api-db"><i class="ti ti-database"></i> Supabase</span>
+            <span class="stag api-db"><i class="ti ti-layers-subtract"></i> BullMQ (Upstash)</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-purple">
+        <div class="step-left">
+          <div class="step-dot">3</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Send Broadcasts</div>
+          <div class="step-desc">Admin creates a promo code. Sends a global push notification to all users and a
+            web-push to website visitors. Emails dispatched to inactive users.</div>
+          <div class="step-tags">
+            <span class="stag api-notify"><i class="ti ti-bell"></i> FCM Broadcast</span>
+            <span class="stag api-notify"><i class="ti ti-broadcast"></i> OneSignal</span>
+            <span class="stag api-notify"><i class="ti ti-mail"></i> Resend</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUSINESS -->
+  <div class="wf-panel" id="wf-biz">
+    <div class="flow">
+      <div class="step sd-amber">
+        <div class="step-left">
+          <div class="step-dot">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">B2B Registration & Billing</div>
+          <div class="step-desc">Company registers. Subscribes to ₹2499/mo "Growth" plan. Automated monthly billing set
+            up via Razorpay.</div>
+          <div class="step-tags">
+            <span class="stag api-auth"><i class="ti ti-building"></i> Supabase Roles</span>
+            <span class="stag api-pay"><i class="ti ti-repeat"></i> Razorpay Subscriptions</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-amber">
+        <div class="step-left">
+          <div class="step-dot">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Bulk CSV Upload</div>
+          <div class="step-desc">Uploads CSV with 50 deliveries. File parsed. Queue processor creates 50 individual
+            bookings, assigning drivers asynchronously.</div>
+          <div class="step-tags">
+            <span class="stag api-db"><i class="ti ti-layers-subtract"></i> BullMQ (Upstash)</span>
+            <span class="stag api-db"><i class="ti ti-database"></i> Supabase</span>
+          </div>
+        </div>
+      </div>
+      <div class="step sd-amber">
+        <div class="step-left">
+          <div class="step-dot">3</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Invoicing & AI Analysis</div>
+          <div class="step-desc">Monthly GST invoices are generated as PDFs. Business asks the AI Chatbot to "analyze my
+            delivery routes this month for cost savings".</div>
+          <div class="step-tags">
+            <span class="stag api-db"><i class="ti ti-file-pdf"></i> react-pdf</span>
+            <span class="stag api-notify"><i class="ti ti-mail"></i> Resend</span>
+            <span class="stag api-ai"><i class="ti ti-brain"></i> Gemini AI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function show(role, btn) {
+    document.querySelectorAll('.wf-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('wf-' + role).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
