@@ -8,7 +8,7 @@ import { db } from '../config/database';
 
 export const validateBookingOwnership = (role: 'user' | 'driver') => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const booking = db.bookings.findById(req.params.id);
+    const booking = db.bookings.findById(req.params.id as string);
 
     if (!booking) {
       res.status(404).json({

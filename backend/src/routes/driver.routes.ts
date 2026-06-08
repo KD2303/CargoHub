@@ -101,7 +101,7 @@ router.get('/:id/earnings',
   (req, res) => {
     // Ownership check: driver can only view their own earnings
     if (req.params.id !== req.user!.uid) {
-      const driver = db.drivers.findById(req.params.id);
+      const driver = db.drivers.findById(req.params.id as string);
       if (!driver || driver.firebaseUid !== req.user!.uid) {
         res.status(403).json({
           success: false,

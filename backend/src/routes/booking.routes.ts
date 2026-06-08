@@ -107,7 +107,7 @@ router.get('/driver/active',
 router.get('/:id',
   verifyFirebaseToken,
   (req, res) => {
-    const booking = db.bookings.findById(req.params.id);
+    const booking = db.bookings.findById(req.params.id as string);
 
     if (!booking) {
       res.status(404).json({ success: false, error: 'BOOKING_NOT_FOUND' });

@@ -46,8 +46,8 @@ router.get('/drivers', (req, res) => {
 router.patch('/drivers/:id/verify',
   validate(KycDecisionSchema),
   (req, res) => {
-    const driver = db.drivers.findById(req.params.id) ||
-      db.drivers.findByFirebaseUid(req.params.id);
+    const driver = db.drivers.findById(req.params.id as string) ||
+      db.drivers.findByFirebaseUid(req.params.id as string);
 
     if (!driver) {
       res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
@@ -78,8 +78,8 @@ router.patch('/drivers/:id/verify',
 router.patch('/drivers/:id/status',
   validate(DriverSuspensionSchema),
   (req, res) => {
-    const driver = db.drivers.findById(req.params.id) ||
-      db.drivers.findByFirebaseUid(req.params.id);
+    const driver = db.drivers.findById(req.params.id as string) ||
+      db.drivers.findByFirebaseUid(req.params.id as string);
 
     if (!driver) {
       res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
@@ -122,7 +122,7 @@ router.patch('/drivers/:id/status',
 router.patch('/bookings/:id/cancel',
   validate(AdminCancelBookingSchema),
   (req, res) => {
-    const booking = db.bookings.findById(req.params.id);
+    const booking = db.bookings.findById(req.params.id as string);
 
     if (!booking) {
       res.status(404).json({ success: false, error: 'BOOKING_NOT_FOUND' });

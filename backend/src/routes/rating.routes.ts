@@ -18,7 +18,7 @@ router.post('/:bookingId',
   requireRole('USER'),
   validate(SubmitRatingSchema),
   (req, res) => {
-    const booking = db.bookings.findById(req.params.bookingId);
+    const booking = db.bookings.findById(req.params.bookingId as string);
 
     if (!booking) {
       res.status(404).json({ success: false, error: 'BOOKING_NOT_FOUND' });
