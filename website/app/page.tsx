@@ -7,6 +7,19 @@ import {
   ArrowRight, Package, Users, BarChart3, Phone, Globe,
   CheckCircle2, IndianRupee, Navigation, Smartphone, Play, Image as ImageIcon
 } from "lucide-react";
+import Image from "next/image";
+import img1 from "./elements/1.png";
+import img2 from "./elements/2.png";
+import img3 from "./elements/3.png";
+import img4 from "./elements/4.png";
+import img5 from "./elements/5.png";
+import img6 from "./elements/6.png";
+import img7 from "./elements/7.png";
+import img8 from "./elements/8.png";
+import img9 from "./elements/9.png";
+import img10 from "./elements/10.png";
+import img11 from "./elements/11.png";
+import img12 from "./elements/12.png";
 
 // ── Animated Counter ────────────────────────────────────────────────────────
 
@@ -133,7 +146,7 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex flex-col justify-center pt-32 pb-24 overflow-hidden" style={{ background: "var(--bg-primary)" }}>
         {/* Curved highlight blob shape representing WareHub background curve */}
         <div className="absolute top-0 right-0 w-[60vw] h-[80vh] rounded-bl-[20vw] bg-[#FFF3EC] pointer-events-none z-0" />
-        
+
         {/* Secondary soft blob overlays */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[25%] left-[2%] w-[350px] h-[350px] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" style={{ background: "var(--brand-primary)" }} />
@@ -152,13 +165,13 @@ export default function LandingPage() {
                 <Zap className="w-3.5 h-3.5" /> Live in 50+ cities
               </div>
 
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-display leading-[1.1] mb-6 font-extrabold" style={{ color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
+              <h1 className="text-4xl md:text-7xl lg:text-[64px] font-display leading-[1.1] mb-6 font-extrabold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
                 Move Cargo.<br />
                 <span className="text-[var(--brand-primary)]">Track Live.</span><br />
                 Pay Smart.
               </h1>
 
-              <p className="text-base md:text-lg mb-8 max-w-xl text-[var(--text-secondary)] font-medium leading-relaxed">
+              <p className="text-base md:text-lg mb-8 max-w-[480px] text-[var(--text-secondary)] font-medium leading-relaxed">
                 India&apos;s most trusted platform for on-demand cargo transport.
                 Book a truck in 30 seconds, track your driver in real-time,
                 and pay securely with Razorpay.
@@ -203,89 +216,88 @@ export default function LandingPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden border-2 border-dashed border-[#FF6648]/20 bg-[#FFF5EF] flex flex-col items-center justify-center p-8 text-center group hover:border-[#0259DD]/40 transition-all duration-300 shadow-md">
-                <div className="absolute inset-0 bg-grid opacity-[0.04]" />
-                
-                {/* Elegant representation of the isometric scene elements */}
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none opacity-85 group-hover:scale-[1.02] transition-transform duration-500">
-                  {/* Soft glowing circular background representing the blob from WareHub */}
-                  <div className="absolute w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-[#FF6648]/10 to-[#0259DD]/5 filter blur-2xl" />
-                  
-                  {/* WareHub Warehouse Mockup */}
-                  <div className="absolute right-[12%] top-[18%] w-[42%] h-[46%] bg-white rounded-2xl border border-gray-100 shadow-lg flex flex-col justify-between overflow-hidden">
-                    <div className="h-6 bg-[#0259DD] w-full flex items-center px-3 justify-between">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
-                      <div className="w-8 h-1 rounded-full bg-white/20" />
-                    </div>
-                    <div className="p-3 flex-1 flex flex-col gap-2 justify-center">
-                      <div className="h-2.5 w-2/3 bg-gray-100 rounded" />
-                      <div className="h-2 w-1/2 bg-gray-100 rounded" />
-                      <div className="h-2 w-3/4 bg-gray-100 rounded" />
-                    </div>
-                    <div className="h-8 bg-gray-50 border-t border-gray-100 px-3 flex items-center justify-between text-[9px] font-mono text-gray-400">
-                      <span>GATE 04</span>
-                      <span className="text-emerald-500 font-bold">READY</span>
-                    </div>
-                  </div>
+              <div className="relative w-full aspect-[1.1] scale-100 lg:scale-[1.15] lg:translate-x-[2%]">
 
-                  {/* WareHub Truck Mockup */}
-                  <div className="absolute left-[10%] bottom-[18%] w-[42%] h-[38%] bg-white rounded-2xl border border-gray-100 shadow-xl flex flex-col overflow-hidden">
-                    <div className="p-4 flex-1 flex gap-3 items-center">
-                      <div className="w-10 h-10 rounded-xl bg-[#FF6648]/15 flex items-center justify-center text-xl">
-                        🚛
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="h-3 w-16 bg-gray-200 rounded mb-1.5" />
-                        <div className="h-2 w-12 bg-gray-100 rounded" />
-                      </div>
-                    </div>
-                    <div className="h-6 bg-[#FF6648]/10 px-3 flex items-center justify-between text-[9px] font-mono text-[#FF6648] font-bold">
-                      <span>TRUCK ID</span>
-                      <span>LKO-32</span>
-                    </div>
-                  </div>
+                {/* SVG Dashed Line */}
+                <svg className="absolute inset-0 w-full h-full z-0 overflow-visible" viewBox="0 0 100 100">
+                  <path d="M 25 82 Q 40 88, 55 80 T 80 75" fill="none" stroke="#0259DD" strokeWidth="0.5" strokeDasharray="1.5 1.5" className="opacity-80" />
+                  {/* Arrowheads */}
+                  <path d="M 38 84.5 L 40 85 L 39 83" fill="none" stroke="#0259DD" strokeWidth="0.5" />
+                  <path d="M 67 78.5 L 69 78 L 68 76" fill="none" stroke="#0259DD" strokeWidth="0.5" />
+                  {/* Endpoint at scale */}
+                  <circle cx="80" cy="75" r="0.6" fill="#0259DD" />
+                </svg>
 
-                  {/* Mini Forklift / Package representation */}
-                  <div className="absolute left-[34%] top-[30%] w-[16%] h-[16%] bg-white rounded-xl border border-gray-100 shadow flex items-center justify-center text-lg">
-                    📦
-                  </div>
-                  
-                  <div className="absolute right-[22%] bottom-[12%] w-[24%] h-[20%] bg-white rounded-xl border border-gray-100 shadow flex flex-col p-2.5 justify-between">
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#FF6648]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#0259DD]" />
-                    </div>
-                    <div className="h-1.5 w-3/4 bg-gray-100 rounded" />
-                    <div className="h-1.5 w-1/2 bg-gray-100 rounded" />
-                  </div>
-
-                  {/* Route path dot indicator */}
-                  <div className="absolute w-[60%] h-[40%] pointer-events-none">
-                    <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                      <path d="M15 75 Q 45 15, 75 35" stroke="#0259DD" strokeWidth="1.5" strokeDasharray="3 3" />
-                      <circle cx="75" cy="35" r="3.5" fill="#0259DD" />
-                      <circle cx="15" cy="75" r="3.5" fill="#FF6648" />
-                    </svg>
-                  </div>
+                {/* Back Layer */}
+                <div className="absolute top-[10%] right-[0%] w-[18%] z-0">
+                  <Image src={img11} alt="Rack" className="w-full h-auto object-contain drop-shadow-sm" />
+                </div>
+                <div className="absolute top-[22%] right-[-6%] w-[18%] z-10">
+                  <Image src={img11} alt="Rack" className="w-full h-auto object-contain drop-shadow-sm" />
                 </div>
 
-                {/* Text overlays explaining the image placeholder */}
-                <div className="relative z-10 flex flex-col items-center gap-2 max-w-xs bg-white/95 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-md transition-all duration-300">
-                  <div className="w-9 h-9 rounded-xl bg-[#0259DD]/10 text-[#0259DD] flex items-center justify-center">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Hero Illustration Frame</h4>
-                    <p className="text-[10px] text-gray-500 mt-1">Placeholder frame. Upload an illustration/image to replace later.</p>
-                  </div>
+                {/* Warehouse */}
+                <div className="absolute top-[15%] right-[10%] w-[55%] z-20">
+                  <Image src={img10} alt="Warehouse" className="w-full h-auto object-contain drop-shadow-xl" />
                 </div>
+
+                {/* Container */}
+                <div className="absolute bottom-[35%] left-[0%] w-[22%] z-10">
+                  <Image src={img12} alt="Container" className="w-full h-auto object-contain drop-shadow-md" />
+                </div>
+
+                {/* Forklift */}
+                <div className="absolute top-[42%] left-[32%] w-[18%] z-20">
+                  <Image src={img3} alt="Forklift" className="w-full h-auto object-contain drop-shadow-md" />
+                </div>
+
+                {/* Worker with manual stacker */}
+                <div className="absolute top-[52%] left-[55%] w-[10%] z-30">
+                  <Image src={img6} alt="Worker" className="w-full h-auto object-contain drop-shadow-md" />
+                </div>
+
+                {/* Small Truck */}
+                <div className="absolute bottom-[32%] left-[22%] w-[25%] z-30">
+                  <Image src={img2} alt="Small Truck" className="w-full h-auto object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Big Truck */}
+                <div className="absolute bottom-[5%] left-[5%] w-[42%] z-40">
+                  <Image src={img1} alt="Big Truck" className="w-full h-auto object-contain drop-shadow-2xl" />
+                </div>
+
+                {/* Worker with pallet jack */}
+                <div className="absolute bottom-[18%] left-[45%] w-[15%] z-40">
+                  <Image src={img5} alt="Worker Pallet Jack" className="w-full h-auto object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Scale */}
+                <div className="absolute bottom-[10%] right-[18%] w-[12%] z-40">
+                  <Image src={img4} alt="Scale" className="w-full h-auto object-contain drop-shadow-lg" />
+                </div>
+
+                {/* Empty Pallets */}
+                <div className="absolute bottom-[22%] right-[2%] w-[14%] z-30">
+                  <Image src={img7} alt="Pallets" className="w-full h-auto object-contain drop-shadow-md" />
+                </div>
+
+                {/* Pallet with Boxes near Big Truck */}
+                <div className="absolute bottom-[2%] left-[0%] w-[12%] z-50">
+                  <Image src={img8} alt="Boxes" className="w-full h-auto object-contain drop-shadow-md" />
+                </div>
+
+                {/* Additional Pallet for Forklift */}
+                <div className="absolute top-[48%] left-[38%] w-[8%] z-30">
+                  <Image src={img8} alt="Forklift Boxes" className="w-full h-auto object-contain drop-shadow-sm" />
+                </div>
+
               </div>
             </motion.div>
           </div>
 
           {/* Bottom feature strip matching the WareHub bottom features */}
-          <motion.div 
-            className="mt-16 w-full bg-[#FFF0EA] border border-[#FF6648]/12 rounded-3xl p-6 md:p-8"
+          <motion.div
+            className="mt-32 lg:mt-48 w-full bg-[#FFF0EA] border border-[#FF6648]/12 rounded-3xl p-6 md:p-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
