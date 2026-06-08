@@ -187,7 +187,7 @@ export default function DriverDashboard() {
             <h2 className="font-display text-2xl font-bold mb-6" style={{ color: "var(--text-primary)" }}>
               💰 Earnings Overview
             </h2>
-            <div className="text-center p-8 rounded-xl mb-6" style={{ background: "linear-gradient(135deg, rgba(108, 59, 245, 0.1), rgba(14, 165, 233, 0.05))" }}>
+            <div className="text-center p-8 rounded-xl mb-6" style={{ background: "linear-gradient(135deg, rgba(2, 89, 221, 0.1), rgba(132, 175, 251, 0.05))" }}>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>This Month</p>
               <p className="font-mono text-5xl font-bold gradient-text mt-2">₹{mockEarnings.thisMonth.toLocaleString()}</p>
               <p className="text-sm mt-2" style={{ color: "var(--brand-success)" }}>
@@ -204,7 +204,7 @@ export default function DriverDashboard() {
                   <div key={day} className="flex-1 flex flex-col items-center gap-2">
                     <motion.div
                       className="w-full rounded-t-lg"
-                      style={{ background: i === 3 ? "var(--brand-primary)" : "rgba(108, 59, 245, 0.3)" }}
+                      style={{ background: i === 3 ? "var(--brand-primary)" : "rgba(2, 89, 221, 0.3)" }}
                       initial={{ height: 0 }}
                       animate={{ height: `${heights[i]}%` }}
                       transition={{ delay: i * 0.1, duration: 0.5 }}

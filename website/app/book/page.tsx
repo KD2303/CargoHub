@@ -158,7 +158,7 @@ export default function BookingPage() {
                           onClick={() => setVehicle(type)}
                           className="p-4 rounded-xl text-left transition-all"
                           style={{
-                            background: vehicle === type ? "rgba(108, 59, 245, 0.1)" : "var(--bg-tertiary)",
+                            background: vehicle === type ? "rgba(2, 89, 221, 0.1)" : "var(--bg-tertiary)",
                             border: vehicle === type ? "2px solid var(--brand-primary)" : "2px solid var(--border-subtle)",
                           }}
                         >
@@ -186,7 +186,7 @@ export default function BookingPage() {
                           onClick={() => setLoadType(type)}
                           className="p-3 rounded-xl text-center transition-all"
                           style={{
-                            background: loadType === type ? "rgba(108, 59, 245, 0.1)" : "var(--bg-tertiary)",
+                            background: loadType === type ? "rgba(2, 89, 221, 0.1)" : "var(--bg-tertiary)",
                             border: loadType === type ? "2px solid var(--brand-primary)" : "2px solid var(--border-subtle)",
                           }}
                         >
@@ -386,7 +386,7 @@ export default function BookingPage() {
                 {fare && (
                   <>
                     <div className="divider" />
-                    <div className="p-4 rounded-xl text-center" style={{ background: "linear-gradient(135deg, rgba(108, 59, 245, 0.1), rgba(14, 165, 233, 0.05))" }}>
+                    <div className="p-4 rounded-xl text-center" style={{ background: "linear-gradient(135deg, rgba(2, 89, 221, 0.1), rgba(132, 175, 251, 0.05))" }}>
                       <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>ESTIMATED TOTAL</p>
                       <p className="font-mono text-3xl font-bold gradient-text">{formatCurrency(fare.total)}</p>
                       <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>incl. 18% GST</p>

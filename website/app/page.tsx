@@ -47,37 +47,37 @@ const features = [
     icon: <Navigation className="w-6 h-6" />,
     title: "Real-Time GPS Tracking",
     desc: "Track your cargo every second. Live driver location on map with 3-second updates.",
-    color: "#6C3BF5",
+    color: "var(--brand-primary)",
   },
   {
     icon: <Shield className="w-6 h-6" />,
     title: "Verified Drivers Only",
     desc: "Every driver passes KYC — Aadhaar, license, and vehicle registration verified.",
-    color: "#10B981",
+    color: "var(--brand-secondary)",
   },
   {
     icon: <IndianRupee className="w-6 h-6" />,
     title: "Transparent Pricing",
     desc: "See the full fare breakdown before booking. No hidden charges, GST included.",
-    color: "#F59E0B",
+    color: "var(--brand-primary)",
   },
   {
     icon: <Zap className="w-6 h-6" />,
     title: "Instant Matching",
     desc: "AI-powered driver matching finds the nearest verified driver in seconds.",
-    color: "#0EA5E9",
+    color: "var(--brand-primary-light)",
   },
   {
     icon: <Package className="w-6 h-6" />,
     title: "All Cargo Types",
     desc: "Furniture, electronics, fragile goods, bulk materials — we handle it all.",
-    color: "#8B5CF6",
+    color: "var(--brand-secondary)",
   },
   {
     icon: <Globe className="w-6 h-6" />,
     title: "Works Everywhere",
     desc: "Android app, iOS app, or web browser. Same account, same bookings, anywhere.",
-    color: "#EC4899",
+    color: "var(--brand-primary)",
   },
 ];
 
@@ -129,10 +129,14 @@ export default function LandingPage() {
 
       {/* ── Hero Section ───────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center pt-16" style={{ background: "var(--bg-primary)" }}>
-        {/* Background glow effects */}
+        {/* Background organic blob shapes & layout elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: "var(--brand-primary)" }} />
-          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-10" style={{ background: "var(--brand-secondary)" }} />
+          {/* Large Royal Blue Blob */}
+          <div className="absolute top-[15%] left-[5%] w-[450px] h-[450px] rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob" style={{ background: "var(--brand-primary)" }} />
+          {/* Coral Orange Blob */}
+          <div className="absolute top-[30%] right-[10%] w-[380px] h-[380px] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" style={{ background: "var(--brand-secondary)" }} />
+          {/* Light Blue Blob */}
+          <div className="absolute bottom-[10%] left-[25%] w-[400px] h-[400px] rounded-full mix-blend-multiply filter blur-3xl opacity-35 animate-blob animation-delay-4000" style={{ background: "var(--brand-primary-light)" }} />
         </div>
 
         <div className="container-wide relative z-10">
@@ -143,13 +147,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
             >
-              <div className="badge badge-delivered mb-6" style={{ display: "inline-flex" }}>
+              <div className="badge badge-delivered mb-6" style={{ display: "inline-flex", background: "var(--brand-primary)", color: "white" }}>
                 <Zap className="w-3.5 h-3.5" /> Live in 50+ cities
               </div>
 
-              <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-                Move Cargo.{" "}
-                <span className="gradient-text">Track Live.</span>{" "}
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-display leading-[0.9] mb-8" style={{ color: "var(--text-primary)", letterSpacing: "-1px" }}>
+                Move Cargo.<br />
+                <span className="gradient-text" style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Track Live.</span><br />
                 Pay Smart.
               </h1>
 
@@ -199,7 +203,7 @@ export default function LandingPage() {
                 {/* Mock booking card */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(108, 59, 245, 0.15)" }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(2, 89, 221, 0.15)" }}>
                       <MapPin className="w-5 h-5" style={{ color: "var(--brand-primary)" }} />
                     </div>
                     <div>
@@ -223,7 +227,7 @@ export default function LandingPage() {
                   <div className="grid grid-cols-3 gap-3">
                     {["🛻 Tata Ace", "🚛 Tempo", "🚚 Pickup"].map((v, i) => (
                       <div key={v} className="text-center p-3 rounded-xl cursor-pointer transition-all" style={{
-                        background: i === 0 ? "rgba(108, 59, 245, 0.1)" : "var(--bg-tertiary)",
+                        background: i === 0 ? "rgba(2, 89, 221, 0.1)" : "var(--bg-tertiary)",
                         border: i === 0 ? "1px solid var(--brand-primary)" : "1px solid var(--border-subtle)",
                       }}>
                         <span className="text-xl">{v.split(" ")[0]}</span>
@@ -394,7 +398,7 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.15 }}
               >
                 <div className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center" style={{
-                  background: "linear-gradient(135deg, rgba(108, 59, 245, 0.1), rgba(14, 165, 233, 0.1))",
+                  background: "linear-gradient(135deg, rgba(2, 89, 221, 0.1), rgba(132, 175, 251, 0.1))",
                   border: "1px solid var(--border-subtle)",
                   color: "var(--brand-primary-light)",
                 }}>
@@ -424,7 +428,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <div className="absolute inset-0 opacity-30" style={{
-              background: "linear-gradient(135deg, rgba(108, 59, 245, 0.2), rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.1))",
+              background: "linear-gradient(135deg, rgba(2, 89, 221, 0.2), rgba(132, 175, 251, 0.1), rgba(16, 185, 129, 0.1))",
             }} />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-extrabold mb-4">

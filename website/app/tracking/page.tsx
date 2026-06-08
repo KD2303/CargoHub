@@ -83,7 +83,7 @@ export default function TrackingPage() {
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--brand-primary)", boxShadow: "0 0 20px rgba(108, 59, 245, 0.4)" }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--brand-primary)", boxShadow: "0 0 20px rgba(2, 89, 221, 0.4)" }}>
                     <MapPin className="w-4 h-4 text-white" />
                   </div>
                   <div className="mt-1 px-2 py-0.5 rounded text-xs font-medium" style={{ background: "var(--bg-card)", color: "var(--text-primary)" }}>Pickup</div>

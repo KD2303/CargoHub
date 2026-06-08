@@ -86,7 +86,7 @@ export default function AdminDashboard() {
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{
                 color: activeTab === item.label ? "var(--text-primary)" : "var(--text-muted)",
-                background: activeTab === item.label ? "rgba(108, 59, 245, 0.1)" : "transparent",
+                background: activeTab === item.label ? "rgba(2, 89, 221, 0.1)" : "transparent",
                 borderLeft: activeTab === item.label ? "3px solid var(--brand-primary)" : "3px solid transparent",
               }}
             >
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
               >
                 <div className="flex items-center justify-between">
                   <span className="stat-label">{stat.label}</span>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(108, 59, 245, 0.1)", color: "var(--brand-primary-light)" }}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(2, 89, 221, 0.1)", color: "var(--brand-primary-light)" }}>
                     {stat.icon}
                   </div>
                 </div>

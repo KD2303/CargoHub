@@ -22,7 +22,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex" style={{ background: "var(--bg-primary)" }}>
       {/* Left panel — branding */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-16" style={{
-        background: "linear-gradient(135deg, rgba(108, 59, 245, 0.15), rgba(14, 165, 233, 0.1))",
+        background: "linear-gradient(135deg, rgba(2, 89, 221, 0.15), rgba(132, 175, 251, 0.1))",
         borderRight: "1px solid var(--border-subtle)",
       }}>
         <div className="absolute inset-0 bg-grid opacity-30" />
@@ -46,7 +46,7 @@ export default function LoginPage() {
               { icon: <Truck className="w-5 h-5" />, title: "Real-Time Tracking", desc: "GPS updates every 3 seconds" },
             ].map((f) => (
               <div key={f.title} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108, 59, 245, 0.15)", color: "var(--brand-primary-light)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(2, 89, 221, 0.15)", color: "var(--brand-primary-light)" }}>
                   {f.icon}
                 </div>
                 <div>
