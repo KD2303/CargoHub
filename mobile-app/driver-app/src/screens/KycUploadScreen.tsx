@@ -5,7 +5,7 @@ import { Header } from '../components/Header';
 import { GradientButton } from '../components/GradientButton';
 import { StatusBadge } from '../components/StatusBadge';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, Upload, CheckCircle2 } from 'lucide-react-native';
+import { Camera, Upload, CircleCheck } from 'lucide-react-native';
 
 type DocType = 'aadhaar' | 'license' | 'rc' | 'insurance' | 'photo';
 
@@ -16,7 +16,10 @@ export const KycUploadScreen = () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') return alert('Sorry, we need camera roll permissions to make this work!');
     let result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, quality: 0.8 });
-    if (!result.canceled && result.assets && result.assets[0]) setDocuments(prev => ({ ...prev, [type]: result.assets[0].uri }));
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setDocuments(prev => ({ ...prev, [type]: uri }));
+    }
   };
 
   const allUploaded = Object.values(documents).every(doc => doc !== null);
@@ -30,7 +33,7 @@ export const KycUploadScreen = () => {
         {isUploaded ? (
           <TouchableOpacity onPress={() => pickImage(type)} style={styles.imagePreviewContainer}>
             <Image source={{ uri: documents[type]! }} style={styles.imagePreview} />
-            <View style={styles.checkIcon}><CheckCircle2 size={16} color="white" /></View>
+            <View style={styles.checkIcon}><CircleCheck size={16} color="white" /></View>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.uploadButton} onPress={() => pickImage(type)}>
