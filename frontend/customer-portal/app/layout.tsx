@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="grain">
+      <body className="grain" suppressHydrationWarning>
         {children}
       </body>
     </html>
