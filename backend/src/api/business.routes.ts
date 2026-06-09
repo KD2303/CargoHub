@@ -20,7 +20,7 @@ router.use(verifyFirebaseToken, requireRole('USER'), requireB2B);
 // Bulk booking
 router.post('/bookings/bulk',
   validate(BulkBookingSchema),
-  (req, res) => {
+  async (req, res) => {
     const results = {
       created: 0,
       failed: 0,
@@ -28,7 +28,7 @@ router.post('/bookings/bulk',
       errors: [] as Array<{ row: number; field: string; message: string }>,
     };
 
-    req.body.bookings.forEach((row: any, index: number) => {
+    await Promise.all(req.body.bookings.map(async (row: any, index: number) => {
       try {
         // Mock geocoding — in production, use Mapbox Geocoding API
         const booking: Booking = {
@@ -64,7 +64,7 @@ router.post('/bookings/bulk',
         });
         booking.fareEstimate = fare.total;
 
-        db.bookings.create(booking);
+        await db.bookings.create(booking);
         results.created++;
         results.bookingIds.push(booking.id);
       } catch (error: any) {
@@ -75,18 +75,18 @@ router.post('/bookings/bulk',
           message: error.message || 'Failed to create booking',
         });
       }
-    });
+    }));
 
     res.status(201).json({ success: true, data: results });
   }
 );
 
 // Fleet invoices
-router.get('/invoices', (req, res) => {
+router.get('/invoices', async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
 
-  const result = db.bookings.findByUserId(req.user!.uid, page, limit);
+  const result = await db.bookings.findByUserId(req.user!.uid, page, limit);
   const invoices = result.data
     .filter(b => b.paymentStatus === 'PAID')
     .map(b => ({

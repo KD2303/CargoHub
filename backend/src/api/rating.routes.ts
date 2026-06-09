@@ -17,8 +17,8 @@ router.post('/:bookingId',
   verifyFirebaseToken,
   requireRole('USER'),
   validate(SubmitRatingSchema),
-  (req, res) => {
-    const booking = db.bookings.findById(req.params.bookingId as string);
+  async (req, res) => {
+    const booking = await db.bookings.findById(req.params.bookingId as string);
 
     if (!booking) {
       res.status(404).json({ success: false, error: 'BOOKING_NOT_FOUND' });
@@ -40,7 +40,7 @@ router.post('/:bookingId',
     }
 
     // Check for existing rating
-    const existing = db.ratings.findByBookingId(booking.id);
+    const existing = await db.ratings.findByBookingId(booking.id);
     if (existing) {
       res.status(400).json({
         success: false,
@@ -50,7 +50,7 @@ router.post('/:bookingId',
       return;
     }
 
-    const rating = db.ratings.create({
+    const rating = await db.ratings.create({
       id: uuid(),
       bookingId: booking.id,
       userId: req.user!.uid,
@@ -62,12 +62,12 @@ router.post('/:bookingId',
 
     // Update driver's rolling average rating
     if (booking.driverId) {
-      const driver = db.drivers.findByFirebaseUid(booking.driverId);
+      const driver = await db.drivers.findByFirebaseUid(booking.driverId);
       if (driver) {
         const newRating = driver.totalTrips > 0
           ? ((driver.rating * driver.totalTrips) + req.body.rating) / (driver.totalTrips + 1)
           : req.body.rating;
-        db.drivers.update(booking.driverId, { rating: Math.round(newRating * 10) / 10 });
+        await db.drivers.update(booking.driverId, { rating: Math.round(newRating * 10) / 10 });
       }
     }
 

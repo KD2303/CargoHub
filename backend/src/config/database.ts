@@ -43,6 +43,16 @@ export const db = {
   },
 
   drivers: {
+    getAll: async () => {
+      const { data, error } = await supabase.from('drivers').select('*');
+      if (error) return [];
+      return (data || []).map(toCamel) as DriverProfile[];
+    },
+    findById: async (id: string): Promise<DriverProfile | null> => {
+      const { data, error } = await supabase.from('drivers').select('*').eq('id', id).single();
+      if (error) return null;
+      return toCamel(data) as DriverProfile;
+    },
     findByFirebaseUid: async (uid: string): Promise<DriverProfile | null> => {
       const { data, error } = await supabase.from('drivers').select('*').eq('firebase_uid', uid).single();
       if (error) return null;
@@ -64,7 +74,7 @@ export const db = {
       
       const nearbyKeys = await redis.geosearch('drivers:location', 
         { type: 'FROMLONLAT', coordinate: { lon: lng, lat: lat } },
-        { type: 'BYRADIUS', radius: radiusKm, radiusType: 'km' },
+        { type: 'BYRADIUS', radius: radiusKm, radiusType: 'KM' },
         'ASC',
         { withDist: true }
       );
@@ -86,6 +96,21 @@ export const db = {
   },
 
   bookings: {
+    getAll: async (filters: any) => {
+      let query = supabase.from('bookings').select('*', { count: 'exact' });
+      if (filters.status) query = query.eq('status', filters.status);
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range((filters.page - 1) * filters.limit, filters.page * filters.limit - 1);
+      if (error) throw error;
+      return {
+        data: (data || []).map(toCamel),
+        total: count || 0,
+        page: filters.page,
+        limit: filters.limit,
+        totalPages: Math.ceil((count || 0) / filters.limit)
+      };
+    },
     findById: async (id: string): Promise<Booking | null> => {
       const { data, error } = await supabase.from('bookings').select('*').eq('id', id).single();
       if (error) return null;
@@ -133,6 +158,35 @@ export const db = {
       const { data, error } = await supabase.from('audit_logs').insert(toSnake(log)).select().single();
       if (error) console.error('Audit Log Error:', error);
       return toCamel(data);
+    }
+  },
+
+  analytics: {
+    getRevenue: async () => {
+      return { total: 0, daily: [], weekly: [], monthly: [] };
+    },
+    getHeatmap: async () => {
+      return [];
+    }
+  },
+
+  ratings: {
+    findByBookingId: async (bookingId: string) => {
+      const { data, error } = await supabase.from('ratings').select('*').eq('booking_id', bookingId).single();
+      if (error) return null;
+      return toCamel(data);
+    },
+    create: async (rating: any) => {
+      const { data, error } = await supabase.from('ratings').insert(toSnake(rating)).select().single();
+      if (error) throw error;
+      return toCamel(data);
+    }
+  },
+
+  notificationTokens: {
+    set: async (uid: string, tokens: any) => {
+      console.log(`Setting notification tokens for ${uid}`, tokens);
+      return true;
     }
   },
 

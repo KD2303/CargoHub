@@ -11,7 +11,7 @@ import type { ClientToServerEvents, ServerToClientEvents, BookingStatus } from '
 export function setupSocketHandlers(
   io: Server<ClientToServerEvents, ServerToClientEvents>
 ): void {
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     console.log(`🔌 Socket connected: ${socket.id}`);
 
     // Get user identity from auth handshake
@@ -20,7 +20,7 @@ export function setupSocketHandlers(
     const uid = mockUid || token;
 
     if (uid) {
-      const user = db.users.findByFirebaseUid(uid);
+      const user = await db.users.findByFirebaseUid(uid);
       if (user) {
         // Auto-join personal room
         if (user.role === 'USER') {
@@ -42,11 +42,11 @@ export function setupSocketHandlers(
 
     // ── Driver Location Update ─────────────────────────────────────────────
 
-    socket.on('driver:location', (data) => {
+    socket.on('driver:location', async (data) => {
       if (!uid) return;
 
       // Update driver location in DB
-      db.drivers.update(uid, {
+      await db.drivers.update(uid, {
         currentLat: data.lat,
         currentLng: data.lng,
       });
@@ -66,23 +66,23 @@ export function setupSocketHandlers(
 
     // ── Booking Accept ─────────────────────────────────────────────────────
 
-    socket.on('booking:accept', ({ bookingId }) => {
+    socket.on('booking:accept', async ({ bookingId }) => {
       if (!uid) return;
 
-      const booking = db.bookings.findById(bookingId);
+      const booking = await db.bookings.findById(bookingId);
       if (!booking || booking.status !== 'PENDING') return;
 
-      const driver = db.drivers.findByFirebaseUid(uid);
+      const driver = await db.drivers.findByFirebaseUid(uid);
       if (!driver || !driver.isAvailable || driver.kycStatus !== 'VERIFIED') return;
 
       // Assign driver to booking
-      db.bookings.update(bookingId, {
+      await db.bookings.update(bookingId, {
         driverId: uid,
         status: 'ACCEPTED',
       });
 
       // Mark driver as on trip
-      db.drivers.update(uid, { isAvailable: false });
+      await db.drivers.update(uid, { isAvailable: false });
 
       // Join booking room
       socket.join(`booking:${bookingId}`);
@@ -113,10 +113,10 @@ export function setupSocketHandlers(
 
     // ── Booking Status Update ──────────────────────────────────────────────
 
-    socket.on('booking:status', ({ bookingId, status }) => {
+    socket.on('booking:status', async ({ bookingId, status }) => {
       if (!uid) return;
 
-      const booking = db.bookings.findById(bookingId);
+      const booking = await db.bookings.findById(bookingId);
       if (!booking || booking.driverId !== uid) return;
 
       // Validate transition
@@ -127,14 +127,14 @@ export function setupSocketHandlers(
       }
 
       // Update booking
-      db.bookings.update(bookingId, { status });
+      await db.bookings.update(bookingId, { status });
 
       // If delivered, set final fare and make driver available
       if (status === 'DELIVERED') {
-        db.bookings.update(bookingId, {
+        await db.bookings.update(bookingId, {
           finalFare: booking.fareEstimate,
         });
-        db.drivers.update(uid, { isAvailable: true });
+        await db.drivers.update(uid, { isAvailable: true });
       }
 
       // Broadcast to room

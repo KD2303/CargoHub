@@ -19,9 +19,9 @@ router.get('/nearby',
   verifyFirebaseToken,
   requireRole('USER'),
   validate(NearbyDriversSchema, 'query'),
-  (req, res) => {
+  async (req, res) => {
     const { lat, lng, vehicleType } = req.query as any;
-    const drivers = db.drivers.findNearby(
+    const drivers = await db.drivers.findNearby(
       parseFloat(lat),
       parseFloat(lng),
       vehicleType as any
@@ -47,8 +47,8 @@ router.patch('/availability',
   requireRole('DRIVER'),
   requireVerifiedKyc,
   validate(ToggleAvailabilitySchema),
-  (req, res) => {
-    const updated = db.drivers.update(req.user!.uid, {
+  async (req, res) => {
+    const updated = await db.drivers.update(req.user!.uid, {
       isAvailable: req.body.available,
     });
 
@@ -66,8 +66,8 @@ router.patch('/location',
   verifyFirebaseToken,
   requireRole('DRIVER'),
   validate(UpdateLocationSchema),
-  (req, res) => {
-    const updated = db.drivers.update(req.user!.uid, {
+  async (req, res) => {
+    const updated = await db.drivers.update(req.user!.uid, {
       currentLat: req.body.lat,
       currentLng: req.body.lng,
     });
@@ -98,10 +98,10 @@ router.patch('/location',
 router.get('/:id/earnings',
   verifyFirebaseToken,
   requireRole('DRIVER'),
-  (req, res) => {
+  async (req, res) => {
     // Ownership check: driver can only view their own earnings
     if (req.params.id !== req.user!.uid) {
-      const driver = db.drivers.findById(req.params.id as string);
+      const driver = await db.drivers.findById(req.params.id as string);
       if (!driver || driver.firebaseUid !== req.user!.uid) {
         res.status(403).json({
           success: false,
@@ -112,7 +112,7 @@ router.get('/:id/earnings',
       }
     }
 
-    const driver = db.drivers.findByFirebaseUid(req.user!.uid);
+    const driver = await db.drivers.findByFirebaseUid(req.user!.uid);
     if (!driver) {
       res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
       return;

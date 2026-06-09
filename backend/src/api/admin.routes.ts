@@ -19,8 +19,8 @@ const router = Router();
 router.use(verifyFirebaseToken, requireRole('ADMIN'));
 
 // Get all bookings with filters
-router.get('/bookings', (req, res) => {
-  const result = db.bookings.getAll({
+router.get('/bookings', async (req, res) => {
+  const result = await db.bookings.getAll({
     status: req.query.status as any,
     page: parseInt(req.query.page as string) || 1,
     limit: parseInt(req.query.limit as string) || 20,
@@ -29,8 +29,8 @@ router.get('/bookings', (req, res) => {
 });
 
 // Get all drivers (KYC queue)
-router.get('/drivers', (req, res) => {
-  let drivers = db.drivers.getAll();
+router.get('/drivers', async (req, res) => {
+  let drivers = await db.drivers.getAll();
 
   if (req.query.kycStatus) {
     drivers = drivers.filter(d => d.kycStatus === req.query.kycStatus);
@@ -45,22 +45,22 @@ router.get('/drivers', (req, res) => {
 // Approve/reject driver KYC
 router.patch('/drivers/:id/verify',
   validate(KycDecisionSchema),
-  (req, res) => {
-    const driver = db.drivers.findById(req.params.id as string) ||
-      db.drivers.findByFirebaseUid(req.params.id as string);
+  async (req, res) => {
+    const driver = await db.drivers.findById(req.params.id as string) ||
+      await db.drivers.findByFirebaseUid(req.params.id as string);
 
     if (!driver) {
       res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
       return;
     }
 
-    const updated = db.drivers.update(driver.firebaseUid, {
+    const updated = await db.drivers.update(driver.firebaseUid, {
       kycStatus: req.body.decision,
       isAvailable: req.body.decision === 'VERIFIED' ? driver.isAvailable : false,
     });
 
     // Audit log
-    db.auditLogs.create({
+    await db.auditLogs.create({
       id: uuid(),
       adminUid: req.user!.uid,
       action: req.body.decision === 'VERIFIED' ? 'KYC_APPROVED' : 'KYC_REJECTED',
@@ -77,9 +77,9 @@ router.patch('/drivers/:id/verify',
 // Suspend/reinstate driver
 router.patch('/drivers/:id/status',
   validate(DriverSuspensionSchema),
-  (req, res) => {
-    const driver = db.drivers.findById(req.params.id as string) ||
-      db.drivers.findByFirebaseUid(req.params.id as string);
+  async (req, res) => {
+    const driver = await db.drivers.findById(req.params.id as string) ||
+      await db.drivers.findByFirebaseUid(req.params.id as string);
 
     if (!driver) {
       res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
@@ -87,14 +87,14 @@ router.patch('/drivers/:id/status',
     }
 
     // Update both user and driver records
-    db.users.update(driver.firebaseUid, { isActive: req.body.isActive });
-    const updated = db.drivers.update(driver.firebaseUid, {
+    await db.users.update(driver.firebaseUid, { isActive: req.body.isActive });
+    const updated = await db.drivers.update(driver.firebaseUid, {
       isActive: req.body.isActive,
       isAvailable: req.body.isActive ? driver.isAvailable : false,
     });
 
     // Audit log
-    db.auditLogs.create({
+    await db.auditLogs.create({
       id: uuid(),
       adminUid: req.user!.uid,
       action: req.body.isActive ? 'DRIVER_REINSTATED' : 'DRIVER_SUSPENDED',
@@ -121,21 +121,21 @@ router.patch('/drivers/:id/status',
 // Admin cancel any booking
 router.patch('/bookings/:id/cancel',
   validate(AdminCancelBookingSchema),
-  (req, res) => {
-    const booking = db.bookings.findById(req.params.id as string);
+  async (req, res) => {
+    const booking = await db.bookings.findById(req.params.id as string);
 
     if (!booking) {
       res.status(404).json({ success: false, error: 'BOOKING_NOT_FOUND' });
       return;
     }
 
-    const updated = db.bookings.update(booking.id, {
+    const updated = await db.bookings.update(booking.id, {
       status: 'CANCELLED',
       cancellationReason: `Admin: ${req.body.reason}`,
     });
 
     // Audit log
-    db.auditLogs.create({
+    await db.auditLogs.create({
       id: uuid(),
       adminUid: req.user!.uid,
       action: 'BOOKING_CANCELLED',
@@ -157,14 +157,14 @@ router.patch('/bookings/:id/cancel',
 );
 
 // Revenue analytics
-router.get('/analytics/revenue', (_req, res) => {
-  const revenue = db.analytics.getRevenue();
+router.get('/analytics/revenue', async (_req, res) => {
+  const revenue = await db.analytics.getRevenue();
   res.json({ success: true, data: revenue });
 });
 
 // Booking heatmap
-router.get('/analytics/heatmap', (_req, res) => {
-  const heatmap = db.analytics.getHeatmap();
+router.get('/analytics/heatmap', async (_req, res) => {
+  const heatmap = await db.analytics.getHeatmap();
   res.json({ success: true, data: heatmap });
 });
 
