@@ -237,17 +237,17 @@ export default function LandingPage() {
                 </div>
 
                 {/* Warehouse */}
-                <div className="absolute top-[15%] right-[10%] w-[55%] z-20">
+                <div className="absolute top-[15%] right-[6%] w-[60%] z-20">
                   <Image src={img10} alt="Warehouse" className="w-full h-auto object-contain drop-shadow-xl" />
                 </div>
 
                 {/* Container */}
-                <div className="absolute bottom-[35%] left-[0%] w-[22%] z-10">
+                <div className="absolute bottom-[45%] right-[90%] w-[32%] z-10">
                   <Image src={img12} alt="Container" className="w-full h-auto object-contain drop-shadow-md" />
                 </div>
 
                 {/* Forklift */}
-                <div className="absolute top-[42%] left-[32%] w-[18%] z-20">
+                <div className="absolute top-[32%] left-[12%] w-[25%] z-20">
                   <Image src={img3} alt="Forklift" className="w-full h-auto object-contain drop-shadow-md" />
                 </div>
 
