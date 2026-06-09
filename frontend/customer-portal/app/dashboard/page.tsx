@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { PackageOpen, Truck, IndianRupee, MapPin } from "lucide-react";
 import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
 import StatCard from "@/components/dashboard/StatCard";
-import LiveMapMock from "@/components/dashboard/LiveMapMock";
+import LiveMap from "@/components/dashboard/LiveMap";
 import QuickBookCard from "@/components/dashboard/QuickBookCard";
 import ActiveShipmentCard from "@/components/dashboard/ActiveShipmentCard";
 import RecentOrdersTable from "@/components/dashboard/RecentOrdersTable";
@@ -67,7 +67,7 @@ export default function DashboardOverview() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <LiveMapMock />
+        <LiveMap />
         <QuickBookCard />
       </div>
 

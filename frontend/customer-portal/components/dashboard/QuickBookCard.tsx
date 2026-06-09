@@ -3,11 +3,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Package, MapPin, Navigation, ArrowRight } from "lucide-react";
+import { useBookingStore } from "@/store/bookingStore";
+import LocationAutocomplete from "./LocationAutocomplete";
 
 export default function QuickBookCard() {
   const [showEstimate, setShowEstimate] = useState(false);
   const [vehicle, setVehicle] = useState("tempo");
   const [loading, setLoading] = useState(false);
+
+  const { pickup, dropoff } = useBookingStore();
 
   const handleEstimate = () => {
     setShowEstimate(true);
@@ -38,25 +42,27 @@ export default function QuickBookCard() {
 
       <div className="flex flex-col gap-4 flex-1">
         {/* Pickup Input */}
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse" />
-          <div className="absolute left-[17px] top-[28px] w-px h-6 bg-gray-300" />
-          <input 
-            type="text" 
-            placeholder="Pickup Location" 
-            className="input-field pl-10 bg-white"
-            defaultValue="Andheri East, Mumbai"
+        <div className="relative z-20">
+          <LocationAutocomplete 
+            type="pickup"
+            placeholder="Search Pickup Location"
+            icon={
+              <>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse z-10" />
+                <div className="absolute left-[17px] top-[28px] w-px h-6 bg-gray-300 z-0" />
+              </>
+            }
           />
         </div>
 
         {/* Drop Input */}
-        <div className="relative">
-          <MapPin className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: "var(--brand-secondary)" }} />
-          <input 
-            type="text" 
-            placeholder="Drop Location" 
-            className="input-field pl-10 bg-white"
-            defaultValue="Thane West, Thane"
+        <div className="relative z-10">
+          <LocationAutocomplete 
+            type="dropoff"
+            placeholder="Search Drop Location"
+            icon={
+              <MapPin className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 z-10" style={{ color: "var(--brand-secondary)" }} />
+            }
           />
         </div>
 

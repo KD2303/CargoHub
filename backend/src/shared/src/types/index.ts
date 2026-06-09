@@ -12,6 +12,7 @@ export type Platform = 'android' | 'ios' | 'web';
 
 export interface AuthUser {
   uid: string;
+  email?: string;
   role: Role;
   accountType: AccountType;
   kycStatus?: KycStatus;
@@ -24,6 +25,10 @@ export interface UserProfile {
   name: string;
   email?: string;
   phone: string;
+  gender?: string;
+  emailVerified?: boolean;
+  profileCompleted?: boolean;
+  fcmToken?: string;
   role: Role;
   accountType: AccountType;
   profilePhoto?: string;

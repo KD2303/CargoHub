@@ -3,12 +3,22 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+import { useAuthStore } from "@/store/authStore";
+
 export default function WelcomeBanner() {
+  const { user } = useAuthStore();
   const [text, setText] = useState("");
-  const fullText = "Good evening, Rahul 👋";
   const [showSubtext, setShowSubtext] = useState(false);
 
   useEffect(() => {
+    const hour = new Date().getHours();
+    let greeting = "Good morning";
+    if (hour >= 12 && hour < 17) greeting = "Good afternoon";
+    else if (hour >= 17) greeting = "Good evening";
+    
+    const firstName = user?.name ? user.name.split(' ')[0] : 'Guest';
+    const fullText = `${greeting}, ${firstName} 👋`;
+    
     let i = 0;
     const timer = setInterval(() => {
       setText(fullText.slice(0, i));
@@ -19,7 +29,7 @@ export default function WelcomeBanner() {
       }
     }, 80);
     return () => clearInterval(timer);
-  }, []);
+  }, [user]);
 
   return (
     <motion.div 

@@ -1,224 +1,161 @@
-// ============================================================================
-// Auth Routes
-// POST /auth/register-user, POST /auth/register-driver, POST /auth/register-tokens, GET /auth/me
-// ============================================================================
-
 import { Router } from 'express';
-import { v4 as uuid } from 'uuid';
 import { db } from '../config/database';
-import { auth } from '../config/firebase';
-import { sendSMS } from '../config/services';
+import { authService } from '../services/auth.service';
 import { verifyFirebaseToken, decodeFirebaseToken } from '../middlewares/auth.middleware';
-import { requireRole } from '../middlewares/role.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { RegisterUserSchema, RegisterDriverSchema, RegisterTokensSchema } from '@cargohub/shared';
 
 const router = Router();
 
-// ── Mobile OTP Logic (MSG91) ─────────────────────────────────────────────────
+// ── New Signup / Profile Completion Flow ─────────────────────────────────────
 
-// Generate and Send OTP
-router.post('/send-otp', async (req, res) => {
+// Register or complete profile for a USER
+// This handles BOTH standard Email signups and Google signups after Firebase Auth
+router.post('/register-user', decodeFirebaseToken, validate(RegisterUserSchema), async (req, res) => {
   try {
-    const { phone } = req.body;
-    if (!phone) {
-      res.status(400).json({ success: false, error: 'Phone number required' });
-      return;
-    }
+    const firebaseUid = req.user!.uid;
+    const email = req.user!.email; // Firebase email
 
-    // Generate 6-digit OTP
-    const isTestNumber = phone === process.env.TEST_PHONE_NUMBER; // Remove hardcoded test number
-    const otp = isTestNumber ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
+    const user = await authService.registerUser(firebaseUid, email, {
+      name: req.body.name,
+      phone: req.body.phone,
+      gender: req.body.gender,
+      profilePictureUrl: req.body.profilePictureUrl,
+      role: 'USER'
+    });
 
-    // Cache in Redis
-    await db.authOTP.setOTP(phone, otp);
-
-    // Send SMS via MSG91 (skip only if using specific test number)
-    if (!isTestNumber) {
-      const templateId = process.env.MSG91_OTP_TEMPLATE_ID || '';
-      try {
-        await sendSMS(phone, templateId, { var: otp });
-      } catch (smsError: any) {
-        console.error(`[MSG91 ERROR] Failed to send to ${phone}`, smsError);
-        res.status(500).json({ success: false, error: 'Failed to send SMS via MSG91' });
-        return;
-      }
-    } else {
-      console.log(`[TEST OTP] Phone: ${phone}, OTP: ${otp}`);
-    }
-
-    res.json({ success: true, message: 'OTP sent successfully via MSG91' });
+    res.status(200).json({ success: true, data: user, message: 'Profile completed successfully' });
   } catch (error: any) {
-    console.error('Send OTP Error:', error);
-    res.status(500).json({ success: false, error: 'Failed to send OTP' });
+    console.error('Register User Error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to register user' });
   }
 });
 
-// Verify OTP & Issue Custom Token
-router.post('/verify-otp', async (req, res) => {
+// Register or complete profile for a DRIVER
+router.post('/register-driver', decodeFirebaseToken, validate(RegisterDriverSchema), async (req, res) => {
   try {
-    const { phone, otp } = req.body;
-    if (!phone || !otp) {
-      res.status(400).json({ success: false, error: 'Phone and OTP required' });
-      return;
-    }
-
-    const cachedOtp = await db.authOTP.getOTP(phone);
-    // Upstash returns numbers for numeric strings, so coerce to string first
-    const cleanCachedOtp = cachedOtp ? String(cachedOtp).replace(/^"|"$/g, '') : null;
+    const firebaseUid = req.user!.uid;
+    const email = req.user!.email;
     
-    if (!cleanCachedOtp || cleanCachedOtp !== String(otp)) {
-      res.status(400).json({ success: false, error: 'Invalid or expired OTP' });
-      return;
-    }
+    // Create Base User Profile for Driver
+    const user = await authService.registerUser(firebaseUid, email, {
+      name: req.body.name,
+      phone: req.body.phone,
+      role: 'DRIVER'
+    });
 
-    // Delete OTP after successful verification
-    await db.authOTP.deleteOTP(phone);
-
-    if (!auth) {
-      console.warn('Firebase Auth not initialized. Returning mock custom token for testing.');
-      return res.json({ 
-        success: true, 
-        token: 'mock-custom-token-for-testing', 
-        isNewUser: false 
+    // Check if Driver profile exists
+    let driver = await db.drivers.findByFirebaseUid(firebaseUid);
+    if (!driver) {
+      driver = await db.drivers.create({
+        id: user.id, // match user id
+        firebaseUid: firebaseUid,
+        name: req.body.name,
+        phone: req.body.phone,
+        vehicleType: req.body.vehicleType,
+        vehicleNumber: req.body.vehicleNumber,
+        rating: 0,
+        totalTrips: 0,
+        kycStatus: 'UNSUBMITTED',
+        isAvailable: false,
+        isActive: true,
+        earnings: { today: 0, thisWeek: 0, thisMonth: 0, tripCount: 0 },
+        createdAt: new Date().toISOString(),
       });
     }
 
-    // Check if user exists in Firebase, otherwise create them
-    let userRecord;
-    let isNewUser = false;
-    let customToken = 'mock-custom-token-for-testing';
+    res.status(200).json({ success: true, data: driver, message: 'Driver registered successfully' });
+  } catch (error: any) {
+    console.error('Register Driver Error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to register driver' });
+  }
+});
 
-    try {
-      try {
-        userRecord = await auth.getUserByPhoneNumber(phone);
-      } catch (e: any) {
-        if (e.code === 'auth/user-not-found') {
-          userRecord = await auth.createUser({ phoneNumber: phone });
-          isNewUser = true;
-        } else {
-          throw e;
-        }
-      }
-      // Generate Firebase Custom Token
-      customToken = await auth.createCustomToken(userRecord.uid);
-    } catch (firebaseError: any) {
-      console.warn('Firebase Auth failed (possibly not enabled in console). Returning mock token.', firebaseError.message);
-      isNewUser = true; // Default to new user for testing if Firebase fails
+// ── Tokens & Profile ─────────────────────────────────────────────────────────
+
+// Upload user avatar
+router.post('/upload-avatar', verifyFirebaseToken, async (req, res) => {
+  try {
+    const firebaseUid = req.user!.uid;
+    const { base64Image } = req.body;
+    
+    if (!base64Image) {
+      res.status(400).json({ success: false, error: 'No image provided' });
+      return;
     }
 
-    res.json({ 
-      success: true, 
-      token: customToken, 
-      isNewUser 
+    const { v2: cloudinary } = await import('cloudinary');
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+      console.warn('Cloudinary not configured. Mocking success.');
+      // Mock update
+      await db.users.update(firebaseUid, { profilePhoto: 'https://mock.url/avatar.jpg' });
+      res.json({ success: true, url: 'https://mock.url/avatar.jpg' });
+      return;
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET
     });
+
+    const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+      folder: 'avatars',
+      transformation: [{ width: 500, height: 500, crop: 'fill' }]
+    });
+
+    await db.users.update(firebaseUid, { profilePhoto: uploadResponse.secure_url });
+    
+    res.json({ success: true, url: uploadResponse.secure_url });
   } catch (error: any) {
-    console.error('Verify OTP Error:', error);
-    res.status(500).json({ success: false, error: 'Failed to verify OTP' });
+    console.error('Upload Avatar Error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload avatar' });
   }
-});
-
-// ── Registration & Profile ───────────────────────────────────────────────────
-
-// Register new user
-router.post('/register-user', decodeFirebaseToken, validate(RegisterUserSchema), async (req, res) => {
-  const firebaseUid = req.user!.uid;
-  const existing = await db.users.findByFirebaseUid(firebaseUid);
-  if (existing) {
-    res.json({ success: true, data: existing, message: 'User already exists.' });
-    return;
-  }
-
-  const user = await db.users.create({
-    id: uuid(),
-    firebaseUid: firebaseUid,
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    role: 'USER',
-    accountType: 'STANDARD',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
-
-  res.status(201).json({ success: true, data: user });
-});
-
-// Register new driver
-router.post('/register-driver', decodeFirebaseToken, validate(RegisterDriverSchema), async (req, res) => {
-  const firebaseUid = req.user!.uid;
-  const existing = await db.users.findByFirebaseUid(firebaseUid);
-  if (existing) {
-    res.json({ success: true, data: existing, message: 'Driver already exists.' });
-    return;
-  }
-
-  const driverId = uuid();
-  await db.users.create({
-    id: driverId,
-    firebaseUid: firebaseUid,
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    role: 'DRIVER',
-    accountType: 'STANDARD',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
-
-  const driver = await db.drivers.create({
-    id: driverId,
-    firebaseUid: firebaseUid,
-    name: req.body.name,
-    phone: req.body.phone,
-    vehicleType: req.body.vehicleType,
-    vehicleNumber: req.body.vehicleNumber,
-    rating: 0,
-    totalTrips: 0,
-    kycStatus: 'UNSUBMITTED',
-    isAvailable: false,
-    isActive: true,
-    earnings: { today: 0, thisWeek: 0, thisMonth: 0, tripCount: 0 },
-    createdAt: new Date().toISOString(),
-  });
-
-  res.status(201).json({ success: true, data: driver });
 });
 
 // Register push notification tokens
 router.post('/register-tokens',
   verifyFirebaseToken,
-  requireRole('USER', 'DRIVER'),
   validate(RegisterTokensSchema),
   async (req, res) => {
-    // db.notificationTokens.set(req.user!.uid, {
-    //   fcmToken: req.body.fcmToken,
-    //   apnsToken: req.body.apnsToken,
-    //   oneSignalId: req.body.oneSignalId,
-    //   platform: req.body.platform,
-    // });
-    res.json({ success: true, message: 'Notification tokens registered (mock).' });
+    try {
+      const firebaseUid = req.user!.uid;
+      const { fcmToken, oneSignalId } = req.body;
+      
+      await db.users.update(firebaseUid, {
+        fcmToken: fcmToken,
+        // Onesignal ID is optional and kept for backward compatibility with schema if needed
+      });
+      
+      res.json({ success: true, message: 'Notification tokens registered.' });
+    } catch (error: any) {
+      console.error('Register Tokens Error:', error);
+      res.status(500).json({ success: false, error: 'Failed to register tokens' });
+    }
   }
 );
 
 // Get current user profile
 router.get('/me', verifyFirebaseToken, async (req, res) => {
-  const user = await db.users.findByFirebaseUid(req.user!.uid);
-  if (!user) {
-    res.status(404).json({ success: false, error: 'USER_NOT_FOUND' });
-    return;
-  }
+  try {
+    const user = await authService.getUserByFirebaseUid(req.user!.uid);
+    if (!user) {
+      res.status(404).json({ success: false, error: 'USER_NOT_FOUND' });
+      return;
+    }
 
-  // If driver, include driver profile
-  if (user.role === 'DRIVER') {
-    const driver = await db.drivers.findByFirebaseUid(req.user!.uid);
-    res.json({ success: true, data: { ...user, driver } });
-    return;
-  }
+    // If driver, include driver profile
+    if (user.role === 'DRIVER') {
+      const driver = await db.drivers.findByFirebaseUid(req.user!.uid);
+      res.json({ success: true, data: { ...user, driver } });
+      return;
+    }
 
-  res.json({ success: true, data: user });
+    res.json({ success: true, data: user });
+  } catch (error: any) {
+    console.error('Get Profile Error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch profile' });
+  }
 });
 
 export default router;

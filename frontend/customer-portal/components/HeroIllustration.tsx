@@ -56,11 +56,11 @@ interface SceneElementProps {
   alt: string;
   positionClass: string;       // absolute position + z-index classes
   dropShadow?: string;         // tailwind drop-shadow class
-  from: object;                // entrance "hidden" state
-  enterTransition: object;     // framer transition for entrance
+  from: any;                   // entrance "hidden" state
+  enterTransition: any;        // framer transition for entrance
   delay: number;               // entrance delay in seconds
   ambient?: {                  // optional perpetual loop after entrance
-    keyframes: object;
+    keyframes: any;
     duration: number;
     loopDelay?: number;        // extra start delay before first loop
   };

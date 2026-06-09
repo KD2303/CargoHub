@@ -36,7 +36,7 @@ export const decodeFirebaseToken = async (
 
   try {
     const decodedToken = await auth.verifyIdToken(token);
-    req.user = { uid: decodedToken.uid } as any;
+    req.user = { uid: decodedToken.uid, email: decodedToken.email } as any;
     next();
   } catch (error) {
     console.error('Firebase token verification failed:', error);
@@ -100,6 +100,7 @@ export const verifyFirebaseToken = async (
     const driver = await db.drivers.findByFirebaseUid(uid);
     req.user = {
       uid: user.firebaseUid,
+      email: user.email,
       role: user.role,
       accountType: user.accountType,
       kycStatus: driver?.kycStatus,

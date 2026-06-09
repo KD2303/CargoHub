@@ -10,6 +10,7 @@ import {
   Wallet, Star, HeadphonesIcon, Settings, LogOut, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { useDashboardStore } from "@/store/dashboardStore";
+import { useAuthStore } from "@/store/authStore";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", route: "/dashboard" },
@@ -25,6 +26,17 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isSidebarCollapsed, toggleSidebar } = useDashboardStore();
+  const { user } = useAuthStore();
+  
+  const handleLogout = async () => {
+    try {
+      const { auth } = await import('@/lib/firebase');
+      await auth.signOut();
+      window.location.href = '/';
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <motion.aside 
@@ -112,25 +124,30 @@ export default function Sidebar() {
           <div className="mb-4 p-3 rounded-xl" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-subtle)" }}>
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>Wallet</span>
-              <span className="text-xs font-bold" style={{ color: "var(--brand-primary)" }}>₹250</span>
+              <span className="text-xs font-bold" style={{ color: "var(--brand-primary)" }}>₹0</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>Active</span>
               <span className="text-xs font-bold flex items-center gap-1" style={{ color: "var(--brand-secondary)" }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse-ring" style={{ background: "var(--brand-secondary)" }}></span>
-                2 bookings
+                0 bookings
               </span>
             </div>
           </div>
         )}
 
-        <button className={`flex items-center transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${isSidebarCollapsed ? "justify-center w-10 h-10 rounded-full" : "gap-3 px-4 py-2 w-full text-left rounded-xl"}`} style={{ color: "var(--text-secondary)" }}>
-          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-xs flex-shrink-0" style={{ color: "var(--brand-primary)" }}>R</div>
+        <button onClick={handleLogout} className={`flex items-center transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${isSidebarCollapsed ? "justify-center w-10 h-10 rounded-full" : "gap-3 px-4 py-2 w-full text-left rounded-xl"}`} style={{ color: "var(--text-secondary)" }}>
+          {user?.profilePhoto ? (
+            <img src={user.profilePhoto} alt="Profile" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-xs flex-shrink-0" style={{ color: "var(--brand-primary)" }}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+            </div>
+          )}
           {!isSidebarCollapsed && (
             <>
               <div className="flex-1 whitespace-nowrap overflow-hidden">
-                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>Rahul K.</p>
-                <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>Customer</p>
+                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{user?.name || "Loading..."}</p>
+                <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{user?.role === 'DRIVER' ? 'Driver' : 'Customer'}</p>
               </div>
               <LogOut className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
             </>

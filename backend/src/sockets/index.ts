@@ -35,14 +35,14 @@ export function setupSocketHandlers(
 
     // ── Join Booking Room ──────────────────────────────────────────────────
 
-    socket.on('join:booking', ({ bookingId }) => {
+    socket.on('join:booking', ({ bookingId }: { bookingId: string }) => {
       socket.join(`booking:${bookingId}`);
       console.log(`   → Socket ${socket.id} joined booking:${bookingId}`);
     });
 
     // ── Driver Location Update ─────────────────────────────────────────────
 
-    socket.on('driver:location', async (data) => {
+    socket.on('driver:location', async (data: { bookingId?: string; lat: number; lng: number; heading?: number; speed?: number; timestamp?: number }) => {
       if (!uid) return;
 
       // Update driver location in DB
@@ -66,7 +66,7 @@ export function setupSocketHandlers(
 
     // ── Booking Accept ─────────────────────────────────────────────────────
 
-    socket.on('booking:accept', async ({ bookingId }) => {
+    socket.on('booking:accept', async ({ bookingId }: { bookingId: string }) => {
       if (!uid) return;
 
       const booking = await db.bookings.findById(bookingId);
@@ -105,7 +105,7 @@ export function setupSocketHandlers(
 
     // ── Booking Reject ─────────────────────────────────────────────────────
 
-    socket.on('booking:reject', ({ bookingId }) => {
+    socket.on('booking:reject', ({ bookingId }: { bookingId: string }) => {
       if (!uid) return;
       console.log(`   ❌ Driver ${uid} rejected booking ${bookingId}`);
       // In production: try next nearest driver
@@ -113,7 +113,7 @@ export function setupSocketHandlers(
 
     // ── Booking Status Update ──────────────────────────────────────────────
 
-    socket.on('booking:status', async ({ bookingId, status }) => {
+    socket.on('booking:status', async ({ bookingId, status }: { bookingId: string; status: BookingStatus }) => {
       if (!uid) return;
 
       const booking = await db.bookings.findById(bookingId);

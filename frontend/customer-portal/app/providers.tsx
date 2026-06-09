@@ -1,21 +1,21 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
+  const initializeAuthListener = useAuthStore((state) => state.initializeAuthListener);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
+    const unsubscribe = initializeAuthListener();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [initializeAuthListener]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       {children as any}
     </ThemeProvider>
   );

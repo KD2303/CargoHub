@@ -23,6 +23,8 @@ export const RegisterUserSchema = z.object({
   name: z.string().min(2).max(100),
   phone: z.string().regex(/^\+91\d{10}$/, 'Must be a valid Indian phone number (+91XXXXXXXXXX)'),
   email: z.string().email().optional(),
+  gender: z.string().optional(),
+  profilePictureUrl: z.string().url().optional(),
 });
 
 export const RegisterDriverSchema = z.object({

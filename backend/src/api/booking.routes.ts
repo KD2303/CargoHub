@@ -1,22 +1,12 @@
-// ============================================================================
-// Booking Routes
-// POST /bookings, GET /bookings, GET /bookings/:id, PATCH /bookings/:id/cancel
-// GET /bookings/driver/active
-// ============================================================================
-
 import { Router } from 'express';
-import { v4 as uuid } from 'uuid';
 import { db } from '../config/database';
+import { bookingService } from '../services/booking.service';
 import { verifyFirebaseToken } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
 import { requireVerifiedKyc } from '../middlewares/kyc.middleware';
 import { validateBookingOwnership } from '../middlewares/ownership.middleware';
 import { validate } from '../middlewares/validate.middleware';
-import { logsnag, resend, sendSMS } from '../config/services';
-import {
-  CreateBookingSchema, CancelBookingSchema,
-  calculateFare, USER_CANCELLABLE_STATUSES, FEE_CANCELLATION_STATUSES,
-} from '@cargohub/shared';
+import { CreateBookingSchema, CancelBookingSchema, USER_CANCELLABLE_STATUSES, FEE_CANCELLATION_STATUSES } from '@cargohub/shared';
 import type { Booking } from '@cargohub/shared';
 
 const router = Router();
@@ -28,88 +18,12 @@ router.post('/',
   validate(CreateBookingSchema),
   async (req, res) => {
     try {
-      const fare = calculateFare({
-        pickupLat: req.body.pickupLat,
-        pickupLng: req.body.pickupLng,
-        dropLat: req.body.dropLat,
-        dropLng: req.body.dropLng,
-        vehicleType: req.body.vehicleType,
-        loadType: req.body.loadType,
-        helpersRequested: req.body.helpersRequested,
-      });
-
-      const booking: Booking = {
-        id: uuid(),
-        bookingRef: `FA-${Date.now().toString(36).toUpperCase()}`,
-        userId: req.user!.uid,
-        pickupLat: req.body.pickupLat,
-        pickupLng: req.body.pickupLng,
-        pickupAddress: req.body.pickupAddress,
-        dropLat: req.body.dropLat,
-        dropLng: req.body.dropLng,
-        dropAddress: req.body.dropAddress,
-        vehicleType: req.body.vehicleType,
-        loadType: req.body.loadType,
-        helpersRequested: req.body.helpersRequested,
-        fareEstimate: fare.total,
-        status: 'PENDING',
-        paymentStatus: 'UNPAID',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      await db.bookings.create(booking);
-
-      // Track in LogSnag
-      if (process.env.LOGSNAG_TOKEN) {
-        logsnag.track({
-          channel: 'bookings',
-          event: 'New Booking',
-          user_id: booking.userId,
-          description: `Booking ${booking.bookingRef} created for ${booking.vehicleType}`,
-          icon: '📦',
-          tags: {
-            vehicle_type: booking.vehicleType,
-          }
-        }).catch(e => console.error(e));
-      }
-
-      // Find nearest driver and emit Socket.io event
-      const nearbyDrivers = await db.drivers.findNearby(
-        req.body.pickupLat,
-        req.body.pickupLng,
-        req.body.vehicleType
-      );
-
-      if (nearbyDrivers.length > 0) {
-        const io = req.app.get('io');
-        // Notify the first driver via socket
-        const targetDriver = nearbyDrivers[0];
-        io.to(`driver:${targetDriver.firebaseUid}`).emit('booking:new', booking);
-        
-        // Notify driver via SMS
-        if (targetDriver.phone) {
-          sendSMS(targetDriver.phone, 'booking_alert_template', {
-            pickup: booking.pickupAddress.substring(0, 30),
-            fare: booking.fareEstimate.toString()
-          });
-        }
-      }
-
-      // Send Email to User
-      const user = await db.users.findByFirebaseUid(booking.userId);
-      if (user?.email && process.env.RESEND_API_KEY) {
-        resend.emails.send({
-          from: 'CargoHub <noreply@cargohub.com>',
-          to: user.email,
-          subject: `Booking Confirmation - ${booking.bookingRef}`,
-          html: `<p>Your booking <strong>${booking.bookingRef}</strong> has been created. We are finding a driver for you.</p>`
-        }).catch(e => console.error(e));
-      }
-
+      const io = req.app.get('io');
+      const { booking, fareBreakdown } = await bookingService.createBooking(req.user!.uid, req.body, io);
+      
       res.status(201).json({
         success: true,
-        data: { booking, fareBreakdown: fare },
+        data: { booking, fareBreakdown },
       });
     } catch (err) {
       console.error(err);
@@ -151,7 +65,7 @@ router.get('/driver/active',
   }
 );
 
-// Get single booking detail (USER own, DRIVER assigned, ADMIN any)
+// Get single booking detail
 router.get('/:id',
   verifyFirebaseToken,
   async (req, res) => {
@@ -220,31 +134,8 @@ router.patch('/:id/cancel',
       }
 
       const hasFee = FEE_CANCELLATION_STATUSES.includes(booking.status);
-
-      const updated = await db.bookings.update(booking.id, {
-        status: 'CANCELLED',
-        cancellationReason: req.body.reason || 'Cancelled by user',
-      });
-
-      // Track in LogSnag
-      if (process.env.LOGSNAG_TOKEN) {
-        logsnag.track({
-          channel: 'bookings',
-          event: 'Booking Cancelled',
-          user_id: booking.userId,
-          description: `Booking ${booking.bookingRef} cancelled.`,
-          icon: '❌',
-        }).catch(e => console.error(e));
-      }
-
-      // Notify driver if assigned
-      if (booking.driverId) {
-        const io = req.app.get('io');
-        io.to(`booking:${booking.id}`).emit('booking:cancelled', {
-          bookingId: booking.id,
-          reason: req.body.reason || 'Cancelled by user',
-        });
-      }
+      const io = req.app.get('io');
+      const updated = await bookingService.cancelBookingByUser(booking.id, req.body.reason || 'Cancelled by user', io);
 
       res.json({
         success: true,

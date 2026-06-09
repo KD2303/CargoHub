@@ -11,6 +11,7 @@ declare global {
       platform?: string;
       user?: {
         uid: string;
+        email?: string;
         role: 'USER' | 'DRIVER' | 'ADMIN';
         accountType: 'STANDARD' | 'B2B';
         kycStatus?: 'UNSUBMITTED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
