@@ -3,11 +3,14 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Sparkles, X, Send, Bot } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 export default function AIDrawer() {
+  const { user } = useAuthStore();
+  const firstName = user?.name ? user.name.split(' ')[0] : 'there';
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: "ai", text: "Hi Rahul! I'm your CargoHub AI. How can I help you today?" }
+  const [messages, setMessages] = useState(() => [
+    { role: "ai", text: `Hi ${firstName}! I'm your CargoHub AI. How can I help you today?` }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
