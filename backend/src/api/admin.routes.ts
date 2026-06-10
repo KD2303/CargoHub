@@ -162,6 +162,16 @@ router.get('/analytics/revenue', async (_req, res) => {
   res.json({ success: true, data: revenue });
 });
 
+// Dashboard stats
+router.get('/dashboard-stats', async (_req, res) => {
+  try {
+    const stats = await db.analytics.getDashboardStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch dashboard stats' });
+  }
+});
+
 // Booking heatmap
 router.get('/analytics/heatmap', async (_req, res) => {
   const heatmap = await db.analytics.getHeatmap();

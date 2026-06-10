@@ -15,6 +15,7 @@ import { corsOptions } from './config/cors';
 import { platformMiddleware } from './middlewares/platform.middleware';
 import { errorHandler } from './middlewares/error.middleware';
 import { arcjetMiddleware } from './middlewares/security.middleware';
+import { globalLimiter } from './middlewares/rateLimit.middleware';
 import { initSentry } from './config/services';
 
 // Initialize Sentry early
@@ -64,7 +65,8 @@ app.use(helmet({
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(arcjetMiddleware); // Rate limiting and bot protection
+app.use(globalLimiter); // Native fallback rate limiting
+app.use(arcjetMiddleware); // Rate limiting and bot protection (if key provided)
 app.use(platformMiddleware);
 
 // Serve static files for testing UI

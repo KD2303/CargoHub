@@ -178,6 +178,40 @@ export const db = {
     },
     getHeatmap: async () => {
       return [];
+    },
+    getDashboardStats: async () => {
+      // Mocked stats for now, but structured exactly as the frontend expects
+      return {
+        stats: [
+          { label: "Total Bookings Today", value: "247", change: "+12%", changeType: "up", accentColor: "blue" },
+          { label: "Active Drivers Online", value: "89", change: "↑ from 74", changeType: "up", accentColor: "green" },
+          { label: "Revenue Today (₹)", value: "₹1,84,320", change: "+8.2%", changeType: "up", accentColor: "purple" },
+          { label: "Pending KYC", value: "3", change: "Needs review", changeType: "down", accentColor: "red" },
+        ],
+        liveEvents: [
+          { id: 1, type: "purple", text: "New booking #BK-1842 — Raj Kumar, Mumbai→Pune", time: "just now" },
+          { id: 2, type: "green", text: "Payment received ₹3,200 — Order #BK-1841", time: "2m ago" },
+          { id: 3, type: "blue", text: "Driver Amit Singh went online", time: "5m ago" },
+          { id: 4, type: "red", text: "Booking #BK-1839 — Cancelled", time: "12m ago" },
+          { id: 5, type: "warning", text: "KYC submitted — Suresh Patel (Pending review)", time: "18m ago" },
+        ],
+        bookingTrends: [
+          { day: "Mon", bookings: 180 },
+          { day: "Tue", bookings: 195 },
+          { day: "Wed", bookings: 210 },
+          { day: "Thu", bookings: 190 },
+          { day: "Fri", bookings: 230 },
+          { day: "Sat", bookings: 260 },
+          { day: "Sun", bookings: 247 },
+        ],
+        recentBookings: [
+          { id: "BK-1842", customer: "Raj Kumar", route: "Mumbai → Pune", driver: "Finding...", amount: "₹4,500", status: "Finding Driver", time: "10:42 AM" },
+          { id: "BK-1841", customer: "Anita Desai", route: "Delhi → Noida", driver: "Amit Singh", amount: "₹3,200", status: "Completed", time: "10:30 AM" },
+          { id: "BK-1840", customer: "Vikram Tech", route: "Bangalore → Hosur", driver: "Ravi K", amount: "₹12,400", status: "Ongoing", time: "09:15 AM" },
+          { id: "BK-1839", customer: "Sneha Patel", route: "Surat → Vapi", driver: "-", amount: "₹2,100", status: "Cancelled", time: "08:50 AM" },
+          { id: "BK-1838", customer: "Rahul M", route: "Chennai → Vellore", driver: "Karthik R", amount: "₹6,800", status: "Ongoing", time: "08:10 AM" },
+        ]
+      };
     }
   },
 

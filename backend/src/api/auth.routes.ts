@@ -4,6 +4,7 @@ import { authService } from '../services/auth.service';
 import { verifyFirebaseToken, decodeFirebaseToken } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { RegisterUserSchema, RegisterDriverSchema, RegisterTokensSchema } from '@cargohub/shared';
+import { strictLimiter } from '../middlewares/rateLimit.middleware';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ const router = Router();
 
 // Register or complete profile for a USER
 // This handles BOTH standard Email signups and Google signups after Firebase Auth
-router.post('/register-user', decodeFirebaseToken, validate(RegisterUserSchema), async (req, res) => {
+router.post('/register-user', strictLimiter, decodeFirebaseToken, validate(RegisterUserSchema), async (req, res) => {
   try {
     const firebaseUid = req.user!.uid;
     const email = req.user!.email; // Firebase email
@@ -32,7 +33,7 @@ router.post('/register-user', decodeFirebaseToken, validate(RegisterUserSchema),
 });
 
 // Register or complete profile for a DRIVER
-router.post('/register-driver', decodeFirebaseToken, validate(RegisterDriverSchema), async (req, res) => {
+router.post('/register-driver', strictLimiter, decodeFirebaseToken, validate(RegisterDriverSchema), async (req, res) => {
   try {
     const firebaseUid = req.user!.uid;
     const email = req.user!.email;

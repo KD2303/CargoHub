@@ -10,12 +10,14 @@ import { razorpay } from '../config/services';
 import { verifyFirebaseToken } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
 import { validate } from '../middlewares/validate.middleware';
+import { strictLimiter } from '../middlewares/rateLimit.middleware';
 import { CreatePaymentOrderSchema, VerifyPaymentSchema } from '@cargohub/shared';
 
 const router = Router();
 
 // Create Razorpay order (USER only)
 router.post('/create-order',
+  strictLimiter,
   verifyFirebaseToken,
   requireRole('USER'),
   validate(CreatePaymentOrderSchema),

@@ -84,3 +84,25 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   metadata JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ==========================================
+-- 🚀 PERFORMANCE OPTIMIZATIONS (INDEXES)
+-- ==========================================
+
+-- Bookings Table Indexes (Heavily queried for tracking and history)
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_driver_id ON bookings(driver_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON bookings(created_at DESC);
+
+-- Drivers Table Indexes (Heavily queried for matchmaking)
+CREATE INDEX IF NOT EXISTS idx_drivers_is_available ON drivers(is_available) WHERE is_available = true;
+CREATE INDEX IF NOT EXISTS idx_drivers_kyc_status ON drivers(kyc_status);
+CREATE INDEX IF NOT EXISTS idx_drivers_vehicle_type ON drivers(vehicle_type);
+
+-- Users Table Indexes (Queried for B2B/Admin validation)
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_account_type ON users(account_type);
+
+-- Ratings Table Indexes
+CREATE INDEX IF NOT EXISTS idx_ratings_driver_id ON ratings(driver_id);
