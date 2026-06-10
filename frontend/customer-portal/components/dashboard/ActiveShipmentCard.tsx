@@ -46,28 +46,65 @@ function ShipmentRow({ shipment }: { shipment: ShipmentProps }) {
       </div>
 
       {/* Animated Progress Bar */}
-      <div className="relative h-1 bg-gray-100 rounded-full mb-5 mt-2">
-        <div className="absolute left-0 top-0 bottom-0 bg-gray-200 rounded-full w-full overflow-hidden">
-          {/* Dashed line background */}
-          <div className="w-[200%] h-full flex" style={{ 
-            backgroundImage: "linear-gradient(90deg, transparent 50%, rgba(2, 89, 221, 0.1) 50%)",
-            backgroundSize: "20px 100%"
-          }} />
-        </div>
-        <motion.div 
+      <div
+        className="relative h-2 rounded-full mb-5 mt-2 overflow-visible"
+        style={{
+          backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(2,89,221,0.08) 8px, rgba(2,89,221,0.08) 10px)",
+          background: "var(--bg-secondary)",
+        }}
+      >
+        {/* Road texture overlay on the track */}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{
+            backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(2,89,221,0.08) 8px, rgba(2,89,221,0.08) 10px)",
+          }}
+        />
+
+        {/* Filled progress bar */}
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${shipment.progress}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="absolute left-0 top-0 bottom-0 rounded-full relative"
+          transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
+          className="absolute left-0 top-0 bottom-0 rounded-full overflow-visible"
           style={{ background: "var(--brand-primary)" }}
         >
-          {/* Moving Truck Icon on the progress bar */}
-          <motion.div 
-            className="absolute -right-3 -top-3 w-6 h-6 flex items-center justify-center text-lg"
-            animate={{ y: [0, -2, 0] }}
-            transition={{ repeat: Infinity, duration: 0.5 }}
+          {/* Glow dot at tip of bar */}
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+            style={{ background: "var(--brand-primary)", boxShadow: "0 0 6px 2px rgba(2,89,221,0.4)" }}
+          />
+
+          {/* Moving Truck on the progress bar */}
+          <motion.div
+            className="absolute -right-4 -top-4 flex flex-col items-center"
+            style={{ transformOrigin: "center bottom" }}
+            animate={{
+              y: [0, -3, -1, -3, 0],
+              rotate: [-1, 0, -1, 1, -1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.4,
+              ease: "easeInOut",
+            }}
           >
-            🚚
+            {/* Motion blur trail */}
+            <div
+              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{
+                width: "14px",
+                height: "3px",
+                background: "linear-gradient(to left, transparent, rgba(2,89,221,0.25))",
+                borderRadius: "2px",
+              }}
+            />
+            <span
+              className="text-lg select-none"
+              style={{ filter: "drop-shadow(0 2px 4px rgba(2,89,221,0.3))" }}
+            >
+              🚚
+            </span>
           </motion.div>
         </motion.div>
       </div>

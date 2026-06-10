@@ -158,7 +158,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg-card);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   transition: transform var(--duration-normal) var(--ease-smooth),
@@ -314,7 +314,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--text-primary);
-  background: rgba(255,255,255,0.85);
+  background: var(--bg-glass);
   border: 1.5px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   outline: none;
@@ -324,7 +324,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .input-field:focus {
   border-color: var(--brand-primary);
-  background: white;
+  background: var(--bg-card);
   box-shadow: 0 0 0 4px rgba(2, 89, 221, 0.1);
 }
 
@@ -333,7 +333,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Cards ─────────────────────────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-xl);
   padding: 28px;
   box-shadow: var(--shadow-card);
@@ -440,12 +440,11 @@ h1, h2, h3, h4, h5, h6 {
 .animation-delay-4000 { animation-delay: 4s; }
 .animation-delay-6000 { animation-delay: 6s; }
 
-/* Dashboard Specific Animations */
-@keyframes truckSlide {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(70%); }
-}
+/* WelcomeBanner animation is now fully Framer Motion — truckSlide no longer used */
+/* Keep as no-op in case referenced elsewhere */
+.animate-truck-drive { animation: none; }
 
+/* Other dashboard animations still in use */
 @keyframes marquee {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
@@ -456,7 +455,6 @@ h1, h2, h3, h4, h5, h6 {
   100% { stroke-dashoffset: 0; }
 }
 
-.animate-truck-drive { animation: truckSlide 3s ease-in-out infinite alternate; }
 .animate-marquee { animation: marquee 40s linear infinite; }
 .animate-draw-stroke { animation: drawStroke 1.5s ease-out forwards; }
 
@@ -546,7 +544,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Stat Cards ────────────────────────────────────────────────────────────── */
 .stat-card {
   background: var(--bg-card);
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-xl);
   padding: 22px 26px;
   box-shadow: var(--shadow-card);

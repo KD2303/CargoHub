@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import logo from "./icon.jpeg";
 import { HeroIllustration } from "../components/HeroIllustration";
+import { ThemeToggle } from "../components/ThemeToggle";
 import img1 from "./elements/1.png";
 import img2 from "./elements/2.png";
 import img3 from "./elements/3.png";
@@ -120,13 +121,16 @@ export default function LandingPage() {
   const [activeVehicle, setActiveVehicle] = useState(0);
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb]">
+    <div className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
       {/* ── Navigation ─────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f4f7fb]/90 backdrop-blur-md border-b border-slate-200/60">
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
+        style={{ background: "var(--bg-glass)", borderColor: "var(--border-subtle)" }}
+      >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between h-[68px]">
 
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
+          <a href="/" className="flex items-center gap-2.5">
             <Image
               src={logo}
               alt="CargoHub Logo"
@@ -134,30 +138,32 @@ export default function LandingPage() {
               height={48}
               className="rounded-full object-cover flex-shrink-0 shadow-sm"
             />
-            <span className="font-sans text-[17px] font-bold tracking-tight text-[#0f172a]">
+            <span className="font-sans text-[17px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
               CargoHub
             </span>
-          </div>
+          </a>
 
           {/* Center Nav Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features"      className="text-[14px] font-semibold text-slate-500 hover:text-[#0f172a] transition-colors">Features</a>
-            <a href="#vehicles"      className="text-[14px] font-semibold text-slate-500 hover:text-[#0f172a] transition-colors">Vehicles</a>
-            <a href="#how-it-works"  className="text-[14px] font-semibold text-slate-500 hover:text-[#0f172a] transition-colors">How It Works</a>
+            <a href="#features"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Features</a>
+            <a href="#vehicles"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Vehicles</a>
+            <a href="#how-it-works" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>How It Works</a>
           </div>
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <a
               href="/login"
-              className="text-[14px] font-semibold text-slate-600 hover:text-[#0f172a] transition-colors px-4 py-2"
+              className="text-[14px] font-semibold transition-colors px-4 py-2"
+              style={{ color: "var(--text-secondary)" }}
             >
               Log In
             </a>
             <a
               href="/book"
-              className="text-[14px] font-bold text-white bg-[#0f172a] hover:bg-slate-800 transition-colors px-5 py-2.5 shadow-sm"
-              style={{ borderRadius: "4px" }}
+              className="text-[14px] font-bold text-white px-5 py-2.5 shadow-sm transition-opacity hover:opacity-90"
+              style={{ background: "var(--brand-primary)", borderRadius: "4px" }}
             >
               Book Now
             </a>
@@ -174,25 +180,25 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
             >
-              <h1 className="text-5xl md:text-7xl lg:text-[80px] font-sans leading-[1.05] mb-6 font-semibold text-[#0f172a] tracking-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-[80px] font-sans leading-[1.05] mb-6 font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
                 Full Sustainable <br /> Cargo Solution
               </h1>
 
-              <p className="text-base md:text-lg mb-10 max-w-2xl text-slate-500 font-medium leading-relaxed">
+              <p className="text-base md:text-lg mb-10 max-w-2xl font-medium leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 We Continue To Pursue That Same Vision In Today&apos;s Complex, <br className="hidden md:block" />
                 Uncertain World, Working Every Day To Earn Our Customers&apos;
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-8">
-                <a href="/login" className="flex items-stretch bg-white text-[#0f172a] text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow">
+                <a href="/login" className="flex items-stretch text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow" style={{ background: "var(--bg-card)", color: "var(--text-primary)" }}>
                   <span className="px-8 py-4 flex items-center">Get Started</span>
-                  <div className="bg-[#0f172a] text-white px-5 flex items-center justify-center">
+                  <div className="text-white px-5 flex items-center justify-center" style={{ background: "var(--text-primary)" }}>
                     <Play className="w-4 h-4 fill-white" />
                   </div>
                 </a>
-                <a href="#watch" className="flex items-center gap-3 text-[#0f172a] text-[15px] font-semibold hover:opacity-80 transition-opacity">
-                  <div className="w-8 h-8 rounded-full border-2 border-slate-300 flex items-center justify-center">
-                    <Play className="w-3 h-3 fill-[#0f172a] translate-x-[1px]" />
+                <a href="#features" className="flex items-center gap-3 text-[15px] font-semibold hover:opacity-80 transition-opacity" style={{ color: "var(--text-primary)" }}>
+                  <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center" style={{ borderColor: "var(--border-hover)" }}>
+                    <Play className="w-3 h-3 translate-x-[1px]" style={{ fill: "var(--text-primary)" }} />
                   </div>
                   Watch more
                 </a>
@@ -394,7 +400,7 @@ export default function LandingPage() {
                 <a href="/book" className="btn-primary text-base" style={{ padding: "16px 40px" }}>
                   Start Shipping <ArrowRight className="w-5 h-5" />
                 </a>
-                <a href="/driver/onboard" className="btn-secondary text-base" style={{ padding: "16px 40px" }}>
+                <a href="/register" className="btn-secondary text-base" style={{ padding: "16px 40px" }}>
                   <Truck className="w-5 h-5" /> Become a Driver
                 </a>
               </div>
@@ -425,17 +431,19 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Product</h4>
               <div className="space-y-3">
-                {["Book a Truck", "Track Shipment", "Fare Calculator", "Business Account"].map(l => (
-                  <a key={l} href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>{l}</a>
-                ))}
+                <a href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</a>
+                <a href="/tracking" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</a>
+                <a href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Fare Calculator</a>
+                <a href="/b2b-portal" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Business Account</a>
               </div>
             </div>
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
-                {["About Us", "Careers", "Blog", "Contact"].map(l => (
-                  <a key={l} href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>{l}</a>
-                ))}
+                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>About Us</a>
+                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Careers</a>
+                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Blog</a>
+                <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
               </div>
             </div>
             <div>

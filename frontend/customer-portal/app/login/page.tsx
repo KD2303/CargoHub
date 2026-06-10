@@ -6,6 +6,7 @@ import {
   Mail, Lock, ArrowRight, Truck,
   Shield, Zap, ChevronLeft, Eye, EyeOff
 } from "lucide-react";
+import { ThemeToggle } from "../../components/ThemeToggle";
 // @ts-ignore - TS module resolution bug with Firebase 11+
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";
@@ -136,9 +137,12 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Back to home */}
-          <a href="/" className="flex items-center gap-2 text-sm mb-8" style={{ color: "var(--text-muted)" }}>
-            <ChevronLeft className="w-4 h-4" /> Back to home
-          </a>
+          <div className="flex items-center justify-between mb-8">
+            <a href="/" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
+              <ChevronLeft className="w-4 h-4" /> Back to home
+            </a>
+            <ThemeToggle />
+          </div>
 
           <h1 className="font-display text-3xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
             Welcome back
@@ -148,15 +152,16 @@ export default function LoginPage() {
           </p>
 
           {/* Role toggle */}
-          <div className="flex rounded-xl p-1 mb-8" style={{ background: "var(--bg-tertiary)" }}>
+          <div className="flex p-1 mb-8" style={{ background: "var(--bg-tertiary)", borderRadius: "var(--radius-md)" }}>
             {(["user", "driver"] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setMode(r)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all"
+                className="flex-1 py-2.5 text-sm font-semibold transition-all"
                 style={{
                   background: mode === r ? "var(--brand-primary)" : "transparent",
                   color: mode === r ? "white" : "var(--text-muted)",
+                  borderRadius: "var(--radius-sm)",
                 }}
               >
                 {r === "user" ? "👤 Customer" : "🚛 Driver"}
