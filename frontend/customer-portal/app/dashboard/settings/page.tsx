@@ -1,11 +1,71 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Bell, Shield, Key, Moon, Globe } from "lucide-react";
+import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useAuthStore } from "@/store/authStore";
+import { useState, useEffect } from "react";
+import { auth as firebaseAuth } from "@/lib/firebase";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { user, setUser } = useAuthStore();
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Initialize form when user data loads
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseAuth.currentUser) return;
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const idToken = await firebaseAuth.currentUser.getIdToken();
+      const res = await fetch("http://localhost:5000/api/auth/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.data) {
+        setUser(data.data);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        alert(data.error || "Failed to update profile");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const initials = user?.name ? user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() : "U";
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -37,36 +97,55 @@ export default function SettingsPage() {
           >
             <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
             <div className="flex items-center gap-6 mb-6">
-              <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-2xl" style={{ color: "var(--brand-primary)" }}>
-                RK
-              </div>
+              {user?.profilePhoto ? (
+                <img src={user.profilePhoto} alt="Profile" className="w-20 h-20 rounded-full object-cover shadow-sm border border-gray-200" />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center font-bold text-2xl" style={{ color: "var(--brand-primary)" }}>
+                  {initials}
+                </div>
+              )}
               <div>
-                <button className="btn-secondary text-xs py-1.5 px-4">Change Avatar</button>
+                <button type="button" className="btn-secondary text-xs py-1.5 px-4" onClick={() => alert("Avatar upload not yet implemented.")}>Change Avatar</button>
                 <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>JPG, GIF or PNG. Max size of 800K</p>
               </div>
             </div>
 
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form className="space-y-4" onSubmit={handleSaveProfile}>
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>First Name</label>
-                  <input type="text" className="input-field py-2" defaultValue="Rahul" />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Last Name</label>
-                  <input type="text" className="input-field py-2" defaultValue="K." />
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Full Name</label>
+                  <input 
+                    type="text" 
+                    className="input-field py-2 w-full" 
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Email Address</label>
-                  <input type="email" className="input-field py-2" defaultValue="rahul@example.com" />
+                  <input 
+                    type="email" 
+                    className="input-field py-2 w-full opacity-70 bg-gray-50 dark:bg-gray-800" 
+                    value={user?.email || ""} 
+                    disabled 
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">Email cannot be changed.</p>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Phone Number</label>
-                  <input type="tel" className="input-field py-2" defaultValue="+91 98765 43210" />
+                  <input 
+                    type="tel" 
+                    className="input-field py-2 w-full" 
+                    value={formData.phone}
+                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="pt-4 flex justify-end">
-                <button className="btn-primary">Save Changes</button>
+                <button type="submit" className="btn-primary flex items-center gap-2" disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saveSuccess ? <Check className="w-4 h-4" /> : null}
+                  {isSaving ? "Saving..." : saveSuccess ? "Saved!" : "Save Changes"}
+                </button>
               </div>
             </form>
           </motion.div>

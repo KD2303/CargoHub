@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Phone, Share2, AlertCircle, Navigation, CheckCircle2 } from "lucide-react";
-import LiveMapMock from "@/components/dashboard/LiveMapMock";
+import LiveMap from "@/components/dashboard/LiveMap";
 
 export default function TrackingPage() {
   const steps = [
@@ -17,7 +17,7 @@ export default function TrackingPage() {
     <div className="h-[calc(100vh-140px)] flex flex-col lg:flex-row gap-6">
       {/* Map Column */}
       <div className="flex-1 rounded-2xl overflow-hidden shadow-sm relative" style={{ border: "1px solid var(--border-subtle)" }}>
-        <LiveMapMock />
+        <LiveMap />
       </div>
 
       {/* Details Column */}

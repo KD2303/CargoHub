@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useDashboardStore } from "@/store/dashboardStore";
 import { useAuthStore } from "@/store/authStore";
+import { useBookingStore } from "@/store/bookingStore";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", route: "/dashboard" },
@@ -25,8 +26,9 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { isSidebarCollapsed, toggleSidebar } = useDashboardStore();
+  const { isSidebarCollapsed, toggleSidebar, stats } = useDashboardStore();
   const { user } = useAuthStore();
+  const resetBooking = useBookingStore(state => state.resetBooking);
   
   const handleLogout = async () => {
     try {
@@ -90,7 +92,11 @@ export default function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.route || pathname.startsWith(item.route + "/");
           return (
-            <Link key={item.route} href={item.route}>
+            <Link key={item.route} href={item.route} onClick={() => {
+              if (item.label === "New Booking") {
+                resetBooking();
+              }
+            }}>
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -129,7 +135,7 @@ export default function Sidebar() {
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>Active</span>
               <span className="text-xs font-bold flex items-center gap-1" style={{ color: "var(--brand-secondary)" }}>
-                0 bookings
+                {stats?.activeShipments || 0} bookings
               </span>
             </div>
           </div>

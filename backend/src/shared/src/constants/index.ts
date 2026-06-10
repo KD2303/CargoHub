@@ -19,7 +19,7 @@ export const VEHICLE_CONFIG: Record<VehicleType, {
     label: 'Tata Ace',
     description: 'Mini truck for small loads',
     capacity: 'Up to 750 kg',
-    baseFare: 299,
+    baseFare: 100,
     perKmRate: 16,
     icon: '🛻',
   },
@@ -27,7 +27,7 @@ export const VEHICLE_CONFIG: Record<VehicleType, {
     label: 'Tempo 407',
     description: 'Medium truck for furniture & appliances',
     capacity: 'Up to 2.5 tons',
-    baseFare: 599,
+    baseFare: 150,
     perKmRate: 22,
     icon: '🚛',
   },
@@ -35,7 +35,7 @@ export const VEHICLE_CONFIG: Record<VehicleType, {
     label: 'Pickup Truck',
     description: 'Open-bed truck for bulk goods',
     capacity: 'Up to 1.5 tons',
-    baseFare: 449,
+    baseFare: 200,
     perKmRate: 18,
     icon: '🚚',
   },
@@ -43,7 +43,7 @@ export const VEHICLE_CONFIG: Record<VehicleType, {
     label: 'Large Truck',
     description: 'Heavy-duty for relocations & large cargo',
     capacity: 'Up to 7 tons',
-    baseFare: 999,
+    baseFare: 200,
     perKmRate: 28,
     icon: '🚛',
   },
@@ -102,7 +102,7 @@ export const FARE_CONSTANTS = {
   MAX_HELPERS: 3,
   GST_RATE: 0.18,                 // 18% IGST
   CANCELLATION_FEE: 50,           // ₹50 base cancellation fee
-  MIN_FARE: 199,                  // Minimum fare for any booking
+  MIN_FARE: 100,                  // Minimum fare for any booking
   SURGE_THRESHOLDS: {
     LOW: 1.0,      // Normal
     MODERATE: 1.2,  // 20% surge

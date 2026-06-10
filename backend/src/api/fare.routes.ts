@@ -29,8 +29,10 @@ router.post('/estimate', validate(FareEstimateSchema), async (req, res) => {
         });
         
         if (olaRes.data?.rows?.[0]?.elements?.[0]?.status === 'OK') {
-          distanceKm = olaRes.data.rows[0].elements[0].distance.value / 1000;
-          durationMins = olaRes.data.rows[0].elements[0].duration.value / 60;
+          const element = olaRes.data.rows[0].elements[0];
+          // Ola Maps returns distance and duration directly as numbers
+          distanceKm = (element.distance.value !== undefined ? element.distance.value : element.distance) / 1000;
+          durationMins = (element.duration.value !== undefined ? element.duration.value : element.duration) / 60;
         }
       } catch (err) {
         console.error('OLA Maps API error:', err instanceof Error ? err.message : err);
@@ -67,24 +69,21 @@ router.post('/estimate', validate(FareEstimateSchema), async (req, res) => {
       vehicleType: req.body.vehicleType,
       loadType: req.body.loadType,
       helpersRequested: req.body.helpersRequested,
+      weight: req.body.weight,
+      distanceKm: distanceKm,
     });
-
-    // Simple override for demonstration
-    // Since calculateFare might be purely haversine based, we adjust it proportionally
-    const haversineDist = baseFare.distanceKm;
-    const ratio = haversineDist > 0 ? distanceKm / haversineDist : 1;
     
-    let total = baseFare.total * ratio;
+    let total = baseFare.total;
     if (isMonsoonSurcharge) {
-      total = total * 1.15; // 15% surcharge
+      total = Math.round(total * 1.15); // 15% surcharge
     }
 
     res.json({ 
       success: true, 
       data: {
         ...baseFare,
-        distanceKm,
-        total: Math.round(total),
+        durationMin: Math.round(durationMins),
+        total: total,
         monsoonSurchargeApplied: isMonsoonSurcharge
       } 
     });

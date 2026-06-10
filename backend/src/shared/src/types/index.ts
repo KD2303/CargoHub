@@ -156,6 +156,8 @@ export interface FareEstimateInput {
   vehicleType: VehicleType;
   loadType: LoadType;
   helpersRequested: number;
+  weight?: number;
+  distanceKm?: number;
 }
 
 export interface FareBreakdown {
@@ -164,6 +166,7 @@ export interface FareBreakdown {
   distanceKm: number;
   loadSurcharge: number;
   helperCharge: number;
+  weightSurcharge: number;
   surgeMultiplier: number;
   subtotal: number;
   gst: number;

@@ -60,8 +60,10 @@ export default function LiveMap() {
         geometry
       };
       
-      if (source) {
-        source.setData(geojson as any);
+      const currentSource = map.current.getSource('route') as maplibregl.GeoJSONSource;
+      
+      if (currentSource) {
+        currentSource.setData(geojson as any);
       } else {
         map.current.addSource('route', {
           type: 'geojson',
@@ -136,16 +138,40 @@ export default function LiveMap() {
       try {
         const styleUrl = `https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json?api_key=${apiKey}`;
         const res = await fetch(styleUrl);
-        const styleData = await res.json();
+        let styleData = await res.json();
 
-        if (styleData.layers) {
+        if (!styleData || !styleData.version) {
+          console.warn("Invalid Ola Maps style. Falling back to OpenStreetMap.");
+          styleData = {
+            version: 8,
+            sources: {
+              'osm': {
+                type: 'raster',
+                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                tileSize: 256,
+                attribution: '&copy; OpenStreetMap contributors'
+              }
+            },
+            layers: [
+              {
+                id: 'osm',
+                type: 'raster',
+                source: 'osm',
+                minzoom: 0,
+                maxzoom: 19
+              }
+            ]
+          };
+        } else if (styleData.layers) {
           styleData.layers = styleData.layers.filter(
             (layer: any) => layer.id !== "3d_model_data" && layer.id !== "ola-mbo" && layer.id !== "pedestrian_polygon"
           );
         }
 
+        if (!mapContainer.current) return;
+
         map.current = new maplibregl.Map({
-          container: mapContainer.current!,
+          container: mapContainer.current,
           style: styleData,
           center: pickup ? [pickup.lng, pickup.lat] : [79.0882, 21.1458], // Nagpur center of India default
           zoom: pickup ? 14 : 4,

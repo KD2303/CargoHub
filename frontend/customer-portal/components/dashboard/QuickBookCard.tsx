@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Package, MapPin, Navigation, ArrowRight } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
 import LocationAutocomplete from "./LocationAutocomplete";
@@ -10,15 +10,68 @@ export default function QuickBookCard() {
   const [showEstimate, setShowEstimate] = useState(false);
   const [vehicle, setVehicle] = useState("tempo");
   const [loading, setLoading] = useState(false);
+  const [estimating, setEstimating] = useState(false);
+  const [weight, setWeight] = useState<string>("");
+  const [fareData, setFareDataLocal] = useState<{ total: number; distanceKm: number; durationMin: number } | null>(null);
 
-  const { pickup, dropoff } = useBookingStore();
+  const { pickup, dropoff, setVehicle: setStoreVehicle, setWeight: setStoreWeight, setFareData: setStoreFareData } = useBookingStore();
 
-  const handleEstimate = () => {
-    setShowEstimate(true);
+  // Reset estimate if inputs change
+  useEffect(() => {
+    setShowEstimate(false);
+  }, [pickup, dropoff, vehicle, weight]);
+
+  const getVehicleEnum = (v: string) => {
+    if (v === "mini") return "TATA_ACE";
+    if (v === "tempo") return "TEMPO_407";
+    return "LARGE_TRUCK";
+  };
+
+  const handleEstimate = async () => {
+    if (!pickup || !dropoff) {
+      alert("Please select both pickup and dropoff locations first.");
+      return;
+    }
+    
+    setEstimating(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/fare/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pickupLat: pickup.lat,
+          pickupLng: pickup.lng,
+          dropLat: dropoff.lat,
+          dropLng: dropoff.lng,
+          vehicleType: getVehicleEnum(vehicle),
+          loadType: "BOXES_CARTONS",
+          helpersRequested: 0,
+          weight: weight ? Number(weight) : undefined,
+        })
+      });
+      
+      const data = await res.json();
+      if (data.success && data.data) {
+        setFareDataLocal(data.data);
+        setShowEstimate(true);
+      } else {
+        alert("Could not calculate fare: " + (data.message || data.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error calculating fare. Ensure the backend is running.");
+    } finally {
+      setEstimating(false);
+    }
   };
 
   const handleBook = () => {
     setLoading(true);
+    // Push local state to global store before navigating
+    setStoreVehicle(vehicle);
+    setStoreWeight(weight);
+    setStoreFareData(fareData as any);
+    
     setTimeout(() => {
       // Simulate routing to booking page
       window.location.href = "/dashboard/book";
@@ -87,13 +140,29 @@ export default function QuickBookCard() {
           ))}
         </div>
 
+        {/* Cargo Weight Input */}
+        <div className="relative z-0">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Package className="w-4 h-4" />
+          </div>
+          <input 
+            type="number"
+            placeholder="Cargo Weight (kg)"
+            className="input-field !pl-10 bg-white w-full"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            min="0"
+          />
+        </div>
+
         {!showEstimate ? (
           <button 
             onClick={handleEstimate}
-            className="btn-secondary w-full mt-4 justify-between group/btn bg-white"
+            disabled={estimating}
+            className="btn-secondary w-full mt-4 justify-between group/btn bg-white disabled:opacity-50"
           >
-            Get Fare Estimate
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            {estimating ? "Calculating..." : "Get Fare Estimate"}
+            {!estimating && <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
           </button>
         ) : (
           <AnimatePresence>
@@ -102,16 +171,19 @@ export default function QuickBookCard() {
               animate={{ opacity: 1, height: "auto" }}
               className="mt-4 overflow-hidden"
             >
+              <div className="text-[10px] text-gray-400 mb-1 px-1">
+                Base Fare + Distance + {weight && Number(weight) > 50 ? `₹${(Number(weight) - 50) * 1} Weight Surcharge` : 'No Weight Surcharge'}
+              </div>
               <div className="p-4 rounded-xl mb-4 bg-blue-50/50 border border-blue-100">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-600">Estimated Fare</span>
-                  <span className="text-xl font-bold font-mono text-gray-900">₹480 - ₹520</span>
+                  <span className="text-xl font-bold font-mono text-gray-900">₹{fareData?.total}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Navigation className="w-3 h-3" />
-                  <span>18 km</span>
+                  <span>{fareData?.distanceKm} km</span>
                   <span className="w-1 h-1 rounded-full bg-gray-300" />
-                  <span>~35 min</span>
+                  <span>~{fareData?.durationMin} min</span>
                 </div>
               </div>
 

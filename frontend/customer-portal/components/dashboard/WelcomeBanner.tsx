@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { useAuthStore } from "@/store/authStore";
+import { useDashboardStore } from "@/store/dashboardStore";
 
 export default function WelcomeBanner() {
   const { user } = useAuthStore();
+  const { stats } = useDashboardStore();
   const [text, setText] = useState("");
   const [showSubtext, setShowSubtext] = useState(false);
 
@@ -59,11 +61,11 @@ export default function WelcomeBanner() {
             className="flex items-center gap-3 text-sm font-medium"
             style={{ color: "var(--text-secondary)" }}
           >
-            <span>2 active shipments</span>
+            <span>{stats?.activeShipments || 0} active shipments</span>
             <span className="w-1 h-1 rounded-full bg-gray-300" />
-            <span>₹680 pending</span>
+            <span>₹{stats?.totalSpent || 0} total spent</span>
             <span className="w-1 h-1 rounded-full bg-gray-300" />
-            <span className="text-amber-600">Monsoon surcharge active</span>
+            <span className="text-amber-600">All systems operational</span>
           </motion.div>
         </div>
 

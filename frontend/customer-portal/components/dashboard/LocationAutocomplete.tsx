@@ -107,7 +107,7 @@ export default function LocationAutocomplete({ type, placeholder, icon }: Locati
         <input 
           type="text" 
           placeholder={placeholder}
-          className="input-field pl-10 bg-white w-full"
+          className="input-field !pl-11 bg-white w-full"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);

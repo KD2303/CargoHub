@@ -38,7 +38,8 @@ function toRad(deg: number): number {
  *   distanceCharge = distance_km * vehicle per_km_rate
  *   loadSurcharge = (base + distanceCharge) * load_surcharge_percent / 100
  *   helperCharge = helpers * HELPER_CHARGE_PER_PERSON
- *   subtotal = (base + distanceCharge + loadSurcharge + helperCharge) * surgeMultiplier
+ *   weightSurcharge = max(0, weight - 50) * 1 (1 rupee per additional kg)
+ *   subtotal = (base + distanceCharge + loadSurcharge + helperCharge + weightSurcharge) * surgeMultiplier
  *   gst = subtotal * GST_RATE
  *   total = subtotal + gst
  */
@@ -49,14 +50,17 @@ export function calculateFare(
   const vehicle = VEHICLE_CONFIG[input.vehicleType];
   const load = LOAD_CONFIG[input.loadType];
 
-  // Distance in km (Haversine — straight line, multiply by 1.3 for road estimate)
-  const straightLineKm = calculateDistance(
-    input.pickupLat,
-    input.pickupLng,
-    input.dropLat,
-    input.dropLng
-  );
-  const distanceKm = Math.round(straightLineKm * 1.3 * 10) / 10; // Road distance estimate
+  // Distance in km (Use provided override or calculate Haversine)
+  let distanceKm = input.distanceKm;
+  if (distanceKm === undefined) {
+    const straightLineKm = calculateDistance(
+      input.pickupLat,
+      input.pickupLng,
+      input.dropLat,
+      input.dropLng
+    );
+    distanceKm = Math.round(straightLineKm * 1.3 * 10) / 10; // Road distance estimate
+  }
 
   // Components
   const base = vehicle.baseFare;
@@ -64,8 +68,14 @@ export function calculateFare(
   const loadSurcharge = Math.round((base + distanceCharge) * (load.surchargePercent / 100));
   const helperCharge = input.helpersRequested * FARE_CONSTANTS.HELPER_CHARGE_PER_PERSON;
 
+  // Weight Surcharge (1 rupee per kg above 50kg)
+  let weightSurcharge = 0;
+  if (input.weight && input.weight > 50) {
+    weightSurcharge = Math.round((input.weight - 50) * 1);
+  }
+
   // Apply surge
-  const rawSubtotal = base + distanceCharge + loadSurcharge + helperCharge;
+  const rawSubtotal = base + distanceCharge + loadSurcharge + helperCharge + weightSurcharge;
   const subtotal = Math.round(rawSubtotal * surgeMultiplier);
 
   // GST
@@ -80,6 +90,7 @@ export function calculateFare(
     distanceKm,
     loadSurcharge,
     helperCharge,
+    weightSurcharge,
     surgeMultiplier,
     subtotal,
     gst,

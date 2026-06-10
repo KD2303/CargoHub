@@ -65,6 +65,20 @@ router.get('/driver/active',
   }
 );
 
+// Get user booking stats (USER only)
+router.get('/stats',
+  verifyFirebaseToken,
+  requireRole('USER'),
+  async (req, res) => {
+    try {
+      const stats = await db.bookings.getUserStats(req.user!.uid);
+      res.json({ success: true, data: stats });
+    } catch (err) {
+      res.status(500).json({ success: false, error: 'INTERNAL_ERROR' });
+    }
+  }
+);
+
 // Get single booking detail
 router.get('/:id',
   verifyFirebaseToken,

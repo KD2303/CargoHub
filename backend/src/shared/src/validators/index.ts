@@ -71,6 +71,7 @@ export const FareEstimateSchema = z.object({
   vehicleType: VehicleTypeSchema,
   loadType: LoadTypeSchema,
   helpersRequested: z.number().int().min(0).max(3),
+  weight: z.number().min(0).optional(),
 });
 
 // ── Driver ──────────────────────────────────────────────────────────────────

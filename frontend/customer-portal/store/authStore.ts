@@ -9,7 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   fetchProfile: () => Promise<void>;
   setUser: (user: UserProfile | null) => void;
-  initializeAuthListener: () => void;
+  initializeAuthListener: () => () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

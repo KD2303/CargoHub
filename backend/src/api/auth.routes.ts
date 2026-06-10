@@ -157,5 +157,25 @@ router.get('/me', verifyFirebaseToken, async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to fetch profile' });
   }
 });
+// Update current user profile
+router.put('/me', verifyFirebaseToken, async (req, res) => {
+  try {
+    const firebaseUid = req.user!.uid;
+    const { name, phone } = req.body;
+    
+    // Create an update object
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (phone) updateData.phone = phone;
+
+    await db.users.update(firebaseUid, updateData);
+    
+    const user = await authService.getUserByFirebaseUid(firebaseUid);
+    res.json({ success: true, data: user });
+  } catch (error: any) {
+    console.error('Update Profile Error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update profile' });
+  }
+});
 
 export default router;

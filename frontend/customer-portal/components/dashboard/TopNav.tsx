@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { Bell, Search, MapPin, Moon, Sun } from "lucide-react";
+import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -39,10 +39,8 @@ export default function TopNav() {
           </motion.span>
         </div>
 
-        {/* Center: Live Weather Strip */}
-        <div className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
-          <MapPin className="w-3.5 h-3.5 text-amber-600" />
-          <span className="text-xs font-semibold text-amber-700">Mumbai · 32°C · 🌧 Monsoon Surcharge Active</span>
+        {/* Center */}
+        <div className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full">
         </div>
 
         {/* Right Actions */}
@@ -85,22 +83,7 @@ export default function TopNav() {
 
       </div>
 
-      {/* Live Ticker Strip */}
-      <div className="h-8 flex items-center overflow-hidden" style={{ background: "rgba(2, 89, 221, 0.05)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="whitespace-nowrap flex items-center animate-marquee text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> CH-0821 picked up in Mumbai</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> New driver Suresh online</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> ₹680 payment received</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> CH-0819 delivered</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> 15 new trucks added in Pune</span>
-          {/* Duplicate for seamless loop */}
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> CH-0821 picked up in Mumbai</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> New driver Suresh online</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> ₹680 payment received</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> CH-0819 delivered</span>
-          <span className="inline-block mx-4"><span style={{ color: "var(--brand-secondary)" }}>●</span> 15 new trucks added in Pune</span>
-        </div>
-      </div>
+      {/* Removed ticker strip */}
     </div>
   );
 }

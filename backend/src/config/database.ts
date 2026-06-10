@@ -150,6 +150,17 @@ export const db = {
         .single();
       if (error || !data) return null;
       return toCamel(data);
+    },
+    getUserStats: async (userId: string) => {
+      const { data, error } = await supabase.from('bookings').select('fare_estimate, status').eq('user_id', userId);
+      if (error) throw error;
+      
+      const totalBookings = data.length;
+      const activeShipments = data.filter((b: any) => ['PENDING', 'ACCEPTED', 'DRIVER_ARRIVING', 'PICKED_UP', 'IN_TRANSIT'].includes(b.status)).length;
+      const totalSpent = data.reduce((sum: number, b: any) => sum + (b.fare_estimate || 0), 0);
+      const savedAddresses = 2; // Optional fallback for now
+      
+      return { totalBookings, activeShipments, totalSpent, savedAddresses };
     }
   },
 
