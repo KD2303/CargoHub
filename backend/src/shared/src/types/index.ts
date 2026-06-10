@@ -32,6 +32,7 @@ export interface UserProfile {
   role: Role;
   accountType: AccountType;
   profilePhoto?: string;
+  walletBalance?: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

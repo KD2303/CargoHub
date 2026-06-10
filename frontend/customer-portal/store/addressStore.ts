@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface SavedAddress {
   id: string;
@@ -21,8 +22,10 @@ interface AddressState {
   setDefaultAddress: (id: string) => void;
 }
 
-export const useAddressStore = create<AddressState>((set) => ({
-  addresses: [], // Start with an empty list instead of dummy data
+export const useAddressStore = create<AddressState>()(
+  persist(
+    (set) => ({
+      addresses: [], // Start with an empty list instead of dummy data
   
   addAddress: (newAddr) => set((state) => {
     const id = Date.now().toString();
@@ -70,4 +73,8 @@ export const useAddressStore = create<AddressState>((set) => ({
       isDefault: a.id === id
     }))
   }))
-}));
+}),
+{
+  name: 'cargohub-address-storage',
+}
+));

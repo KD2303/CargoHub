@@ -1,16 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, CreditCard, Plus, Receipt } from "lucide-react";
-
-const transactions = [
-  { id: "TXN-0821", date: "Today, 10:35 AM", description: "Payment for CH-0821", amount: "-₹1,250", type: "debit" },
-  { id: "TXN-0820", date: "Today, 09:00 AM", description: "Wallet Top-up", amount: "+₹5,000", type: "credit" },
-  { id: "TXN-0819", date: "Yesterday", description: "Payment for CH-0819", amount: "-₹4,500", type: "debit" },
-  { id: "TXN-0801", date: "01 Jun 2026", description: "Refund for Cancelled Order", amount: "+₹500", type: "credit" },
-];
+import { useAuthStore } from "@/store/authStore";
 
 export default function PaymentsPage() {
+  const { user } = useAuthStore();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const { auth } = await import("@/lib/firebase");
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) return;
+
+        const res = await fetch("http://localhost:5000/api/bookings", {
+          headers: { "Authorization": `Bearer ${idToken}` }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.data) {
+          // Map bookings to transactions
+          const txns = data.data.map((b: any) => ({
+            id: b.id,
+            displayId: b.bookingRef || b.id.substring(0, 8),
+            date: new Date(b.createdAt).toLocaleDateString(),
+            description: `Payment for ${b.bookingRef || "Booking"}`,
+            amount: `-₹${b.finalFare || b.fareEstimate || 0}`,
+            type: "debit"
+          }));
+          setTransactions(txns);
+        }
+      } catch (err) {
+        console.error("Failed to fetch transactions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,7 +64,7 @@ export default function PaymentsPage() {
           </div>
           <div className="relative z-10">
             <p className="text-blue-100 font-medium mb-1">Available Balance</p>
-            <h2 className="text-4xl font-mono font-bold mb-6">₹250</h2>
+            <h2 className="text-4xl font-mono font-bold mb-6">₹{user?.walletBalance || 0}</h2>
             <div className="flex gap-3">
               <button className="flex-1 bg-white text-blue-900 font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-105 active:scale-95 shadow-sm">
                 Add Funds
@@ -113,7 +146,7 @@ export default function PaymentsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + i * 0.05 }}
                 >
-                  <td className="font-medium" style={{ color: "var(--text-primary)" }}>{txn.id}</td>
+                  <td className="font-medium" style={{ color: "var(--text-primary)" }}>{txn.displayId}</td>
                   <td>{txn.description}</td>
                   <td style={{ color: "var(--text-muted)" }}>{txn.date}</td>
                   <td>
@@ -128,6 +161,11 @@ export default function PaymentsPage() {
                   </td>
                 </motion.tr>
               ))}
+              {transactions.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-gray-500">No transactions found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

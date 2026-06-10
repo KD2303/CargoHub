@@ -19,6 +19,11 @@ export default function SupportPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Ticket Form State
+  const [ticketData, setTicketData] = useState({ orderId: "", issueType: "Delay in Delivery", description: "" });
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [ticketSuccess, setTicketSuccess] = useState(false);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -56,6 +61,24 @@ export default function SupportPage() {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleTicketSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ticketData.description.trim()) {
+      alert("Please provide a description of the issue.");
+      return;
+    }
+    setIsSubmittingTicket(true);
+    setTicketSuccess(false);
+
+    // Simulate API call to POST /support/ticket
+    setTimeout(() => {
+      setIsSubmittingTicket(false);
+      setTicketSuccess(true);
+      setTicketData({ orderId: "", issueType: "Delay in Delivery", description: "" });
+      setTimeout(() => setTicketSuccess(false), 5000);
+    }, 1500);
   };
 
   return (
@@ -131,15 +154,25 @@ export default function SupportPage() {
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5" style={{ color: "var(--brand-primary)" }} /> Raise a Ticket
             </h3>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleTicketSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Order ID (Optional)</label>
-                  <input type="text" className="input-field py-2" placeholder="e.g. CH-0821" />
+                  <input 
+                    type="text" 
+                    className="input-field py-2" 
+                    placeholder="e.g. CH-0821" 
+                    value={ticketData.orderId}
+                    onChange={(e) => setTicketData({ ...ticketData, orderId: e.target.value })}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Issue Type</label>
-                  <select className="input-field py-2 appearance-none">
+                  <select 
+                    className="input-field py-2 appearance-none"
+                    value={ticketData.issueType}
+                    onChange={(e) => setTicketData({ ...ticketData, issueType: e.target.value })}
+                  >
                     <option>Delay in Delivery</option>
                     <option>Payment Issue</option>
                     <option>Vehicle Condition</option>
@@ -149,9 +182,24 @@ export default function SupportPage() {
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Description</label>
-                <textarea className="input-field py-2 h-24 resize-none" placeholder="Describe your issue..."></textarea>
+                <textarea 
+                  className="input-field py-2 h-24 resize-none" 
+                  placeholder="Describe your issue..."
+                  value={ticketData.description}
+                  onChange={(e) => setTicketData({ ...ticketData, description: e.target.value })}
+                ></textarea>
               </div>
-              <button className="btn-primary w-full">Submit Ticket</button>
+              <button 
+                type="submit" 
+                className="btn-primary w-full flex justify-center items-center gap-2"
+                disabled={isSubmittingTicket}
+              >
+                {isSubmittingTicket ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                {isSubmittingTicket ? "Submitting..." : ticketSuccess ? "Ticket Submitted!" : "Submit Ticket"}
+              </button>
+              {ticketSuccess && (
+                <p className="text-sm text-green-600 text-center mt-2 font-medium">We have received your ticket and will contact you shortly.</p>
+              )}
             </form>
           </motion.div>
 

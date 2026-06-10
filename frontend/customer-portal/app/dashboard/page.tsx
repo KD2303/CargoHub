@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PackageOpen, Truck, IndianRupee, MapPin } from "lucide-react";
+import { PackageOpen, Truck, IndianRupee, MapPin, AlertCircle, RefreshCw } from "lucide-react";
 import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
 import StatCard from "@/components/dashboard/StatCard";
 import LiveMap from "@/components/dashboard/LiveMap";
@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { useDashboardStore } from "@/store/dashboardStore";
 
 export default function DashboardOverview() {
-  const { stats, recentBookings, fetchDashboardData } = useDashboardStore();
+  const { stats, recentBookings, error, isLoading, fetchDashboardData } = useDashboardStore();
 
   useEffect(() => {
     fetchDashboardData();
@@ -49,6 +49,22 @@ export default function DashboardOverview() {
   return (
     <>
       <WelcomeBanner />
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+            <AlertCircle className="w-5 h-5" />
+            <p className="font-medium">Failed to load dashboard data. Showing cached/fallback data.</p>
+          </div>
+          <button 
+            onClick={() => fetchDashboardData()} 
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-red-600 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Retry
+          </button>
+        </div>
+      )}
 
       <motion.div 
         variants={staggerGrid}

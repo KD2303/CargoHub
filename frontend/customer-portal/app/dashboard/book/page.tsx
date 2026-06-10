@@ -2,8 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Navigation, Package, IndianRupee, CheckCircle2, ArrowRight, Truck, Download } from "lucide-react";
+import { Navigation, Package, IndianRupee, CheckCircle2, ArrowRight, Truck, Download } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
+import { useAuthStore } from "@/store/authStore";
 import LocationAutocomplete from "@/components/dashboard/LocationAutocomplete";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
@@ -25,9 +26,21 @@ export default function BookingPage() {
     setWeight,
     cargoType,
     setCargoType,
+    helpers,
+    setHelpers,
     fareData,
     setFareData,
   } = useBookingStore();
+  
+  const [createdBookingId, setCreatedBookingId] = useState("CH-2024-0900");
+
+  const getLoadTypeEnum = (c: string) => {
+    if (c === "Electronics") return "ELECTRONICS";
+    if (c === "Furniture") return "FURNITURE";
+    if (c === "Fragile Goods") return "FRAGILE_GOODS";
+    if (c === "Bulk Goods") return "BULK_GOODS";
+    return "BOXES_CARTONS";
+  };
 
   const getVehicleEnum = (v: string) => {
     if (v === "mini") return "TATA_ACE";
@@ -48,8 +61,8 @@ export default function BookingPage() {
           dropLat: dropoff.lat,
           dropLng: dropoff.lng,
           vehicleType: getVehicleEnum(vehicle),
-          loadType: "BOXES_CARTONS", // We could map cargoType to enum if needed
-          helpersRequested: 0,
+          loadType: getLoadTypeEnum(cargoType),
+          helpersRequested: helpers,
           weight: weight ? Number(weight) : undefined,
         })
       });
@@ -64,12 +77,12 @@ export default function BookingPage() {
     }
   };
 
-  // Re-calculate fare if vehicle or weight changes while on step 2
+  // Re-calculate fare if vehicle, weight, or helpers changes while on step 2
   useEffect(() => {
     if (step === 2 || step === 3) {
       calculateFare();
     }
-  }, [vehicle, weight, step]);
+  }, [vehicle, weight, helpers, cargoType, step]);
 
   const handleNext = () => {
     if (step === 1) {
@@ -79,7 +92,48 @@ export default function BookingPage() {
       }
     }
     if (step < 3) setStep(step + 1);
-    else setIsSuccess(true); // Pay & Confirm
+  };
+
+  const handleConfirmPay = async (paymentMethod: 'UPI' | 'WALLET') => {
+    if (!pickup || !dropoff) return;
+    
+    // In Phase 1 we mock the Razorpay UI, but we DO create the real booking
+    try {
+      const { auth } = await import("@/lib/firebase");
+      const idToken = await auth.currentUser?.getIdToken();
+      
+      const payload = {
+        pickupLat: pickup.lat,
+        pickupLng: pickup.lng,
+        pickupAddress: pickup.address || "N/A",
+        dropLat: dropoff.lat,
+        dropLng: dropoff.lng,
+        dropAddress: dropoff.address || "N/A",
+        vehicleType: getVehicleEnum(vehicle),
+        loadType: getLoadTypeEnum(cargoType),
+        helpersRequested: helpers,
+      };
+
+      const res = await fetch("http://localhost:5000/api/bookings", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setCreatedBookingId(data.data.booking.id);
+        setIsSuccess(true);
+      } else {
+        alert("Failed to create booking: " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error confirming booking");
+    }
   };
 
   const handleDownloadReceipt = () => {
@@ -96,7 +150,7 @@ export default function BookingPage() {
     
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Booking ID: CH-2024-0900`, 130, 20);
+    doc.text(`Booking ID: ${createdBookingId}`, 130, 20);
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 130, 26);
     
@@ -202,7 +256,7 @@ export default function BookingPage() {
           <button onClick={handleDownloadReceipt} className="btn-secondary">
             <Download className="w-4 h-4 mr-2" /> Download Receipt
           </button>
-          <a href="/dashboard/track?id=CH-2024-0900" className="btn-primary">
+          <a href={`/dashboard/track?id=${createdBookingId}`} className="btn-primary">
             Track Shipment <Navigation className="w-4 h-4 ml-2" />
           </a>
         </motion.div>
@@ -278,7 +332,7 @@ export default function BookingPage() {
                       type="dropoff"
                       placeholder="Search drop address..."
                       icon={
-                        <MapPin className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 z-10" style={{ color: "var(--brand-secondary)" }} />
+                        <Navigation className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 z-10" style={{ color: "var(--brand-secondary)" }} />
                       }
                     />
                   </div>
@@ -315,7 +369,7 @@ export default function BookingPage() {
                 ))}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Cargo Type</label>
                   <select 
@@ -341,6 +395,18 @@ export default function BookingPage() {
                     onChange={(e) => setWeight(e.target.value)}
                   />
                   <p className="text-[10px] text-gray-400 mt-1">₹1 surcharge per kg above 50kg</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Helpers Needed</label>
+                  <select 
+                    className="input-field bg-white w-full"
+                    value={helpers}
+                    onChange={(e) => setHelpers(Number(e.target.value))}
+                  >
+                    <option value="0">0 (Driver only)</option>
+                    <option value="1">1 Helper (₹300)</option>
+                    <option value="2">2 Helpers (₹600)</option>
+                  </select>
                 </div>
               </div>
               
@@ -395,11 +461,11 @@ export default function BookingPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <button className="border-2 border-blue-600 bg-blue-50 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-blue-700">
+                <button onClick={() => handleConfirmPay('UPI')} className="border-2 border-blue-600 bg-blue-50 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-blue-700">
                   <IndianRupee className="w-5 h-5" /> Pay via UPI
                 </button>
-                <button className="border border-gray-200 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:border-gray-300">
-                  Wallet (Bal: ₹0)
+                <button onClick={() => handleConfirmPay('WALLET')} className="border border-gray-200 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:border-gray-300">
+                  Wallet (Bal: ₹{useAuthStore().user?.walletBalance || 0})
                 </button>
               </div>
             </motion.div>
@@ -412,9 +478,11 @@ export default function BookingPage() {
               Back
             </button>
           )}
-          <button onClick={handleNext} disabled={estimating} className="btn-primary">
-            {step === 3 ? 'Confirm & Pay' : 'Continue'} <ArrowRight className="w-4 h-4 ml-1" />
-          </button>
+          {step < 3 && (
+            <button onClick={handleNext} disabled={estimating} className="btn-primary">
+              Continue <ArrowRight className="w-4 h-4 ml-1" />
+            </button>
+          )}
         </div>
       </div>
     </div>

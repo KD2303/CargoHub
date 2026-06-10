@@ -11,6 +11,7 @@ export default function LiveMap() {
   const map = useRef<maplibregl.Map | null>(null);
   const pickupMarker = useRef<maplibregl.Marker | null>(null);
   const dropoffMarker = useRef<maplibregl.Marker | null>(null);
+  const driverMarker = useRef<maplibregl.Marker | null>(null);
 
   // Fetch the setters only, so the map doesn't re-render while dragging and cause the pins to fluctuate
   const setPickup = useBookingStore(state => state.setPickup);
@@ -97,10 +98,21 @@ export default function LiveMap() {
   };
 
   // Helper to create a marker dynamically
-  const createMarker = (type: 'pickup' | 'dropoff', location: any) => {
+  const createMarker = (type: 'pickup' | 'dropoff' | 'driver', location: any) => {
     if (!map.current) return null;
     
     const el = document.createElement('div');
+    if (type === 'driver') {
+      el.className = 'w-8 h-8 bg-white rounded-full border-2 border-blue-500 shadow-lg flex items-center justify-center relative overflow-hidden transition-all duration-500';
+      el.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-blue-50"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><path d="M14 17h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>`;
+      el.title = `Driver Location`;
+      
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([location.lng, location.lat])
+        .addTo(map.current);
+      return marker;
+    }
+
     el.className = 'w-5 h-5 rounded-full border-2 border-white shadow-lg cursor-pointer transition-transform hover:scale-110';
     el.style.backgroundColor = type === 'pickup' ? 'var(--brand-success)' : 'var(--brand-secondary)';
     el.title = `Drag to change ${type}`;
@@ -126,7 +138,7 @@ export default function LiveMap() {
     if (map.current || !mapContainer.current) return;
 
     // Read the initial state ONCE
-    const { pickup, dropoff } = useBookingStore.getState();
+    const { pickup, dropoff, driverLocation } = useBookingStore.getState();
 
     const initMap = async () => {
       const apiKey = process.env.NEXT_PUBLIC_OLA_MAPS_API_KEY;
@@ -192,6 +204,7 @@ export default function LiveMap() {
 
           if (pickup) pickupMarker.current = createMarker('pickup', pickup);
           if (dropoff) dropoffMarker.current = createMarker('dropoff', dropoff);
+          if (driverLocation) driverMarker.current = createMarker('driver', driverLocation);
 
           updateRouteLineAndBounds(pickup, dropoff);
         });
@@ -252,6 +265,18 @@ export default function LiveMap() {
         dropoffMarker.current.remove();
         dropoffMarker.current = null;
         changed = true;
+      }
+
+      // Handle Driver Marker
+      if (state.driverLocation) {
+        if (driverMarker.current) {
+          driverMarker.current.setLngLat([state.driverLocation.lng, state.driverLocation.lat]);
+        } else if (map.current?.isStyleLoaded()) {
+          driverMarker.current = createMarker('driver', state.driverLocation);
+        }
+      } else if (driverMarker.current) {
+        driverMarker.current.remove();
+        driverMarker.current = null;
       }
 
       if (changed) {

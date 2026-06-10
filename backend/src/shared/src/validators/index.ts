@@ -32,7 +32,13 @@ export const RegisterDriverSchema = z.object({
   phone: z.string().regex(/^\+91\d{10}$/, 'Must be a valid Indian phone number'),
   email: z.string().email().optional(),
   vehicleType: VehicleTypeSchema,
-  vehicleNumber: z.string().regex(/^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4}$/, 'Invalid vehicle registration number'),
+  vehicleNumber: z.string()
+    .toUpperCase()
+    .transform(val => val.replace(/[-\s]/g, ''))
+    .refine(
+      val => /^[A-Z]{2}\d{2}[A-Z]{1,3}\d{4}$/.test(val) || /^\d{2}BH\d{4}[A-Z]{1,2}$/.test(val),
+      { message: 'Invalid Indian vehicle registration number (e.g. MH02AB1234 or 21BH1234AA)' }
+    ),
 });
 
 export const RegisterTokensSchema = z.object({

@@ -14,6 +14,7 @@ interface DashboardState {
   stats: DashboardStats | null;
   recentBookings: Booking[];
   isLoading: boolean;
+  error: string | null;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   fetchDashboardData: () => Promise<void>;
@@ -24,16 +25,17 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   stats: null,
   recentBookings: [],
   isLoading: false,
+  error: null,
 
   toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
   setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
 
   fetchDashboardData: async () => {
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, error: null });
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
-        set({ stats: null, recentBookings: [], isLoading: false });
+        set({ stats: null, recentBookings: [], isLoading: false, error: 'User not authenticated' });
         return;
       }
       const idToken = await currentUser.getIdToken();
@@ -53,11 +55,12 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       set({
         stats: statsData.success ? statsData.data : null,
         recentBookings: bookingsData.success ? bookingsData.data : [],
-        isLoading: false
+        isLoading: false,
+        error: (!statsData.success && !bookingsData.success) ? 'Failed to fetch dashboard data' : null
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch dashboard data:', error);
-      set({ isLoading: false });
+      set({ isLoading: false, error: error.message || 'Network error occurred' });
     }
   }
 }));

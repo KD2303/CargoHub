@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/store/authStore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { auth as firebaseAuth } from "@/lib/firebase";
 
 export default function SettingsPage() {
@@ -17,6 +17,8 @@ export default function SettingsPage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form when user data loads
   useEffect(() => {
@@ -65,6 +67,42 @@ export default function SettingsPage() {
     }
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        const idToken = await firebaseAuth.currentUser?.getIdToken();
+        if (!idToken) return;
+
+        const res = await fetch("http://localhost:5000/api/auth/upload-avatar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ base64Image })
+        });
+
+        const data = await res.json();
+        if (data.success && data.url) {
+          setUser({ ...user!, profilePhoto: data.url });
+        } else {
+          alert(data.error || "Failed to upload avatar");
+        }
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Upload failed", error);
+      setIsUploading(false);
+    }
+  };
+
   const initials = user?.name ? user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() : "U";
 
   return (
@@ -105,7 +143,21 @@ export default function SettingsPage() {
                 </div>
               )}
               <div>
-                <button type="button" className="btn-secondary text-xs py-1.5 px-4" onClick={() => alert("Avatar upload not yet implemented.")}>Change Avatar</button>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  onChange={handleAvatarChange} 
+                />
+                <button 
+                  type="button" 
+                  className="btn-secondary text-xs py-1.5 px-4" 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? "Uploading..." : "Change Avatar"}
+                </button>
                 <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>JPG, GIF or PNG. Max size of 800K</p>
               </div>
             </div>

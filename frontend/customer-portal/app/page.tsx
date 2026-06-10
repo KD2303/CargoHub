@@ -8,7 +8,7 @@ import {
   CheckCircle2, IndianRupee, Navigation, Smartphone, Play, Image as ImageIcon
 } from "lucide-react";
 import Image from "next/image";
-import logo from "./logo.jpeg";
+import logo from "./icon.jpeg";
 import { HeroIllustration } from "../components/HeroIllustration";
 import img1 from "./elements/1.png";
 import img2 from "./elements/2.png";
@@ -130,9 +130,9 @@ export default function LandingPage() {
             <Image
               src={logo}
               alt="CargoHub Logo"
-              width={36}
-              height={36}
-              className="rounded-full object-cover flex-shrink-0"
+              width={48}
+              height={48}
+              className="rounded-full object-cover flex-shrink-0 shadow-sm"
             />
             <span className="font-sans text-[17px] font-bold tracking-tight text-[#0f172a]">
               CargoHub
@@ -169,7 +169,7 @@ export default function LandingPage() {
       <section className="relative min-h-[80vh] flex flex-col pt-24 pb-20 overflow-visible items-center text-center">
         <div className="container mx-auto px-6 md:px-12 relative z-10 w-full flex flex-col items-center">
             <motion.div
-              className="max-w-4xl mx-auto flex flex-col items-center mt-4 mb-4 z-20"
+              className="relative max-w-4xl mx-auto flex flex-col items-center mt-4 mb-4 z-20"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
@@ -184,7 +184,7 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-8">
-                <a href="#start" className="flex items-stretch bg-white text-[#0f172a] text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow">
+                <a href="/login" className="flex items-stretch bg-white text-[#0f172a] text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow">
                   <span className="px-8 py-4 flex items-center">Get Started</span>
                   <div className="bg-[#0f172a] text-white px-5 flex items-center justify-center">
                     <Play className="w-4 h-4 fill-white" />
@@ -412,9 +412,9 @@ export default function LandingPage() {
                 <Image
                   src={logo}
                   alt="CargoHub Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-full object-cover flex-shrink-0"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover flex-shrink-0 shadow-sm"
                 />
                 <span className="font-display text-xl font-bold">CargoHub</span>
               </div>

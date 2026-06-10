@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/app/logo.jpeg";
+import logo from "@/app/icon.jpeg";
 import { 
   LayoutDashboard, PackagePlus, MapPin, ClipboardList, 
   Wallet, Star, HeadphonesIcon, Settings, LogOut, ChevronLeft, ChevronRight
@@ -70,8 +70,8 @@ export default function Sidebar() {
           <Image
             src={logo}
             alt="CargoHub Logo"
-            width={32}
-            height={32}
+            width={48}
+            height={48}
             className="rounded-lg object-cover flex-shrink-0 shadow-sm"
           />
           {!isSidebarCollapsed && (
