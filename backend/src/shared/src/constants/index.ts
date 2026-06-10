@@ -47,6 +47,22 @@ export const VEHICLE_CONFIG: Record<VehicleType, {
     perKmRate: 28,
     icon: '🚛',
   },
+  MINI_PICKUP: {
+    label: 'Mini Pickup',
+    description: 'Small delivery',
+    capacity: 'Up to 300 kg',
+    baseFare: 80,
+    perKmRate: 12,
+    icon: '🛻',
+  },
+  MINI_TRUCK: {
+    label: 'Mini Truck',
+    description: 'Medium truck',
+    capacity: 'Up to 1.5 tons',
+    baseFare: 180,
+    perKmRate: 20,
+    icon: '🚚',
+  },
 };
 
 // ── Load Type Configuration ─────────────────────────────────────────────────

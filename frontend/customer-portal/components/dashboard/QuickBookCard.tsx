@@ -5,8 +5,10 @@ import { useState, useEffect } from "react";
 import { Package, MapPin, Navigation, ArrowRight } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
 import LocationAutocomplete from "./LocationAutocomplete";
+import { useRouter } from "next/navigation";
 
 export default function QuickBookCard() {
+  const router = useRouter();
   const [showEstimate, setShowEstimate] = useState(false);
   const [vehicle, setVehicle] = useState("tempo");
   const [loading, setLoading] = useState(false);
@@ -73,8 +75,8 @@ export default function QuickBookCard() {
     setStoreFareData(fareData as any);
     
     setTimeout(() => {
-      // Simulate routing to booking page
-      window.location.href = "/dashboard/book";
+      // Navigate using Next.js router to preserve Zustand store
+      router.push("/dashboard/book");
     }, 1500);
   };
 
@@ -93,17 +95,16 @@ export default function QuickBookCard() {
         <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>Book Cargo</h2>
       </div>
 
-      <div className="flex flex-col gap-4 flex-1">
+      <div className="flex flex-col gap-4 flex-1 relative">
+        <div className="absolute left-[17px] top-[22px] h-[60px] w-px bg-gray-300 z-10 pointer-events-none" />
+        
         {/* Pickup Input */}
         <div className="relative z-20">
           <LocationAutocomplete 
             type="pickup"
             placeholder="Search Pickup Location"
             icon={
-              <>
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse z-10" />
-                <div className="absolute left-[17px] top-[28px] w-px h-6 bg-gray-300 z-0" />
-              </>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse bg-white z-20" />
             }
           />
         </div>
@@ -114,7 +115,7 @@ export default function QuickBookCard() {
             type="dropoff"
             placeholder="Search Drop Location"
             icon={
-              <MapPin className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 z-10" style={{ color: "var(--brand-secondary)" }} />
+              <MapPin className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 bg-white z-20" style={{ color: "var(--brand-secondary)" }} />
             }
           />
         </div>

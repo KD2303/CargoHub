@@ -7,8 +7,9 @@ import {
   IndianRupee, Navigation, Clock, AlertCircle, CheckCircle2,
   Minus, Plus, Info, Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { VEHICLE_CONFIG, LOAD_CONFIG, FARE_CONSTANTS } from "@cargohub/shared";
-import { calculateFare, formatCurrency } from "@cargohub/shared";
+import { calculateSmartFare, formatCurrency } from "@cargohub/shared";
 import type { VehicleType, LoadType, FareBreakdown } from "@cargohub/shared";
 
 const vehicleTypes = Object.entries(VEHICLE_CONFIG) as [VehicleType, typeof VEHICLE_CONFIG[VehicleType]][];
@@ -25,7 +26,7 @@ export default function BookingPage() {
 
   // Calculate fare when moving to step 3
   const handleCalculateFare = () => {
-    const result = calculateFare({
+    const result = calculateSmartFare({
       pickupLat: 26.8467,
       pickupLng: 80.9462,
       dropLat: 26.8722,
@@ -44,9 +45,9 @@ export default function BookingPage() {
       <header className="sticky top-0 z-50 glass" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
         <div className="container-wide flex items-center justify-between h-20">
           <div className="flex items-center gap-4">
-            <a href="/" className="w-10 h-10 rounded-xl bg-white border border-gray-150 flex items-center justify-center text-gray-700 hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
+            <Link href="/" className="w-10 h-10 rounded-xl bg-white border border-gray-150 flex items-center justify-center text-gray-700 hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
               <ChevronLeft className="w-5 h-5" />
-            </a>
+            </Link>
             <span className="font-display text-2xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>Book a Truck</span>
           </div>
           <div className="flex items-center gap-3">
@@ -354,6 +355,11 @@ export default function BookingPage() {
                         <span className="text-sm" style={{ color: "var(--text-secondary)" }}>Subtotal</span>
                         <span className="font-mono text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{formatCurrency(fare.subtotal)}</span>
                       </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span style={{ color: "var(--text-secondary)" }}>Weight Charge</span>
+                        <span className="font-semibold">{formatCurrency(fare.weightCharge || 0)}</span>
+                      </div>
+                      <div className="divider" />
                       <div className="flex items-center justify-between">
                         <span className="text-sm" style={{ color: "var(--text-secondary)" }}>GST (18%)</span>
                         <span className="font-mono text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{formatCurrency(fare.gst)}</span>

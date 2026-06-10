@@ -12,7 +12,9 @@ interface FareData {
   distanceKm: number;
   loadSurcharge: number;
   helperCharge: number;
-  weightSurcharge: number;
+  weightSurcharge?: number;
+  weightCharge?: number;
+  tollCharge?: number;
   surgeMultiplier: number;
   subtotal: number;
   gst: number;
@@ -43,8 +45,8 @@ interface BookingState {
 }
 
 export const useBookingStore = create<BookingState>((set) => ({
-  pickup: { lng: 72.8777, lat: 19.0760, address: "Andheri East, Mumbai" }, // Default Mumbai
-  dropoff: { lng: 73.8567, lat: 18.5204, address: "Thane West, Thane" }, // Default Thane
+  pickup: { lng: 78.149246, lat: 26.199406, address: "Maharaj Bada Madhogang Laskar Gwalior, Victoria Hall Building, Jiwaji Chowk, Topi Bazar, Chitnis Ki Goth, Lashkar, Gwalior, Madhya Pradesh, 474001, India" }, 
+  dropoff: { lng: 78.173559, lat: 26.224334, address: "Sanjay Batham, 33/A, Sewa Nagar, Dwarkapuri, Lashkar, Gwalior, Madhya Pradesh, 474002, India" }, 
   driverLocation: null,
   vehicle: "tempo",
   weight: "",

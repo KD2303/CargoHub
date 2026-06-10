@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { db } from '../config/database';
-import { calculateFare, Booking, BookingCreateInput } from '@cargohub/shared';
+import { calculateSmartFare, Booking, BookingCreateInput } from '@cargohub/shared';
 import { analyticsService } from './analytics.service';
 import { emailService } from './email.service';
 import { notificationService } from './notification.service';
@@ -29,19 +29,19 @@ export const bookingService = {
       }
     }
 
-    const baseFare = calculateFare({
+    const baseFare = calculateSmartFare({
       pickupLat: input.pickupLat,
       pickupLng: input.pickupLng,
       dropLat: input.dropLat,
       dropLng: input.dropLng,
       vehicleType: input.vehicleType,
-      loadType: input.loadType,
+      loadType: input.loadType, // kept for schema compat
       helpersRequested: input.helpersRequested,
+      weight: input.weight,
+      distanceKm: distanceKm,
     });
 
-    const haversineDist = baseFare.distanceKm;
-    const ratio = haversineDist > 0 ? distanceKm / haversineDist : 1;
-    const finalFareTotal = Math.round(baseFare.total * ratio);
+    const finalFareTotal = baseFare.total;
 
     const booking: Booking = {
       id: uuid(),

@@ -6,6 +6,7 @@ import {
   Phone, Mail, ArrowRight, Eye, EyeOff, Truck,
   Shield, Zap, ChevronLeft, User, Lock
 } from "lucide-react";
+import Link from "next/link";
 import { ThemeToggle } from "../../components/ThemeToggle";
 // @ts-ignore - TS module resolution bug with Firebase 11+
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
@@ -220,9 +221,9 @@ export default function RegisterPage() {
             <>
               {/* Back to home */}
               <div className="flex items-center justify-between mb-8">
-                <a href="/" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                <Link href="/" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
                   <ChevronLeft className="w-4 h-4" /> Back to home
-                </a>
+                </Link>
                 <ThemeToggle />
               </div>
 
@@ -391,9 +392,9 @@ export default function RegisterPage() {
               {/* Login link */}
               <p className="text-sm text-center mt-8" style={{ color: "var(--text-muted)" }}>
                 Already have an account?{" "}
-                <a href="/login" className="font-semibold" style={{ color: "var(--brand-primary-light)" }}>
+                <Link href="/login" className="font-semibold" style={{ color: "var(--brand-primary-light)" }}>
                   Sign in
-                </a>
+                </Link>
               </p>
             </>
           ) : (

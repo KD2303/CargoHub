@@ -7,6 +7,7 @@ import {
   Package, CheckCircle2, ChevronLeft, MessageCircle,
   ArrowRight, IndianRupee,
 } from "lucide-react";
+import Link from "next/link";
 
 const mockBooking = {
   id: "FA-K8X7YT",
@@ -53,9 +54,9 @@ export default function TrackingPage() {
       <header className="sticky top-0 z-50 glass" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
         <div className="container-wide flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
-            <a href="/book" className="btn-icon" style={{ width: 32, height: 32 }}>
+            <Link href="/book" className="btn-icon" style={{ width: 32, height: 32 }}>
               <ChevronLeft className="w-4 h-4" />
-            </a>
+            </Link>
             <div>
               <span className="font-display text-lg font-bold">Live Tracking</span>
               <span className="font-mono text-xs ml-2" style={{ color: "var(--brand-primary-light)" }}>{mockBooking.id}</span>

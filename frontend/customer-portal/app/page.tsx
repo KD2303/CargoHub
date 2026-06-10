@@ -7,6 +7,7 @@ import {
   ArrowRight, Package, Users, BarChart3, Phone, Globe,
   CheckCircle2, IndianRupee, Navigation, Smartphone, Play, Image as ImageIcon
 } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import logo from "./icon.jpeg";
 import { HeroIllustration } from "../components/HeroIllustration";
@@ -130,7 +131,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between h-[68px]">
 
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image
               src={logo}
               alt="CargoHub Logo"
@@ -141,7 +142,7 @@ export default function LandingPage() {
             <span className="font-sans text-[17px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
               CargoHub
             </span>
-          </a>
+          </Link>
 
           {/* Center Nav Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -153,20 +154,20 @@ export default function LandingPage() {
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <a
+            <Link
               href="/login"
               className="text-[14px] font-semibold transition-colors px-4 py-2"
               style={{ color: "var(--text-secondary)" }}
             >
               Log In
-            </a>
-            <a
+            </Link>
+            <Link
               href="/book"
               className="text-[14px] font-bold text-white px-5 py-2.5 shadow-sm transition-opacity hover:opacity-90"
               style={{ background: "var(--brand-primary)", borderRadius: "4px" }}
             >
               Book Now
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -190,12 +191,12 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-8">
-                <a href="/login" className="flex items-stretch text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow" style={{ background: "var(--bg-card)", color: "var(--text-primary)" }}>
+                <Link href="/login" className="flex items-stretch text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.12)] transition-shadow" style={{ background: "var(--bg-card)", color: "var(--text-primary)" }}>
                   <span className="px-8 py-4 flex items-center">Get Started</span>
                   <div className="text-white px-5 flex items-center justify-center" style={{ background: "var(--text-primary)" }}>
                     <Play className="w-4 h-4 fill-white" />
                   </div>
-                </a>
+                </Link>
                 <a href="#features" className="flex items-center gap-3 text-[15px] font-semibold hover:opacity-80 transition-opacity" style={{ color: "var(--text-primary)" }}>
                   <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center" style={{ borderColor: "var(--border-hover)" }}>
                     <Play className="w-3 h-3 translate-x-[1px]" style={{ fill: "var(--text-primary)" }} />
@@ -397,12 +398,12 @@ export default function LandingPage() {
                 Join thousands of businesses and individuals who trust CargoHub for their cargo needs.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <a href="/book" className="btn-primary text-base" style={{ padding: "16px 40px" }}>
+                <Link href="/book" className="btn-primary text-base" style={{ padding: "16px 40px" }}>
                   Start Shipping <ArrowRight className="w-5 h-5" />
-                </a>
-                <a href="/register" className="btn-secondary text-base" style={{ padding: "16px 40px" }}>
+                </Link>
+                <Link href="/register" className="btn-secondary text-base" style={{ padding: "16px 40px" }}>
                   <Truck className="w-5 h-5" /> Become a Driver
-                </a>
+                </Link>
               </div>
             </div>
           </motion.div>
@@ -431,10 +432,10 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Product</h4>
               <div className="space-y-3">
-                <a href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</a>
-                <a href="/tracking" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</a>
-                <a href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Fare Calculator</a>
-                <a href="/b2b-portal" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Business Account</a>
+                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</Link>
+                <Link href="/tracking" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</Link>
+                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Fare Calculator</Link>
+                <Link href="/b2b-portal" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Business Account</Link>
               </div>
             </div>
             <div>

@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { validate } from '../middlewares/validate.middleware';
-import { FareEstimateSchema, calculateFare } from '@cargohub/shared';
+import { FareEstimateSchema, calculateSmartFare } from '@cargohub/shared';
 import axios from 'axios';
 
 const router = Router();
@@ -60,30 +60,30 @@ router.post('/estimate', validate(FareEstimateSchema), async (req, res) => {
       }
     }
 
-    // Use shared calculateFare logic but override distance and apply surcharge
-    const baseFare = calculateFare({
+    let surgeCondition = "Normal";
+    if (isMonsoonSurcharge) {
+      surgeCondition = "Heavy Rain";
+    }
+
+    // Use shared calculateSmartFare logic but override distance and apply surcharge
+    const fareResult = calculateSmartFare({
       pickupLat: req.body.pickupLat,
       pickupLng: req.body.pickupLng,
       dropLat: req.body.dropLat,
       dropLng: req.body.dropLng,
       vehicleType: req.body.vehicleType,
-      loadType: req.body.loadType,
+      loadType: req.body.loadType, // kept for schema compat
       helpersRequested: req.body.helpersRequested,
       weight: req.body.weight,
       distanceKm: distanceKm,
+      surgeCondition: surgeCondition as any,
     });
-    
-    let total = baseFare.total;
-    if (isMonsoonSurcharge) {
-      total = Math.round(total * 1.15); // 15% surcharge
-    }
 
     res.json({ 
       success: true, 
       data: {
-        ...baseFare,
+        ...fareResult,
         durationMin: Math.round(durationMins),
-        total: total,
         monsoonSurchargeApplied: isMonsoonSurcharge
       } 
     });

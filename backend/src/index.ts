@@ -63,8 +63,8 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(globalLimiter); // Native fallback rate limiting
 app.use(arcjetMiddleware); // Rate limiting and bot protection (if key provided)
 app.use(platformMiddleware);

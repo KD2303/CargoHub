@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/authStore";
 import LocationAutocomplete from "@/components/dashboard/LocationAutocomplete";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
+import Link from "next/link";
 
 // Dynamically import LiveMap with SSR disabled
 const LiveMap = dynamic(() => import("@/components/dashboard/LiveMap"), { ssr: false });
@@ -16,6 +17,7 @@ export default function BookingPage() {
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
   const [estimating, setEstimating] = useState(false);
+  const { user } = useAuthStore();
 
   const {
     pickup,
@@ -112,6 +114,7 @@ export default function BookingPage() {
         vehicleType: getVehicleEnum(vehicle),
         loadType: getLoadTypeEnum(cargoType),
         helpersRequested: helpers,
+        weight: weight ? Number(weight) : undefined,
       };
 
       const res = await fetch("http://localhost:5000/api/bookings", {
@@ -150,7 +153,7 @@ export default function BookingPage() {
     
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Booking ID: ${createdBookingId}`, 130, 20);
+    doc.text(step === 2 ? `Estimation Bill` : `Booking ID: ${createdBookingId}`, 130, 20);
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 130, 26);
     
@@ -200,8 +203,12 @@ export default function BookingPage() {
     doc.text("Base Fare", 25, currentY); doc.text(`Rs. ${fareData?.base || 0}`, 160, currentY); currentY += 6;
     doc.text(`Distance Charge (${fareData?.distanceKm || 0} km)`, 25, currentY); doc.text(`Rs. ${fareData?.distanceCharge || 0}`, 160, currentY); currentY += 6;
     
-    if (fareData?.weightSurcharge) {
-      doc.text("Weight Surcharge (>50kg)", 25, currentY); doc.text(`Rs. ${fareData.weightSurcharge}`, 160, currentY); currentY += 6;
+    if (fareData?.weightCharge) {
+      doc.text("Weight Charge", 25, currentY); doc.text(`Rs. ${fareData.weightCharge}`, 160, currentY); currentY += 6;
+    }
+    
+    if (fareData?.tollCharge) {
+      doc.text("Toll Charge", 25, currentY); doc.text(`Rs. ${fareData.tollCharge}`, 160, currentY); currentY += 6;
     }
     
     doc.text("GST (18%)", 25, currentY); doc.text(`Rs. ${fareData?.gst || 0}`, 160, currentY); currentY += 6;
@@ -256,9 +263,9 @@ export default function BookingPage() {
           <button onClick={handleDownloadReceipt} className="btn-secondary">
             <Download className="w-4 h-4 mr-2" /> Download Receipt
           </button>
-          <a href={`/dashboard/track?id=${createdBookingId}`} className="btn-primary">
+          <Link href={`/dashboard/track?id=${createdBookingId}`} className="btn-primary">
             Track Shipment <Navigation className="w-4 h-4 ml-2" />
-          </a>
+          </Link>
         </motion.div>
       </div>
     );
@@ -312,17 +319,16 @@ export default function BookingPage() {
             >
               <div>
                 <h2 className="text-lg font-bold mb-4 text-gray-900">Pickup & Drop Details</h2>
-                <div className="space-y-4">
+                <div className="space-y-4 relative">
+                  <div className="absolute left-[17px] top-[42px] h-[80px] w-px bg-gray-300 z-10 pointer-events-none" />
+                  
                   <div className="relative z-20">
                     <label className="block text-xs font-semibold text-gray-500 mb-1">Pickup Location</label>
                     <LocationAutocomplete 
                       type="pickup"
                       placeholder="Search pickup address..."
                       icon={
-                        <>
-                          <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse z-10" />
-                          <div className="absolute left-[17px] top-[28px] w-px h-6 bg-gray-300 z-0" />
-                        </>
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse bg-white z-20" />
                       }
                     />
                   </div>
@@ -332,7 +338,7 @@ export default function BookingPage() {
                       type="dropoff"
                       placeholder="Search drop address..."
                       icon={
-                        <Navigation className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 z-10" style={{ color: "var(--brand-secondary)" }} />
+                        <Navigation className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 bg-white z-20" style={{ color: "var(--brand-secondary)" }} />
                       }
                     />
                   </div>
@@ -441,10 +447,16 @@ export default function BookingPage() {
                     <span>Distance Charge ({fareData?.distanceKm || 0} km)</span>
                     <span className="font-mono">₹{fareData?.distanceCharge || 0}</span>
                   </div>
-                  {fareData?.weightSurcharge ? (
+                  {fareData?.weightCharge ? (
                     <div className="flex justify-between text-orange-600">
-                      <span>Weight Surcharge (&gt;50kg)</span>
-                      <span className="font-mono">₹{fareData.weightSurcharge}</span>
+                      <span>Weight Charge</span>
+                      <span className="font-mono">₹{fareData.weightCharge}</span>
+                    </div>
+                  ) : null}
+                  {fareData?.tollCharge ? (
+                    <div className="flex justify-between">
+                      <span>Toll Charge</span>
+                      <span className="font-mono">₹{fareData.tollCharge}</span>
                     </div>
                   ) : null}
                   <div className="flex justify-between">
@@ -457,6 +469,9 @@ export default function BookingPage() {
                       ₹{fareData?.total || 0}
                     </span>
                   </div>
+                  <button onClick={handleDownloadReceipt} className="w-full mt-4 border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                    <Download className="w-4 h-4" /> Download Estimation Bill (PDF)
+                  </button>
                 </div>
               </div>
 
@@ -465,7 +480,7 @@ export default function BookingPage() {
                   <IndianRupee className="w-5 h-5" /> Pay via UPI
                 </button>
                 <button onClick={() => handleConfirmPay('WALLET')} className="border border-gray-200 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:border-gray-300">
-                  Wallet (Bal: ₹{useAuthStore().user?.walletBalance || 0})
+                  Wallet (Bal: ₹{user?.walletBalance || 0})
                 </button>
               </div>
             </motion.div>

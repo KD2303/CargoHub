@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Phone, Navigation, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface Driver {
   name: string;
@@ -123,9 +124,9 @@ function ShipmentRow({ shipment }: { shipment: ShipmentProps }) {
           <button className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-colors">
             <Phone className="w-4 h-4" />
           </button>
-          <a href={`/dashboard/track?id=${shipment.id}`} className="p-2 rounded-lg text-white transition-colors" style={{ background: "var(--brand-primary)" }}>
+          <Link href={`/dashboard/track?id=${shipment.id}`} className="p-2 rounded-lg text-white transition-colors" style={{ background: "var(--brand-primary)" }}>
             <Navigation className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -137,7 +138,7 @@ export default function ActiveShipmentCard({ shipments }: { shipments: ShipmentP
     <div className="card col-span-1 bg-gray-50/50">
       <div className="flex justify-between items-center mb-6">
         <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>Active Shipments</h2>
-        <a href="/dashboard/orders" className="text-sm font-semibold hover:underline" style={{ color: "var(--brand-primary)" }}>View All</a>
+        <Link href="/dashboard/orders" className="text-sm font-semibold hover:underline" style={{ color: "var(--brand-primary)" }}>View All</Link>
       </div>
       
       {shipments.length > 0 ? (

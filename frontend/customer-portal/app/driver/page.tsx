@@ -13,6 +13,7 @@ import {
   Bell, MapIcon, Zap, CreditCard, MessageSquare, Database,
   Shield, Cloud, Lock, GitBranch, Loader2, X
 } from "lucide-react";
+import Link from "next/link";
 
 const mockEarnings = {
   today: 2450,
@@ -275,9 +276,9 @@ export default function DriverDashboard() {
       <header className="sticky top-0 z-50 glass" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
         <div className="container-wide flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <a href="/" className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
+            <Link href="/" className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
               <ChevronLeft className="w-4 h-4" />
-            </a>
+            </Link>
             <div>
               <span className="font-display text-lg font-bold tracking-tight text-gray-800">Driver Portal</span>
               <span className={`badge ml-3 font-semibold ${isOnline ? "badge-delivered" : "badge-cancelled"}`} style={{ fontSize: "9px" }}>

@@ -40,7 +40,7 @@ export interface UserProfile {
 
 // ── Vehicles & Load ─────────────────────────────────────────────────────────
 
-export type VehicleType = 'TATA_ACE' | 'TEMPO_407' | 'PICKUP_TRUCK' | 'LARGE_TRUCK';
+export type VehicleType = 'MINI_PICKUP' | 'TATA_ACE' | 'MINI_TRUCK' | 'LARGE_TRUCK' | 'TEMPO_407' | 'PICKUP_TRUCK';
 
 export type LoadType =
   | 'FURNITURE'
@@ -99,6 +99,7 @@ export interface BookingCreateInput {
   vehicleType: VehicleType;
   loadType: LoadType;
   helpersRequested: number;
+  weight?: number;
   scheduledAt?: string;
 }
 
@@ -159,6 +160,7 @@ export interface FareEstimateInput {
   helpersRequested: number;
   weight?: number;
   distanceKm?: number;
+  surgeCondition?: string;
 }
 
 export interface FareBreakdown {
@@ -167,7 +169,9 @@ export interface FareBreakdown {
   distanceKm: number;
   loadSurcharge: number;
   helperCharge: number;
-  weightSurcharge: number;
+  weightSurcharge?: number;
+  weightCharge?: number;
+  tollCharge?: number;
   surgeMultiplier: number;
   subtotal: number;
   gst: number;

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Package, Search, ExternalLink, Calendar, MapPin, CheckCircle2, Clock, Truck, XCircle, Star, X, Download } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { auth as firebaseAuth } from "@/lib/firebase";
@@ -248,9 +249,9 @@ export default function OrdersPage() {
                           </button>
                         </>
                       )}
-                      <a href={`/dashboard/track?id=${order.id}`} className="btn-icon inline-flex h-9 w-9" title="Track">
+                      <Link href={`/dashboard/track?id=${order.id}`} className="btn-icon inline-flex h-9 w-9" title="Track">
                         <ExternalLink className="w-4 h-4" />
-                      </a>
+                      </Link>
                     </div>
                   </td>
                 </motion.tr>

@@ -226,26 +226,24 @@ export default function LiveMap() {
 
   // Subscribe to store changes imperatively to update markers WITHOUT re-rendering LiveMap
   useEffect(() => {
-    const unsub = useBookingStore.subscribe((state) => {
-      let changed = false;
+    let prevPickup = useBookingStore.getState().pickup;
+    let prevDropoff = useBookingStore.getState().dropoff;
 
+    const unsub = useBookingStore.subscribe((state) => {
       // Handle Pickup Marker
       if (state.pickup) {
         if (pickupMarker.current) {
           const currentPos = pickupMarker.current.getLngLat();
           if (Math.abs(currentPos.lng - state.pickup.lng) > 0.0001 || Math.abs(currentPos.lat - state.pickup.lat) > 0.0001) {
             pickupMarker.current.setLngLat([state.pickup.lng, state.pickup.lat]);
-            changed = true;
           }
         } else if (map.current?.isStyleLoaded()) {
           // Create marker if it didn't exist
           pickupMarker.current = createMarker('pickup', state.pickup);
-          changed = true;
         }
       } else if (pickupMarker.current) {
         pickupMarker.current.remove();
         pickupMarker.current = null;
-        changed = true;
       }
 
       // Handle Dropoff Marker
@@ -254,17 +252,14 @@ export default function LiveMap() {
           const currentPos = dropoffMarker.current.getLngLat();
           if (Math.abs(currentPos.lng - state.dropoff.lng) > 0.0001 || Math.abs(currentPos.lat - state.dropoff.lat) > 0.0001) {
             dropoffMarker.current.setLngLat([state.dropoff.lng, state.dropoff.lat]);
-            changed = true;
           }
         } else if (map.current?.isStyleLoaded()) {
           // Create marker if it didn't exist
           dropoffMarker.current = createMarker('dropoff', state.dropoff);
-          changed = true;
         }
       } else if (dropoffMarker.current) {
         dropoffMarker.current.remove();
         dropoffMarker.current = null;
-        changed = true;
       }
 
       // Handle Driver Marker
@@ -279,8 +274,13 @@ export default function LiveMap() {
         driverMarker.current = null;
       }
 
-      if (changed) {
+      const pickupChanged = state.pickup?.lng !== prevPickup?.lng || state.pickup?.lat !== prevPickup?.lat;
+      const dropoffChanged = state.dropoff?.lng !== prevDropoff?.lng || state.dropoff?.lat !== prevDropoff?.lat;
+
+      if (pickupChanged || dropoffChanged) {
         updateRouteLineAndBounds(state.pickup, state.dropoff);
+        prevPickup = state.pickup;
+        prevDropoff = state.dropoff;
       }
     });
     return unsub;

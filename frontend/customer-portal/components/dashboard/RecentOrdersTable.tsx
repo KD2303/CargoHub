@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Download, Navigation, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface OrderProps {
   id: string;
@@ -93,9 +94,9 @@ export default function RecentOrdersTable({ orders }: { orders: OrderProps[] }) 
                   </td>
                   <td>
                     {order.status === "In Transit" ? (
-                      <a href={`/dashboard/track?id=${order.id}`} className="flex items-center gap-1 text-xs font-bold transition-all group-hover:translate-x-1" style={{ color: "var(--brand-secondary)" }}>
+                      <Link href={`/dashboard/track?id=${order.id}`} className="flex items-center gap-1 text-xs font-bold transition-all group-hover:translate-x-1" style={{ color: "var(--brand-secondary)" }}>
                         <Navigation className="w-3 h-3" /> Track
-                      </a>
+                      </Link>
                     ) : order.status === "Delivered" ? (
                       <button className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors">
                         <Download className="w-3 h-3" /> Receipt
