@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -6,6 +7,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { DriverProvider } from './src/context/DriverContext';
 import { SocketProvider } from './src/context/SocketContext';
 import { Navigation } from './src/navigation/Navigation';
+import { initNotifications } from './src/services/NotificationService';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,7 +18,7 @@ export default function App() {
     async function prepare() {
       console.log('[DEBUG] App prepare started');
       try {
-        // Prepare any resources here
+        await initNotifications();
       } catch (e) {
         console.warn(e);
       } finally {
@@ -34,10 +36,19 @@ export default function App() {
     prepare();
   }, []);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <View style={{ flex: 1, backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white' }}>Loading App...</Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   return (
-    <SafeAreaProvider style={{ flex: 1 }}>
+    <SafeAreaProvider>
       <StatusBar style="dark" />
       <AuthProvider>
         <SocketProvider>

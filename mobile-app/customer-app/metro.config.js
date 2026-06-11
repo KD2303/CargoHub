@@ -1,26 +1,27 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
-// Find the project and workspace directories
-const projectRoot = __dirname;
-const workspaceRoot = path.resolve(projectRoot, '../..');
+const config = getDefaultConfig(__dirname);
 
-const config = getDefaultConfig(projectRoot);
-
-// 1. Watch the root of the monorepo
-config.watchFolders = [workspaceRoot];
-
-// 2. Force Metro to resolve (sub)packages from the nodeModulesPaths
-config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, 'node_modules'),
-  path.resolve(workspaceRoot, 'node_modules'),
+config.resolver.blockList = [
+  /.*\.npm-cache.*/,
+  /.*\.git.*/,
+  /.*\.expo.*/,
+  /.*\.planning.*/,
+  /.*[/\\]frontend[/\\]admin-dashboard[/\\].*/,
+  /.*[/\\]frontend[/\\]customer-portal[/\\].*/,
+  /.*[/\\]frontend[/\\]b2b-portal[/\\].*/,
+  /.*[/\\]backend[/\\](?!src[/\\]shared).*/,
 ];
 
-// 3. Force singleton packages to resolve to local workspace to prevent conflicts
-const singletons = ['react', 'react-native', 'react-native-svg'];
-config.resolver.extraNodeModules = singletons.reduce((acc, name) => {
-  acc[name] = path.resolve(projectRoot, 'node_modules', name);
-  return acc;
-}, {});
+const metroResolver = require('metro-resolver');
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && moduleName === 'react-native-maps') {
+    return {
+      type: 'empty',
+    };
+  }
+  return metroResolver.resolve(context, moduleName, platform);
+};
 
 module.exports = config;

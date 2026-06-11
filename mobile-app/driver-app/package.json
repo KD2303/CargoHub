@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx expo start",
-    "dev:driver": "npx expo start",
-    "android": "npx expo start --android",
-    "ios": "npx expo start --ios",
-    "web": "npx expo start --web"
+    "start": "node --max-old-space-size=4096 node_modules/expo/bin/cli start",
+    "dev:driver": "node --max-old-space-size=4096 node_modules/expo/bin/cli start",
+    "android": "node --max-old-space-size=4096 node_modules/expo/bin/cli start --android",
+    "ios": "node --max-old-space-size=4096 node_modules/expo/bin/cli start --ios",
+    "web": "node --max-old-space-size=4096 node_modules/expo/bin/cli start --web"
   },
   "dependencies": {
     "@cargohub/shared": "*",
@@ -34,7 +34,7 @@
     "react-dom": "18.3.1",
     "react-freeze": "^1.0.4",
     "react-native": "0.76.9",
-    "react-native-gesture-handler": "^3.0.1",
+    "react-native-gesture-handler": "~2.20.2",
     "react-native-maps": "1.18.0",
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
@@ -46,12 +46,14 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/plugin-transform-template-literals": "^7.29.7",
+    "@babel/runtime": "^7.20.0",
     "@types/react": "~18.3.12",
     "typescript": "^5.3.3"
   },
   "overrides": {
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "@types/react": "~18.3.12"
   },
   "private": true
 }

@@ -3,7 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "module": "ESNext"
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "react": ["../../node_modules/react"],
+      "react/*": ["../../node_modules/react/*"],
+      "react-native": ["../../node_modules/react-native"],
+      "react-native/*": ["../../node_modules/react-native/*"],
+      "@types/react": ["../../node_modules/@types/react"],
+      "@types/react/*": ["../../node_modules/@types/react/*"]
+    }
   }
 }

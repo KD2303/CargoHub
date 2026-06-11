@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
+console.log('--- INDEX START ---');
 import App from './App';
-
-console.log('[DEBUG] index.js started executing');
+console.log('--- APP IMPORTED ---');
 registerRootComponent(App);

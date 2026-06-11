@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Dimensions } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapViewOriginal, { Marker as MarkerOriginal, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { api } from '../services/api';
 import { AvailableJobCard } from '../components/AvailableJobCard';
 import { IncomingJobModal } from './IncomingJobModal';
 import { useSocket } from '../context/SocketContext';
 import { useDriver } from '../context/DriverContext';
-import { ArrowLeft, Loader2, MapPin } from 'lucide-react-native';
+import { ArrowLeft as ArrowLeftIcon, Loader2 as Loader2Icon, MapPin as MapPinIcon } from 'lucide-react-native';
+
+const MapView = MapViewOriginal as any;
+const Marker = MarkerOriginal as any;
+const ArrowLeft = ArrowLeftIcon as any;
+const Loader2 = Loader2Icon as any;
+const MapPin = MapPinIcon as any;
 
 const { height } = Dimensions.get('window');
 
@@ -103,11 +109,6 @@ export const AvailableJobsScreen = ({ navigation }: any) => {
         <View style={styles.center}>
            <Text style={styles.emptyText}>Loading available jobs...</Text>
         </View>
-      ) : availableJobs.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyText}>No available jobs right now.</Text>
-          <Text style={styles.emptySubtext}>We'll notify you when a new booking is requested.</Text>
-        </View>
       ) : (
         <View style={styles.content}>
           <View style={styles.mapContainer}>
@@ -154,29 +155,36 @@ export const AvailableJobsScreen = ({ navigation }: any) => {
             </MapView>
           </View>
           
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            {availableJobs.map(job => (
-              <AvailableJobCard 
-                key={job.id}
-                job={job} 
-                onPress={(j) => {
-                  if (kycStatus !== 'VERIFIED') {
-                    Alert.alert(
-                      'KYC Required',
-                      'You must verify your identity before you can accept jobs.',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Verify Now', onPress: () => navigation.navigate('KycUpload') }
-                      ]
-                    );
-                    return;
-                  }
-                  setIncomingJob(j);
-                  setModalVisible(true);
-                }} 
-              />
-            ))}
-          </ScrollView>
+          {availableJobs.length === 0 ? (
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>No available jobs right now.</Text>
+              <Text style={styles.emptySubtext}>We'll notify you when a new booking is requested.</Text>
+            </View>
+          ) : (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              {availableJobs.map(job => (
+                <AvailableJobCard 
+                  key={job.id}
+                  job={job} 
+                  onPress={(j) => {
+                    if (kycStatus !== 'VERIFIED') {
+                      Alert.alert(
+                        'KYC Required',
+                        'You must verify your identity before you can accept jobs.',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { text: 'Verify Now', onPress: () => navigation.navigate('KycUpload') }
+                        ]
+                      );
+                      return;
+                    }
+                    setIncomingJob(j);
+                    setModalVisible(true);
+                  }} 
+                />
+              ))}
+            </ScrollView>
+          )}
         </View>
       )}
 

@@ -47,8 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.data.data);
         return;
       }
-    } catch (e) {
-      console.log('Error fetching user profile during login:', e);
+    } catch (e: any) {
+      console.log('Error fetching user profile during login:', e.message || e);
+      throw e;
     }
     if (fallbackProfile) setUser(fallbackProfile);
   };

@@ -85,8 +85,8 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
         </View>
         
         <View style={styles.headlineContainer}>
-          <Text style={styles.headline}>Deliver Smarter.{"\n"}Earn More.</Text>
-          <Text style={styles.subheadline}>India's cargo logistics — at your fingertips</Text>
+          <Text style={styles.headline}>Move Anything.{"\n"}Anywhere.</Text>
+          <Text style={styles.subheadline}>Instant cargo delivery across India — at your fingertips</Text>
         </View>
       </Animated.View>
 
@@ -145,18 +145,18 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
       <Animated.View style={[styles.bottomSection, { opacity: fadeAnim }]}>
         <View style={styles.buttonStack}>
           <GradientButton 
-            title="Get Started as Driver" 
-            onPress={() => handleStart('DRIVER')}
-            variant="coral"
+            title="Book a Truck Now" 
+            onPress={() => handleStart('USER')}
+            variant="primary"
             style={styles.primaryBtn}
           />
           
           <TouchableOpacity 
             style={styles.secondaryBtn}
-            onPress={() => handleStart('USER')}
+            onPress={() => handleStart('DRIVER')}
             activeOpacity={0.8}
           >
-            <Text style={styles.secondaryBtnText}>I'm a Customer</Text>
+            <Text style={styles.secondaryBtnText}>I'm a Driver</Text>
           </TouchableOpacity>
         </View>
 
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   motionLine: {
     height: 2,
-    backgroundColor: theme.colors.brand.primary,
+    backgroundColor: '#378ADD',
     borderRadius: 1,
     opacity: 0.4,
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   cab: {
     width: 28,
     height: 28,
-    backgroundColor: theme.colors.brand.primary, // Coral Cab
+    backgroundColor: '#378ADD', // Blue Cab
     borderTopRightRadius: 8,
     borderTopLeftRadius: 2,
     borderBottomLeftRadius: 2,

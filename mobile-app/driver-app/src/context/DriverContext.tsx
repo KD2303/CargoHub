@@ -26,18 +26,42 @@ export const DriverProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchDriverData = async () => {
-    if (!user || user.role !== 'DRIVER') return;
+    if (!user) return;
     setIsLoading(true);
     try {
-      const response = await api.get(`/drivers/${user.firebaseUid}`);
-      if (response.data?.data) {
-        setDriver(response.data.data);
-        setIsOnline(response.data.data.isAvailable);
+      if (user.role === 'DRIVER') {
+        // Use /drivers/me to avoid param mismatch 403
+        const response = await api.get('/drivers/me');
+        if (response.data?.data) {
+          setDriver(response.data.data);
+          setIsOnline(response.data.data.isAvailable);
+        }
+
+        // Fetch active booking — silently handle KYC_REQUIRED 403
+        try {
+          const activeResp = await api.get('/bookings/driver/active');
+          if (activeResp.data?.data) setActiveBooking(activeResp.data.data);
+        } catch (bookingErr: any) {
+          // KYC not verified yet — expected for new drivers, not an error
+          if (bookingErr?.response?.status === 403) {
+            console.log('[DriverContext] KYC not verified yet, skipping active booking fetch');
+          } else {
+            console.log('[DriverContext] Error fetching active booking:', bookingErr);
+          }
+        }
+      } else if (user.role === 'USER') {
+        // For customers, fetch their active booking
+        try {
+          const bookingsResp = await api.get('/bookings?limit=1&status=PENDING,ACCEPTED,DRIVER_ARRIVING,ARRIVED,PICKED_UP,IN_TRANSIT');
+          if (bookingsResp.data?.data?.length > 0) {
+            setActiveBooking(bookingsResp.data.data[0]);
+          }
+        } catch (e) {
+          console.log('[DriverContext] Customer booking fetch error:', e);
+        }
       }
-      const activeResp = await api.get('/bookings/driver/active');
-      if (activeResp.data?.data) setActiveBooking(activeResp.data.data);
     } catch (error) {
-      console.log('Error fetching driver data', error);
+      console.log('[DriverContext] Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }

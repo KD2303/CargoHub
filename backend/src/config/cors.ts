@@ -7,6 +7,8 @@ import type { CorsOptions } from 'cors';
 const allowedOrigins = [
   process.env.WEBSITE_URL || 'http://localhost:3000',
   process.env.WEBSITE_URL_LOCAL || 'http://localhost:3000',
+  'http://localhost:4000',
+  'http://localhost:4001',
   'capacitor://localhost',
   'ionic://localhost',
 ];

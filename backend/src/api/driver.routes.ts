@@ -122,16 +122,71 @@ router.get('/:id/earnings',
   }
 );
 
+import { cloudinary } from '../config/services';
+
+// Get own driver profile (DRIVER only) — avoids /:id param mismatch
+router.get('/me',
+  verifyFirebaseToken,
+  requireRole('DRIVER'),
+  async (req, res) => {
+    try {
+      const driver = await db.drivers.findByFirebaseUid(req.user!.uid);
+      if (!driver) {
+        res.status(404).json({ success: false, error: 'DRIVER_NOT_FOUND' });
+        return;
+      }
+      res.json({ success: true, data: driver });
+    } catch (error: any) {
+      console.error('Get Driver Me Error:', error);
+      res.status(500).json({ success: false, error: 'INTERNAL_ERROR' });
+    }
+  }
+);
+
 // Submit KYC documents (DRIVER only)
 router.post('/kyc/submit',
   verifyFirebaseToken,
   requireRole('DRIVER'),
   async (req, res) => {
     try {
-      // Update driver's KYC status to PENDING
-      const updated = await db.drivers.update(req.user!.uid, {
+      const { documents } = req.body;
+      const updateData: any = {
         kycStatus: 'PENDING',
-      });
+      };
+      
+      if (documents) {
+        const uploadPromises = [];
+        
+        const processDoc = async (key: string, dataStr: string) => {
+          if (dataStr && dataStr.startsWith('data:image/')) {
+            const result = await cloudinary.uploader.upload(dataStr, {
+              folder: `kyc_documents/${req.user!.uid}`,
+              resource_type: 'image',
+            });
+            return { key, url: result.secure_url };
+          }
+          return { key, url: dataStr }; // Return as is if already a URL
+        };
+
+        const keysMap: Record<string, string> = {
+          aadhaarFront: 'aadhaarUrl',
+          license: 'licenseUrl',
+          rc: 'rcUrl',
+          photo: 'vehiclePhotoUrl'
+        };
+
+        for (const [docKey, dbKey] of Object.entries(keysMap)) {
+           if (documents[docKey]) {
+             uploadPromises.push(processDoc(docKey, documents[docKey]).then(res => {
+               updateData[dbKey] = res.url;
+             }));
+           }
+        }
+        
+        await Promise.all(uploadPromises);
+      }
+
+      const updated = await db.drivers.update(req.user!.uid, updateData);
       res.json({ success: true, data: updated, message: 'KYC documents submitted successfully' });
     } catch (error: any) {
       console.error('KYC Submit Error:', error);

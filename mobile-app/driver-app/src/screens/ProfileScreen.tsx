@@ -1,21 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Image, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Image, Linking, TextInput, Modal, ActivityIndicator } from 'react-native';
 import { theme } from '../theme/theme';
 import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { useDriver } from '../context/DriverContext';
 import { 
-  LogOut, ChevronRight, ShieldCheck, 
-  Bell, HelpCircle, FileText, Camera, Edit2, 
-  Star, Calendar, Truck 
+  LogOut as LogOutIcon, ChevronRight as ChevronRightIcon, ShieldCheck as ShieldCheckIcon, 
+  Bell as BellIcon, HelpCircle as HelpCircleIcon, FileText as FileTextIcon, Camera as CameraIcon, Edit2 as Edit2Icon, 
+  Star as StarIcon, Calendar as CalendarIcon, Truck as TruckIcon, X as XIcon 
 } from 'lucide-react-native';
+
+const LogOut = LogOutIcon as any;
+const ChevronRight = ChevronRightIcon as any;
+const ShieldCheck = ShieldCheckIcon as any;
+const Bell = BellIcon as any;
+const HelpCircle = HelpCircleIcon as any;
+const FileText = FileTextIcon as any;
+const Camera = CameraIcon as any;
+const Edit2 = Edit2Icon as any;
+const Star = StarIcon as any;
+const Calendar = CalendarIcon as any;
+const Truck = TruckIcon as any;
+const X = XIcon as any;
 import * as ImagePicker from 'expo-image-picker';
+import { api } from '../services/api';
 
 export const ProfileScreen = ({ navigation }: any) => {
-  const { logout } = useAuth();
-  const { driver } = useDriver();
+  const { logout, updateProfile } = useAuth();
+  const { driver, refreshDriverData } = useDriver();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState(driver?.name || '');
+  const [editPhone, setEditPhone] = useState(driver?.phone || '');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const kycStatus = driver?.kycStatus || 'NOT_SUBMITTED';
 
@@ -26,7 +45,7 @@ export const ProfileScreen = ({ navigation }: any) => {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -70,6 +89,27 @@ export const ProfileScreen = ({ navigation }: any) => {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    if (!editName.trim() || !editPhone.trim()) {
+      Alert.alert('Error', 'Name and phone cannot be empty.');
+      return;
+    }
+    setIsUpdating(true);
+    try {
+      const response = await api.put('/auth/me', { name: editName, phone: editPhone });
+      if (response.data?.success) {
+        updateProfile({ name: editName, phone: editPhone });
+        await refreshDriverData();
+        setIsEditModalVisible(false);
+        Alert.alert('Success', 'Profile updated successfully!');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.response?.data?.error || 'Failed to update profile.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header title="Profile" />
@@ -89,7 +129,12 @@ export const ProfileScreen = ({ navigation }: any) => {
               <Camera size={14} color="white" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.driverName}>{driver?.name || 'Driver Partner'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
+            <Text style={styles.driverName}>{driver?.name || 'Driver Partner'}</Text>
+            <TouchableOpacity onPress={() => setIsEditModalVisible(true)} style={{ marginLeft: 8, padding: 4 }}>
+              <Edit2 size={16} color={theme.colors.brand.primary} />
+            </TouchableOpacity>
+          </View>
           <Text style={styles.driverPhone}>{driver?.phone || '+91 99999 99999'}</Text>
         </View>
 
@@ -160,19 +205,18 @@ export const ProfileScreen = ({ navigation }: any) => {
           <Text style={styles.sectionTitle}>Settings</Text>
           
           <View style={styles.settingsContainer}>
-            {/* Notification Row with Switch */}
-            <View style={styles.settingItem}>
+            {/* Notification Row */}
+            <TouchableOpacity 
+              style={styles.settingItem} 
+              onPress={() => navigation.navigate('NotificationSettings')} 
+              activeOpacity={0.8}
+            >
               <View style={styles.settingLeft}>
                 <Bell size={20} color={theme.colors.text.secondary} />
                 <Text style={styles.settingTitle}>Push Notifications</Text>
               </View>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: theme.colors.border.subtle, true: 'rgba(216, 90, 48, 0.3)' }}
-                thumbColor={notificationsEnabled ? theme.colors.brand.primary : '#f4f3f4'}
-              />
-            </View>
+              <ChevronRight size={20} color={theme.colors.text.muted} />
+            </TouchableOpacity>
 
             {/* Help & Support */}
             <TouchableOpacity style={styles.settingItem} onPress={handleHelpSupport} activeOpacity={0.8}>
@@ -200,6 +244,51 @@ export const ProfileScreen = ({ navigation }: any) => {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal visible={isEditModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setIsEditModalVisible(false)}>
+                <X size={24} color={theme.colors.text.primary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput
+                style={styles.input}
+                value={editName}
+                onChangeText={setEditName}
+                placeholder="Enter your name"
+                placeholderTextColor={theme.colors.text.muted}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                value={editPhone}
+                onChangeText={setEditPhone}
+                keyboardType="phone-pad"
+                placeholder="Enter your phone number"
+                placeholderTextColor={theme.colors.text.muted}
+              />
+            </View>
+
+            <TouchableOpacity 
+              style={styles.saveBtn} 
+              onPress={handleUpdateProfile}
+              disabled={isUpdating}
+            >
+              {isUpdating ? <ActivityIndicator color="white" /> : <Text style={styles.saveBtnText}>Save Changes</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -253,4 +342,15 @@ const styles = StyleSheet.create({
   // Log Out button
   logoutBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, padding: 14, borderWidth: 1.5, borderColor: theme.colors.brand.danger, borderRadius: theme.radius.full, marginBottom: 20 },
   logoutText: { fontFamily: theme.typography.bodySemibold.fontFamily, fontSize: 15, color: theme.colors.brand.danger, fontWeight: 'bold' },
+
+  // Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: theme.colors.background.primary, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: theme.spacing.xl, paddingBottom: 40 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: theme.colors.text.primary },
+  inputGroup: { marginBottom: 20 },
+  inputLabel: { fontSize: 14, color: theme.colors.text.secondary, marginBottom: 8, fontWeight: '500' },
+  input: { backgroundColor: theme.colors.background.card, borderWidth: 1, borderColor: theme.colors.border.subtle, borderRadius: theme.radius.lg, padding: 16, fontSize: 16, color: theme.colors.text.primary },
+  saveBtn: { backgroundColor: theme.colors.brand.primary, padding: 16, borderRadius: theme.radius.full, alignItems: 'center', marginTop: 10 },
+  saveBtnText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
 });
