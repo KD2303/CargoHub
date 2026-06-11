@@ -28,26 +28,14 @@ const formatDriver = (data: any): DriverProfile | null => {
   const camel = toCamel(data);
   return {
     ...camel,
-    earnings: {
-      today: Number(camel.earningsToday || 0),
-      thisWeek: Number(camel.earningsThisWeek || 0),
-      thisMonth: Number(camel.earningsThisMonth || 0),
-      tripCount: Number(camel.earningsTripCount || 0),
-    }
+    earnings: camel.earnings || { today: 0, thisWeek: 0, thisMonth: 0, tripCount: 0 }
   } as DriverProfile;
 };
 
 const flattenDriver = (driver: any) => {
   if (!driver) return driver;
-  const { earnings, ...rest } = driver;
-  const flat = { ...rest };
-  if (earnings) {
-    flat.earningsToday = earnings.today;
-    flat.earningsThisWeek = earnings.thisWeek;
-    flat.earningsThisMonth = earnings.thisMonth;
-    flat.earningsTripCount = earnings.tripCount;
-  }
-  return toSnake(flat);
+  // Supabase 'drivers' table now uses JSONB for 'earnings' column
+  return toSnake(driver);
 };
 
 export const db = {
