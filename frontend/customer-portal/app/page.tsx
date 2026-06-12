@@ -162,6 +162,8 @@ export default function LandingPage() {
             <a href="#features"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Features</a>
             <a href="#vehicles"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Vehicles</a>
             <a href="#how-it-works" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>How It Works</a>
+            <Link href="/download"  className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Download App</Link>
+            <Link href="/developer" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Developers</Link>
           </div>
 
           {/* Right Actions */}
@@ -501,7 +503,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
-                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>About Us</a>
+                <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Our Team (Panchayat)</Link>
                 <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Careers</a>
                 <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Blog</a>
                 <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
@@ -510,12 +512,12 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Download</h4>
               <div className="space-y-3">
-                <a href="#" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <Smartphone className="w-4 h-4" /> Android App
-                </a>
-                <a href="#" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <Phone className="w-4 h-4" /> iOS App
-                </a>
+                <Link href="/download" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                  <Smartphone className="w-4 h-4" /> Android App APK
+                </Link>
+                <Link href="/download" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                  <Smartphone className="w-4 h-4" /> iOS App APK
+                </Link>
               </div>
             </div>
           </div>
