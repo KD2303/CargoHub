@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Easing, Image } from 'react-native';
 import { theme } from '../theme/theme';
 import { GradientButton } from '../components/GradientButton';
 import { Truck as TruckIcon, ChevronDown as ChevronDownIcon } from 'lucide-react-native';
@@ -27,7 +27,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
         toValue: width + 50,
         duration: 4500,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-        useNativeDriver: false,
+        useNativeDriver: true,
       })
     ).start();
 
@@ -37,7 +37,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
         toValue: -40,
         duration: 800,
         easing: Easing.linear,
-        useNativeDriver: false,
+        useNativeDriver: true,
       })
     ).start();
 
@@ -48,13 +48,13 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
           toValue: 6,
           duration: 1000,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
         Animated.timing(bounceAnim, {
           toValue: 0,
           duration: 1000,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
       ])
     ).start();
@@ -63,7 +63,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1200,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   }, []);
 
@@ -79,7 +79,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
       <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
         <View style={styles.logoRow}>
           <View style={styles.logoIcon}>
-            <Truck size={24} color="white" />
+            <Image source={require('../assets/logo.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
           </View>
           <Text style={styles.logoText}>CargoHub</Text>
         </View>

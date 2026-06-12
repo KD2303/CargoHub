@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Easing, Image } from 'react-native';
 import { theme } from '../theme/theme';
 import { GradientButton } from '../components/GradientButton';
 import { Truck as TruckIcon, ChevronDown as ChevronDownIcon } from 'lucide-react-native';
@@ -79,7 +79,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ navigation }) => {
       <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
         <View style={styles.logoRow}>
           <View style={styles.logoIcon}>
-            <Truck size={24} color="white" />
+            <Image source={require('../assets/logo.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
           </View>
           <Text style={styles.logoText}>CargoHub</Text>
         </View>

@@ -7,6 +7,8 @@ import { Server } from 'socket.io';
 import { db } from '../config/database';
 import { VALID_STATUS_TRANSITIONS } from '@cargohub/shared';
 import type { ClientToServerEvents, ServerToClientEvents, BookingStatus } from '@cargohub/shared';
+import { auth } from '../config/firebase';
+import jwt from 'jsonwebtoken';
 
 import { liveUsers } from '../shared/liveUsers';
 
@@ -19,7 +21,28 @@ export function setupSocketHandlers(
     // Get user identity from auth handshake
     const token = socket.handshake.auth?.token as string;
     const mockUid = socket.handshake.auth?.mockUid as string;
-    const uid = mockUid || token;
+    let uid = mockUid;
+
+    if (!uid && token) {
+      try {
+        if (auth) {
+          const decodedToken = await auth.verifyIdToken(token);
+          uid = decodedToken.uid;
+        } else {
+          const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_for_development_only';
+          const decoded: any = jwt.verify(token, jwtSecret);
+          uid = decoded.uid;
+        }
+      } catch (fbError) {
+        try {
+          const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_for_development_only';
+          const decoded: any = jwt.verify(token, jwtSecret);
+          uid = decoded.uid;
+        } catch (jwtError) {
+          console.error('Socket token authentication failed:', fbError, jwtError);
+        }
+      }
+    }
 
     if (uid) {
       const user = await db.users.findByFirebaseUid(uid);

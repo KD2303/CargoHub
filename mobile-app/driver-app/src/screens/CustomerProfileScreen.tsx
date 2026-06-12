@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Modal, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Modal, ActivityIndicator, TextInput, Switch } from 'react-native';
 import { theme } from '../theme/theme';
 import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   LogOut as LogOutIcon, ChevronRight as ChevronRightIcon, Bell as BellIcon,
-  HelpCircle as HelpCircleIcon, Info as InfoIcon, CreditCard as CreditCardIcon, MapPin as MapPinIcon, Camera as CameraIcon, Edit2 as Edit2Icon, X as XIcon, Plus as PlusIcon
+  HelpCircle as HelpCircleIcon, Info as InfoIcon, CreditCard as CreditCardIcon, MapPin as MapPinIcon, Camera as CameraIcon, Edit2 as Edit2Icon, X as XIcon, Plus as PlusIcon,
+  Moon as MoonIcon
 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { api } from '../services/api';
@@ -21,9 +23,11 @@ const Camera = CameraIcon as any;
 const Edit2 = Edit2Icon as any;
 const X = XIcon as any;
 const Plus = PlusIcon as any;
+const Moon = MoonIcon as any;
 
 export const CustomerProfileScreen = ({ navigation }: any) => {
   const { logout, user, updateProfile } = useAuth();
+  const { themeMode, toggleTheme } = useTheme();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -198,6 +202,20 @@ export const CustomerProfileScreen = ({ navigation }: any) => {
               </View>
               <ChevronRight size={20} color={theme.colors.text.muted} />
             </TouchableOpacity>
+
+            {/* Theme Toggle Row */}
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Moon size={20} color={theme.colors.text.secondary} />
+                <Text style={styles.settingText}>Dark Mode</Text>
+              </View>
+              <Switch
+                value={themeMode === 'dark'}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.colors.border.subtle, true: 'rgba(56, 189, 248, 0.3)' }}
+                thumbColor={themeMode === 'dark' ? theme.colors.brand.primary : '#f4f3f4'}
+              />
+            </View>
 
             <TouchableOpacity style={styles.settingItem} onPress={() => navigation.navigate('CustomerSupport')} activeOpacity={0.7}>
               <View style={styles.settingLeft}>

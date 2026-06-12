@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Modal, Vibration, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
-import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { CountdownTimer } from '../components/CountdownTimer';
+import { useTheme } from '../context/ThemeContext';
 import { MapPin, Navigation, Package, IndianRupee, Clock, ChevronDown } from 'lucide-react-native';
 
 const { height, width } = Dimensions.get('window');
@@ -17,6 +18,7 @@ interface IncomingJobProps {
 export const IncomingJobModal: React.FC<IncomingJobProps> = ({ visible, job, onAccept, onDecline }) => {
   const [loading, setLoading] = useState(false);
   const [expired, setExpired] = useState(false);
+  const { themeMode } = useTheme();
 
   useEffect(() => {
     if (visible) {
@@ -48,7 +50,7 @@ export const IncomingJobModal: React.FC<IncomingJobProps> = ({ visible, job, onA
   };
 
   const hasCoordinates = job.pickupLat && job.pickupLng && job.dropLat && job.dropLng;
-  const olaMapsKey = process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || 'MOCK_KEY';
+  const olaMapsKey = (process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '');
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -74,6 +76,7 @@ export const IncomingJobModal: React.FC<IncomingJobProps> = ({ visible, job, onA
             {hasCoordinates && (
               <View style={styles.mapContainer}>
                 <MapView
+                  provider={PROVIDER_GOOGLE}
                   style={styles.map}
                   mapType="none" // Hides Google Maps default layer
                   initialRegion={{
@@ -89,8 +92,9 @@ export const IncomingJobModal: React.FC<IncomingJobProps> = ({ visible, job, onA
                 >
                   {/* Ola Maps Raster Tile Layer */}
                   <UrlTile 
-                    urlTemplate={`https://api.olamaps.io/tiles/vector/v1/raster/default-dark-standard/{z}/{x}/{y}.png?api_key=${olaMapsKey}`}
+                    urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${olaMapsKey}`}
                     maximumZ={19}
+                    shouldReplaceMapContent={true}
                   />
                   <Polyline
                     coordinates={[

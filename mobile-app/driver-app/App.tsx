@@ -1,55 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from './src/context/AuthContext';
 import { DriverProvider } from './src/context/DriverContext';
 import { SocketProvider } from './src/context/SocketContext';
 import { Navigation } from './src/navigation/Navigation';
 import { initNotifications } from './src/services/NotificationService';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
-SplashScreen.preventAutoHideAsync();
-
-export default function App() {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+function MainApp() {
+  const { themeMode } = useTheme();
 
   useEffect(() => {
-    async function prepare() {
-      console.log('[DEBUG] App prepare started');
-      try {
-        await initNotifications();
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        console.log('[DEBUG] Setting fontsLoaded = true');
-        setFontsLoaded(true);
-        try {
-          console.log('[DEBUG] Hiding Splash Screen...');
-          await SplashScreen.hideAsync();
-          console.log('[DEBUG] Splash Screen hidden');
-        } catch (splashErr) {
-          console.warn('SplashScreen hide failed:', splashErr);
-        }
-      }
-    }
-    prepare();
+    // Fire-and-forget — don't block rendering
+    initNotifications().catch((e) => console.warn('initNotifications failed:', e));
   }, []);
 
-  if (!fontsLoaded) {
-    return (
-      <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <View style={{ flex: 1, backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'white' }}>Loading App...</Text>
-        </View>
-      </SafeAreaProvider>
-    );
-  }
-
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
+    <SafeAreaProvider key={themeMode}>
+      <StatusBar style={themeMode === 'light' ? 'dark' : 'light'} />
       <AuthProvider>
         <SocketProvider>
           <DriverProvider>
@@ -60,6 +29,11 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-// Trigger TS server reload
 
-
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
+  );
+}

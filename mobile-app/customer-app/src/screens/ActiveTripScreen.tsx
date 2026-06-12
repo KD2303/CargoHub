@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { api } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 import { getSocket } from '../services/socket';
 import { Phone, MessageSquare, ShieldAlert } from 'lucide-react-native';
 
 export const ActiveTripScreen = ({ route, navigation }: any) => {
   const { bookingId } = route.params;
+  const { themeMode } = useTheme();
   const [booking, setBooking] = useState<any>(null);
+  const [driverLocation, setDriverLocation] = useState<{lat: number, lng: number} | null>(null);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -23,13 +26,26 @@ export const ActiveTripScreen = ({ route, navigation }: any) => {
 
     const socket = getSocket();
     if (socket) {
-      socket.on('booking:update', (data) => {
+      socket.emit('join:booking', { bookingId });
+
+      socket.on('booking:status', (data) => {
         if (data.bookingId === bookingId) {
           fetchBooking(); // Refresh data
         }
       });
+
+      socket.on('booking:accepted', (data) => {
+        fetchBooking();
+      });
+
+      socket.on('driver:location', (data: any) => {
+        setDriverLocation({ lat: data.lat, lng: data.lng });
+      });
+
       return () => {
-        socket.off('booking:update');
+        socket.off('booking:status');
+        socket.off('booking:accepted');
+        socket.off('driver:location');
       };
     }
   }, [bookingId]);
@@ -42,28 +58,59 @@ export const ActiveTripScreen = ({ route, navigation }: any) => {
     );
   }
 
+  const pickupLat = booking.pickupLocation?.coordinates?.[1] || 26.8467;
+  const pickupLng = booking.pickupLocation?.coordinates?.[0] || 80.9462;
+  const dropLat = booking.dropoffLocation?.coordinates?.[1] || 26.8722;
+  const dropLng = booking.dropoffLocation?.coordinates?.[0] || 80.9908;
+
   const driver = booking.driver;
   const isDriverAssigned = !!driver;
-  
+
   return (
     <View style={styles.container}>
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
+        mapType="none"
         initialRegion={{
-          latitude: booking.pickupLocation.coordinates[1],
-          longitude: booking.pickupLocation.coordinates[0],
-          latitudeDelta: 0.02,
-          longitudeDelta: 0.02,
+          latitude: pickupLat,
+          longitude: pickupLng,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
         }}
       >
+        <UrlTile
+          urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${(process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '')}`}
+          maximumZ={19}
+          flipY={false}
+          shouldReplaceMapContent={true}
+        />
         <Marker 
-          coordinate={{ latitude: booking.pickupLocation.coordinates[1], longitude: booking.pickupLocation.coordinates[0] }} 
+          coordinate={{ latitude: pickupLat, longitude: pickupLng }} 
           title="Pickup"
         />
         <Marker 
-          coordinate={{ latitude: booking.dropoffLocation.coordinates[1], longitude: booking.dropoffLocation.coordinates[0] }} 
+          coordinate={{ latitude: dropLat, longitude: dropLng }} 
           title="Dropoff"
           pinColor="blue"
+        />
+        {isDriverAssigned && (driverLocation || driver?.currentLat) && (
+          <Marker 
+            coordinate={{ 
+              latitude: driverLocation?.lat || driver.currentLat, 
+              longitude: driverLocation?.lng || driver.currentLng 
+            }} 
+            title="Driver"
+            pinColor={theme.colors.brand.secondary}
+          />
+        )}
+        <Polyline 
+          coordinates={[
+            { latitude: pickupLat, longitude: pickupLng },
+            { latitude: dropLat, longitude: dropLng }
+          ]}
+          strokeColor={theme.colors.brand.primary}
+          strokeWidth={4}
         />
       </MapView>
 

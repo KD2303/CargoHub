@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Im
 import { theme } from '../theme/theme';
 import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   LogOut as LogOutIcon, ChevronRight as ChevronRightIcon,
   Bell as BellIcon, HelpCircle as HelpCircleIcon, FileText as FileTextIcon, Camera as CameraIcon,
-  Star as StarIcon, Clock as ClockIcon
+  Star as StarIcon, Clock as ClockIcon, Moon as MoonIcon
 } from 'lucide-react-native';
 
 const LogOut = LogOutIcon as any;
@@ -17,10 +18,12 @@ const FileText = FileTextIcon as any;
 const Camera = CameraIcon as any;
 const Star = StarIcon as any;
 const Clock = ClockIcon as any;
+const Moon = MoonIcon as any;
 import * as ImagePicker from 'expo-image-picker';
 
 export const ProfileScreen = ({ navigation }: any) => {
   const { logout, user, updateProfile } = useAuth();
+  const { themeMode, toggleTheme } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
@@ -117,6 +120,20 @@ export const ProfileScreen = ({ navigation }: any) => {
                 onValueChange={setNotificationsEnabled}
                 trackColor={{ false: theme.colors.border.subtle, true: 'rgba(216, 90, 48, 0.3)' }}
                 thumbColor={notificationsEnabled ? theme.colors.brand.primary : '#f4f3f4'}
+              />
+            </View>
+
+            {/* Theme Toggle Row */}
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Moon size={20} color={theme.colors.text.secondary} />
+                <Text style={styles.settingTitle}>Dark Mode</Text>
+              </View>
+              <Switch
+                value={themeMode === 'dark'}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.colors.border.subtle, true: 'rgba(56, 189, 248, 0.3)' }}
+                thumbColor={themeMode === 'dark' ? theme.colors.brand.primary : '#f4f3f4'}
               />
             </View>
 

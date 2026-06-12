@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert, ScrollView, ActivityIndicator, Animated, Easing } from 'react-native';
-import MapViewOriginal, { Marker as MarkerOriginal, UrlTile as UrlTileOriginal } from 'react-native-maps';
+import MapViewOriginal, { Marker as MarkerOriginal, UrlTile as UrlTileOriginal, PROVIDER_GOOGLE } from 'react-native-maps';
 const MapView = MapViewOriginal as any;
 const Marker = MarkerOriginal as any;
 const UrlTile = UrlTileOriginal as any;
@@ -29,6 +29,7 @@ import { theme } from '../theme/theme';
 import { useAuth } from '../context/AuthContext';
 import { useDriver } from '../context/DriverContext';
 import { useSocket } from '../context/SocketContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 import { GradientButton } from '../components/GradientButton';
 import { StatusBar } from 'expo-status-bar';
@@ -73,6 +74,7 @@ function suggestVehicle(weightKg: number): string {
 
 export const CustomerHomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
+  const { themeMode } = useTheme();
   const { setActiveBooking } = useDriver();
   const { socket } = useSocket();
 
@@ -235,6 +237,7 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
       {/* Map Background */}
       {location ? (
         <MapView
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={{
             latitude: location.coords.latitude,
@@ -246,9 +249,10 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
           showsUserLocation
         >
           <UrlTile
-            urlTemplate="https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/static/{z}/{x}/{y}.png?api_key=YOUR_OLA_KEY"
+            urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${(process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '')}`}
             maximumZ={19}
             flipY={false}
+            shouldReplaceMapContent={true}
           />
         </MapView>
       ) : (
