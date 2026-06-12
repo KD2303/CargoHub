@@ -151,4 +151,46 @@ router.post('/webhook', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+import fs from 'fs';
+import path from 'path';
+
+// Test Endpoint for Hackathon Demo (No Auth)
+router.post('/test-create-order', async (req, res) => {
+  try {
+    const requestedAmount = req.body.amount || 500;
+    
+    // Read logo as base64 to bypass localhost HTTPS mixed-content block in Razorpay iframe
+    let logoBase64 = '';
+    try {
+      const logoPath = path.resolve(__dirname, '../../../frontend/customer-portal/app/icon.jpeg');
+      if (fs.existsSync(logoPath)) {
+        const data = fs.readFileSync(logoPath);
+        logoBase64 = `data:image/jpeg;base64,${data.toString('base64')}`;
+      }
+    } catch (e) {
+      console.error('Failed to read logo', e);
+    }
+    const options = {
+      amount: Math.round(requestedAmount * 100), // convert INR to paise
+      currency: "INR",
+      receipt: `test_receipt_${Math.floor(Math.random() * 1000)}`
+    };
+    
+    const order = await razorpay.orders.create(options);
+    
+    res.json({
+      success: true,
+      data: {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        logo: logoBase64
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: 'INTERNAL_SERVER_ERROR' });
+  }
+});
+
 export default router;
