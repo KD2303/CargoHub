@@ -22,7 +22,6 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        working-directory: ./mobile-app/driver-app
         run: npm install
 
       - name: Prebuild Expo Project
