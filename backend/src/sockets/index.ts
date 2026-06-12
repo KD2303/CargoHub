@@ -8,6 +8,8 @@ import { db } from '../config/database';
 import { VALID_STATUS_TRANSITIONS } from '@cargohub/shared';
 import type { ClientToServerEvents, ServerToClientEvents, BookingStatus } from '@cargohub/shared';
 
+import { liveUsers } from '../shared/liveUsers';
+
 export function setupSocketHandlers(
   io: Server<ClientToServerEvents, ServerToClientEvents>
 ): void {
@@ -22,6 +24,17 @@ export function setupSocketHandlers(
     if (uid) {
       const user = await db.users.findByFirebaseUid(uid);
       if (user) {
+        socket.data.uid = user.firebaseUid;
+        socket.data.role = user.role;
+        liveUsers[user.role as keyof typeof liveUsers]?.set(user.firebaseUid, {
+          uid: user.firebaseUid,
+          role: user.role,
+          email: user.email,
+          name: user.name || user.email || 'Unknown',
+          startTime: Date.now(),
+          lastPulse: Date.now()
+        });
+
         // Auto-join personal room
         if (user.role === 'USER') {
           socket.join(`user:${uid}`);
@@ -29,6 +42,9 @@ export function setupSocketHandlers(
         } else if (user.role === 'DRIVER') {
           socket.join(`driver:${uid}`);
           console.log(`   → Driver ${user.name} joined room driver:${uid}`);
+        } else if (user.role === 'ADMIN') {
+          socket.join('admin_dashboard');
+          console.log(`   → Admin ${user.name} joined room admin_dashboard`);
         }
       }
     }
@@ -151,6 +167,9 @@ export function setupSocketHandlers(
 
     socket.on('disconnect', (reason) => {
       console.log(`🔌 Socket disconnected: ${socket.id} (${reason})`);
+      if (socket.data.role && socket.data.uid) {
+        liveUsers[socket.data.role as keyof typeof liveUsers]?.delete(socket.data.uid);
+      }
     });
   });
 

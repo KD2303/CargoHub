@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { NotificationPopover } from "../NotificationPopover";
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -69,16 +70,7 @@ export default function TopNav() {
             </button>
           )}
 
-          <button className="relative w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" style={{ border: "1px solid var(--border-subtle)", background: "var(--bg-primary)" }}>
-            <Bell className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.5 }}
-              className="absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900"
-              style={{ background: "var(--brand-secondary)" }}
-            />
-          </button>
+          <NotificationPopover />
         </div>
 
       </div>

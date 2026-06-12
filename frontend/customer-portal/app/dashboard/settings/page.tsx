@@ -5,7 +5,8 @@ import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check, ChevronLeft, Lock
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect, useRef } from "react";
-import { auth as firebaseAuth } from "@/lib/firebase";
+import { auth as firebaseAuth } from "@/lib/firebase";import { toast } from '@/store/toastStore';
+
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -72,11 +73,11 @@ export default function SettingsPage() {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        alert(data.error || "Failed to update profile");
+        toast.error(data.error || "Failed to update profile");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile");
+      toast.error("Failed to update profile");
     } finally {
       setIsSaving(false);
     }
@@ -107,7 +108,7 @@ export default function SettingsPage() {
         if (data.success && data.url) {
           setUser({ ...user!, profilePhoto: data.url });
         } else {
-          alert(data.error || "Failed to upload avatar");
+          toast.error(data.error || "Failed to upload avatar");
         }
         setIsUploading(false);
       };
@@ -440,7 +441,7 @@ export default function SettingsPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (securityData.newPassword !== securityData.confirmPassword) {
-                  alert("Passwords do not match!");
+                  toast.error("Passwords do not match!");
                   return;
                 }
                 setIsSaving(true);

@@ -7,20 +7,62 @@ interface AuthState {
   user: UserProfile | null;
   loading: boolean;
   isAuthenticated: boolean;
+  adminToken: string | null;
+  adminUser: any | null;
   fetchProfile: () => Promise<void>;
   setUser: (user: UserProfile | null) => void;
   initializeAuthListener: () => () => void;
+  setAdminLogin: (token: string, user: any) => void;
+  logoutAdmin: () => void;
+  verifyAdminSession: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
   isAuthenticated: false,
+  adminToken: null,
+  adminUser: null,
 
   setUser: (user) => set({ user, isAuthenticated: !!user, loading: false }),
 
+  setAdminLogin: (token, user) => {
+    localStorage.setItem('adminToken', token);
+    set({ adminToken: token, adminUser: user, isAuthenticated: true, loading: false });
+  },
+
+  logoutAdmin: () => {
+    localStorage.removeItem('adminToken');
+    set({ adminToken: null, adminUser: null, isAuthenticated: false });
+  },
+
+  verifyAdminSession: async () => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      // Not an admin session
+      return;
+    }
+    
+    try {
+      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/admin/auth/verify', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        set({ adminToken: token, adminUser: data.user, isAuthenticated: true, loading: false });
+      } else {
+        get().logoutAdmin();
+      }
+    } catch (e) {
+      get().logoutAdmin();
+    }
+  },
+
   fetchProfile: async () => {
     try {
+      // Don't override if it's an admin session
+      if (get().adminToken) return;
+
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
         set({ user: null, isAuthenticated: false, loading: false });
@@ -47,7 +89,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initializeAuthListener: () => {
+    // First check if there's an admin session in local storage
+    if (typeof window !== 'undefined' && localStorage.getItem('adminToken')) {
+      get().verifyAdminSession();
+    }
+
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
+      // Ignore firebase changes if admin is logged in
+      if (get().adminToken) return;
+
       if (firebaseUser) {
         await get().fetchProfile();
       } else {

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Briefcase, FileText, Settings, LogOut, Package } from "lucide-react";
 import Link from "next/link";
 import RouteGuardLogin from "@/components/auth/RouteGuardLogin";
+import { toast } from '@/store/toastStore';
 
 export default function B2BLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, loading, setUser } = useAuthStore();
@@ -39,7 +40,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
         updatedAt: new Date().toISOString(),
       });
     } else {
-      alert("Invalid credentials. Please use the demo credentials provided.");
+      toast.error("Invalid credentials. Please use the demo credentials provided.");
     }
   };
 

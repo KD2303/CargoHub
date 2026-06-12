@@ -8,7 +8,8 @@ import { useAuthStore } from "@/store/authStore";
 import LocationAutocomplete from "@/components/dashboard/LocationAutocomplete";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
-import Link from "next/link";
+import Link from "next/link";import { toast } from '@/store/toastStore';
+
 
 // Dynamically import LiveMap with SSR disabled
 const LiveMap = dynamic(() => import("@/components/dashboard/LiveMap"), { ssr: false });
@@ -89,7 +90,7 @@ export default function BookingPage() {
   const handleNext = () => {
     if (step === 1) {
       if (!pickup || !dropoff) {
-        alert("Please select both pickup and dropoff locations.");
+        toast.error("Please select both pickup and dropoff locations.");
         return;
       }
     }
@@ -131,11 +132,11 @@ export default function BookingPage() {
         setCreatedBookingId(data.data.booking.id);
         setIsSuccess(true);
       } else {
-        alert("Failed to create booking: " + data.error);
+        toast.error("Failed to create booking: " + data.error);
       }
     } catch (err) {
       console.error(err);
-      alert("Error confirming booking");
+      toast.error("Error confirming booking");
     }
   };
 

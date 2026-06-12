@@ -30,8 +30,10 @@ import paymentRoutes from './api/payment.routes';
 import ratingRoutes from './api/rating.routes';
 import supportRoutes from './api/support.routes';
 import adminRoutes from './api/admin.routes';
+import adminAuthRoutes from './api/adminAuth.routes';
 import businessRoutes from './api/business.routes';
 import aiRoutes from './api/ai.routes';
+import notificationRoutes from './api/notification.routes';
 
 // Socket
 import { setupSocketHandlers } from './sockets';
@@ -92,6 +94,8 @@ app.use('/api/fare', fareRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/ai', aiRoutes);

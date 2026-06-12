@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import RouteGuardLogin from "@/components/auth/RouteGuardLogin";
+import { toast } from '@/store/toastStore';
 
 export default function DriverLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, loading, setUser } = useAuthStore();
@@ -38,7 +39,7 @@ export default function DriverLayout({ children }: { children: React.ReactNode }
         updatedAt: new Date().toISOString(),
       });
     } else {
-      alert("Invalid credentials. Please use the demo credentials provided.");
+      toast.error("Invalid credentials. Please use the demo credentials provided.");
     }
   };
 

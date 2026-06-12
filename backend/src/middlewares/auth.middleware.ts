@@ -2,6 +2,41 @@ import type { Request, Response, NextFunction } from 'express';
 import { auth } from '../config/firebase';
 import { db } from '../config/database';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
+
+export const verifyAdminToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ success: false, error: 'UNAUTHORIZED' });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_for_development_only';
+    const decoded: any = jwt.verify(token, jwtSecret);
+    
+    if (decoded.role !== 'ADMIN') {
+      res.status(403).json({ success: false, error: 'FORBIDDEN' });
+      return;
+    }
+
+    req.user = {
+      uid: decoded.uid,
+      email: decoded.email,
+      role: 'ADMIN',
+      accountType: 'STANDARD',
+      isActive: true,
+    };
+    next();
+  } catch (err) {
+    res.status(401).json({ success: false, error: 'INVALID_TOKEN' });
+  }
+};
 
 export const decodeFirebaseToken = async (
   req: Request,
@@ -123,6 +158,35 @@ export const verifyFirebaseToken = async (
       kycStatus: driver?.kycStatus,
       isActive: user.isActive,
     };
+
+    // --- GLOBAL AUDIT LOGGER FOR ALL USERS ---
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+      res.on('finish', async () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            const logEntry = {
+              id: uuid(),
+              adminUid: req.user!.uid, // Reusing adminUid field for any user's uid
+              action: `${req.method}_${req.path.replace(/\//g, '_').toUpperCase()}`.replace(/^_|_$/g, ''),
+              targetType: req.user!.role, // Store their role as the target type for context
+              targetId: req.path,
+              metadata: { method: req.method, path: req.path, query: req.query, body: req.body },
+              createdAt: new Date().toISOString(),
+            };
+            await db.auditLogs.create(logEntry as any);
+            
+            // Stream the audit log to connected admins
+            const io = req.app.get('io');
+            if (io) {
+              // Convert DB case back to camelCase for the frontend stream
+              io.to('admin_dashboard').emit('audit_log:new', logEntry);
+            }
+          } catch(e) {
+            console.error("Global Audit Log failed", e);
+          }
+        }
+      });
+    }
 
     next();
   } catch (error) {

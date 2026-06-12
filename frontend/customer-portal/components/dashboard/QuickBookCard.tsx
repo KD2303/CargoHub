@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { Package, MapPin, Navigation, ArrowRight } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
 import LocationAutocomplete from "./LocationAutocomplete";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";import { toast } from '@/store/toastStore';
+
 
 export default function QuickBookCard() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function QuickBookCard() {
 
   const handleEstimate = async () => {
     if (!pickup || !dropoff) {
-      alert("Please select both pickup and dropoff locations first.");
+      toast.error("Please select both pickup and dropoff locations first.");
       return;
     }
     
@@ -57,11 +58,11 @@ export default function QuickBookCard() {
         setFareDataLocal(data.data);
         setShowEstimate(true);
       } else {
-        alert("Could not calculate fare: " + (data.message || data.error || "Unknown error"));
+        toast.error("Could not calculate fare: " + (data.message || data.error || "Unknown error"));
       }
     } catch (err) {
       console.error(err);
-      alert("Error calculating fare. Ensure the backend is running.");
+      toast.error("Error calculating fare. Ensure the backend is running.");
     } finally {
       setEstimating(false);
     }

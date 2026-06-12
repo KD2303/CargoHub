@@ -10,7 +10,8 @@ import Link from "next/link";
 import { ThemeToggle } from "../../components/ThemeToggle";
 // @ts-ignore - TS module resolution bug with Firebase 11+
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";
+import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";import { toast } from '@/store/toastStore';
+
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"user" | "driver">("user");
@@ -21,13 +22,13 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Please enter both email and password.");
+      toast.error("Please enter both email and password.");
       return;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
@@ -49,7 +50,7 @@ export default function LoginPage() {
         console.warn('Firebase API key error detected, bypassing login for development');
         window.location.href = mode === "user" ? "/dashboard" : "/driver";
       } else {
-        alert("Login failed: " + err.message);
+        toast.error("Login failed: " + err.message);
       }
     } finally {
       setLoading(false);
@@ -89,7 +90,7 @@ export default function LoginPage() {
         console.warn('Firebase API key error detected, bypassing Google login for development');
         window.location.href = mode === "user" ? "/dashboard" : "/driver";
       } else {
-        alert("Google login failed: " + err.message);
+        toast.error("Google login failed: " + err.message);
       }
     } finally {
       setLoading(false);

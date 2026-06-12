@@ -3,7 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { MapPin, Plus, Edit2, Trash2, Home, Briefcase, Building, X, Navigation, CheckCircle2 } from "lucide-react";
-import { useAddressStore } from "@/store/addressStore";
+import { useAddressStore } from "@/store/addressStore";import { toast } from '@/store/toastStore';
+
 
 const getIcon = (type: string) => {
   if (type === "Home") return Home;
@@ -49,7 +50,7 @@ export default function AddressesPage() {
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      toast.error("Geolocation is not supported by your browser");
       return;
     }
 
@@ -84,7 +85,7 @@ export default function AddressesPage() {
             pin: pin || prev.pin,
           }));
         } else {
-          alert("Could not fetch address for this location.");
+          toast.error("Could not fetch address for this location.");
         }
       } catch (err) {
         console.error("Failed to reverse geocode:", err);
@@ -93,7 +94,7 @@ export default function AddressesPage() {
       }
     }, (error) => {
       console.error(error);
-      alert("Unable to retrieve your location. Please check browser permissions.");
+      toast.error("Unable to retrieve your location. Please check browser permissions.");
       setIsLocating(false);
     });
   };

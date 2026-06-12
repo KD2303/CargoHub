@@ -13,7 +13,8 @@ import {
   Bell, MapIcon, Zap, CreditCard, MessageSquare, Database,
   Shield, Cloud, Lock, GitBranch, Loader2, X
 } from "lucide-react";
-import Link from "next/link";
+import Link from "next/link";import { toast } from '@/store/toastStore';
+
 
 const mockEarnings = {
   today: 2450,
@@ -193,7 +194,7 @@ export default function DriverDashboard() {
   const handleAcceptBooking = () => {
     if (incomingBooking && socketRef.current) {
       socketRef.current.emit("booking:accept", { bookingId: incomingBooking.id });
-      alert("Booking Accepted!");
+      toast.success("Booking Accepted!");
       setActiveBooking(incomingBooking);
       setIncomingBooking(null);
     }
@@ -203,14 +204,14 @@ export default function DriverDashboard() {
     if (confirm("Are you sure you want to cancel this booking? This may affect your rating.")) {
       // Typically call an API to cancel
       setActiveBooking(null);
-      alert("Booking Cancelled");
+      toast.error("Booking Cancelled");
     }
   };
 
   const handleCompleteBooking = () => {
     // Typically call an API to complete
     setActiveBooking(null);
-    alert("Trip Completed! Earnings updated.");
+    toast.success("Trip Completed! Earnings updated.");
   };
 
   useEffect(() => {
@@ -252,7 +253,7 @@ export default function DriverDashboard() {
         const json = await res.json();
         if (!json.success) {
           setIsOnline(!newStatus); // revert on failure
-          alert(json.error || "Failed to update availability");
+          toast.error(json.error || "Failed to update availability");
         }
       } catch (err) {
         console.error("Availability update failed", err);

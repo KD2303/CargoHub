@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { redis } from './redis';
 import type { UserProfile, DriverProfile, Booking, Rating, AuditLog, BookingStatus, VehicleType } from '@cargohub/shared';
+import { liveUsers } from '../shared/liveUsers';
 
 // Helper to convert DB snake_case to JS camelCase (simplified for this mock)
 const toCamel = (obj: any) => {
@@ -54,6 +55,21 @@ export const db = {
       const { data, error } = await supabase.from('users').update(toSnake(updates)).eq('firebase_uid', uid).select().single();
       if (error) throw error;
       return toCamel(data);
+    },
+    getAll: async () => {
+      const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+      if (error) return [];
+      return (data || []).map(toCamel) as UserProfile[];
+    },
+    delete: async (uid: string) => {
+      const { error } = await supabase.from('users').delete().eq('firebase_uid', uid);
+      if (error) throw error;
+      return true;
+    },
+    getActiveCount: async () => {
+      const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('is_active', true);
+      if (error) return 0;
+      return count || 0;
     }
   },
 
@@ -82,6 +98,11 @@ export const db = {
       const { data, error } = await supabase.from('drivers').update(flattenDriver(updates)).eq('firebase_uid', uid).select().single();
       if (error) throw error;
       return formatDriver(data);
+    },
+    delete: async (id: string) => {
+      const { error } = await supabase.from('drivers').delete().eq('firebase_uid', id).or(`id.eq.${id}`);
+      if (error) throw error;
+      return true;
     },
     findNearby: async (lat: number, lng: number, vehicleType?: VehicleType, radiusKm = 15) => {
       // Use Redis geospatial query for active drivers
@@ -143,6 +164,11 @@ export const db = {
       const { data, error } = await supabase.from('bookings').update(toSnake(updates)).eq('id', id).select().single();
       if (error) throw error;
       return toCamel(data);
+    },
+    delete: async (id: string) => {
+      const { error } = await supabase.from('bookings').delete().eq('id', id);
+      if (error) throw error;
+      return true;
     },
     findByUserId: async (userId: string, page = 1, limit = 20, status?: BookingStatus) => {
       let query = supabase.from('bookings').select('*', { count: 'exact' }).eq('user_id', userId);
@@ -207,10 +233,51 @@ export const db = {
   },
 
   auditLogs: {
+    getAll: async () => {
+      const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false });
+      if (error) return [];
+      return (data || []).map(toCamel);
+    },
     create: async (log: AuditLog) => {
       const { data, error } = await supabase.from('audit_logs').insert(toSnake(log)).select().single();
       if (error) console.error('Audit Log Error:', error);
       return toCamel(data);
+    }
+  },
+
+  broadcasts: {
+    getAll: async () => {
+      const { data, error } = await supabase.from('broadcasts').select('*').order('created_at', { ascending: false });
+      if (error) return [];
+      return (data || []).map(toCamel);
+    },
+    create: async (broadcast: any) => {
+      const { data, error } = await supabase.from('broadcasts').insert(toSnake(broadcast)).select().single();
+      if (error) throw error;
+      return toCamel(data);
+    },
+    delete: async (id: string) => {
+      const { error } = await supabase.from('broadcasts').delete().eq('id', id);
+      if (error) throw error;
+      return true;
+    }
+  },
+
+  promoCodes: {
+    getAll: async () => {
+      const { data, error } = await supabase.from('promo_codes').select('*').order('created_at', { ascending: false });
+      if (error) return [];
+      return (data || []).map(toCamel);
+    },
+    create: async (promo: any) => {
+      const { data, error } = await supabase.from('promo_codes').insert(toSnake(promo)).select().single();
+      if (error) throw error;
+      return toCamel(data);
+    },
+    delete: async (id: string) => {
+      const { error } = await supabase.from('promo_codes').delete().eq('id', id);
+      if (error) throw error;
+      return true;
     }
   },
 
@@ -222,37 +289,77 @@ export const db = {
       return [];
     },
     getDashboardStats: async () => {
-      // Mocked stats for now, but structured exactly as the frontend expects
+      const activeDrivers = liveUsers.DRIVER.size;
+      const activeUsers = liveUsers.USER.size;
+      const activeAdmins = liveUsers.ADMIN.size;
+
+      const { data: bookings } = await db.bookings.getAll({ page: 1, limit: 1000 });
+      const recentBookings = await db.bookings.getAll({ page: 1, limit: 5 });
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todaysBookings = bookings.filter((b: any) => new Date(b.createdAt) >= today).length;
+      
+      const { data: users } = await supabase.from('users').select('*');
+      const { data: drivers } = await supabase.from('drivers').select('*');
+
+      // Compute simple 7 day trend
+      const trends = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        const nextD = new Date(d);
+        nextD.setDate(nextD.getDate() + 1);
+        
+        const dayBookings = bookings.filter((b: any) => {
+          const bDate = new Date(b.createdAt);
+          return bDate >= d && bDate < nextD;
+        }).length;
+        
+        trends.push({
+          day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+          bookings: dayBookings
+        });
+      }
+
+      // Compute latest 5 events from audit logs
+      const { data: logs } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(5);
+      const liveEvents = (logs || []).map((l: any, i: number) => {
+        let type = 'purple';
+        if (l.action.includes('SUSPEND') || l.action.includes('DELETE') || l.action.includes('CANCEL')) type = 'red';
+        else if (l.action.includes('CREATE') || l.action.includes('APPROVE') || l.action.includes('REINSTATE')) type = 'green';
+        else if (l.action.includes('UPDATE')) type = 'blue';
+
+        return {
+          id: l.id || i,
+          type,
+          text: `Action: ${l.action.replace(/_/g, ' ')}`,
+          time: new Date(l.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+      });
+      if (liveEvents.length === 0) {
+        liveEvents.push({ id: 1, type: "purple", text: "Dashboard Analytics Initialized", time: "just now" });
+      }
+
       return {
         stats: [
-          { label: "Total Bookings Today", value: "247", change: "+12%", changeType: "up", accentColor: "blue" },
-          { label: "Active Drivers Online", value: "89", change: "↑ from 74", changeType: "up", accentColor: "green" },
-          { label: "Revenue Today (₹)", value: "₹1,84,320", change: "+8.2%", changeType: "up", accentColor: "purple" },
-          { label: "Pending KYC", value: "3", change: "Needs review", changeType: "down", accentColor: "red" },
+          { label: "Total Bookings Today", value: todaysBookings.toString(), change: "Active", changeType: "up", accentColor: "blue" },
+          { label: "Registered Drivers", value: (drivers?.length || 0).toString(), change: "Total", changeType: "up", accentColor: "green" },
+          { label: "Registered Customers", value: (users?.length || 0).toString(), change: "Total", changeType: "up", accentColor: "purple" },
+          { label: "Live Admins", value: activeAdmins.toString(), change: "Managing platform", changeType: "up", accentColor: "red" },
         ],
-        liveEvents: [
-          { id: 1, type: "purple", text: "New booking #BK-1842 — Raj Kumar, Mumbai→Pune", time: "just now" },
-          { id: 2, type: "green", text: "Payment received ₹3,200 — Order #BK-1841", time: "2m ago" },
-          { id: 3, type: "blue", text: "Driver Amit Singh went online", time: "5m ago" },
-          { id: 4, type: "red", text: "Booking #BK-1839 — Cancelled", time: "12m ago" },
-          { id: 5, type: "warning", text: "KYC submitted — Suresh Patel (Pending review)", time: "18m ago" },
-        ],
-        bookingTrends: [
-          { day: "Mon", bookings: 180 },
-          { day: "Tue", bookings: 195 },
-          { day: "Wed", bookings: 210 },
-          { day: "Thu", bookings: 190 },
-          { day: "Fri", bookings: 230 },
-          { day: "Sat", bookings: 260 },
-          { day: "Sun", bookings: 247 },
-        ],
-        recentBookings: [
-          { id: "BK-1842", customer: "Raj Kumar", route: "Mumbai → Pune", driver: "Finding...", amount: "₹4,500", status: "Finding Driver", time: "10:42 AM" },
-          { id: "BK-1841", customer: "Anita Desai", route: "Delhi → Noida", driver: "Amit Singh", amount: "₹3,200", status: "Completed", time: "10:30 AM" },
-          { id: "BK-1840", customer: "Vikram Tech", route: "Bangalore → Hosur", driver: "Ravi K", amount: "₹12,400", status: "Ongoing", time: "09:15 AM" },
-          { id: "BK-1839", customer: "Sneha Patel", route: "Surat → Vapi", driver: "-", amount: "₹2,100", status: "Cancelled", time: "08:50 AM" },
-          { id: "BK-1838", customer: "Rahul M", route: "Chennai → Vellore", driver: "Karthik R", amount: "₹6,800", status: "Ongoing", time: "08:10 AM" },
-        ]
+        liveEvents,
+        bookingTrends: trends,
+        recentBookings: recentBookings.data.map((b: any) => ({
+          id: b.id,
+          customer: b.userName || "Unknown",
+          route: b.route || "Unknown",
+          driver: b.driverId ? "Assigned" : "Finding...",
+          amount: `₹${b.fareEstimate || 0}`,
+          status: b.status,
+          time: new Date(b.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }))
       };
     }
   },
@@ -274,6 +381,42 @@ export const db = {
     set: async (uid: string, tokens: any) => {
       console.log(`Setting notification tokens for ${uid}`, tokens);
       return true;
+    }
+  },
+
+  notifications: {
+    // In-memory mock store for notifications
+    _data: [] as any[],
+    getAllForUser: async (userId: string) => {
+      const now = new Date();
+      return db.notifications._data
+        .filter(n => {
+          // Filter out if expired
+          if (n.expiresAt && new Date(n.expiresAt) < now) return false;
+          // Filter out if read by THIS user
+          if (n.readBy && n.readBy.includes(userId)) return false;
+          
+          return n.targetUid === userId || n.targetUid === 'ALL';
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+    create: async (notification: any) => {
+      const newNotif = { ...notification, readBy: [] };
+      db.notifications._data.push(newNotif);
+      return newNotif;
+    },
+    markAsRead: async (id: string, userId: string) => {
+      const idx = db.notifications._data.findIndex(n => n.id === id);
+      if (idx !== -1) {
+        if (!db.notifications._data[idx].readBy) {
+          db.notifications._data[idx].readBy = [];
+        }
+        if (!db.notifications._data[idx].readBy.includes(userId)) {
+          db.notifications._data[idx].readBy.push(userId);
+        }
+        return true;
+      }
+      return false;
     }
   }
 };
