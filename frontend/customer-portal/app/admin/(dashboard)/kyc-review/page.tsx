@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
-import { Modal } from "@/components/ui/Modal";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Avatar } from "@/components/admin/ui/Avatar";
+import { Modal } from "@/components/admin/ui/Modal";
 import { Check, X, Eye, FileText, FileImage, Loader2 } from "lucide-react";
-import { fetchApi } from "@/lib/api";
-import { toast } from "react-hot-toast";
+import { adminFetch } from "@/lib/admin/api";
+import { toast } from "@/store/toastStore";
 
 export default function KycReviewPage() {
   const [activeTab, setActiveTab] = useState("Pending");
@@ -20,7 +20,7 @@ export default function KycReviewPage() {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const res = await fetchApi("/admin/drivers");
+      const res = await adminFetch("/admin/drivers");
       const json = await res.json();
       if (json.success) {
         setDrivers(json.data);
@@ -41,7 +41,7 @@ export default function KycReviewPage() {
   const handleDecision = async (id: string, decision: 'VERIFIED' | 'REJECTED') => {
     try {
       setActionLoading(id);
-      const res = await fetchApi(`/admin/drivers/${id}/verify`, {
+      const res = await adminFetch(`/admin/drivers/${id}/verify`, {
         method: "PATCH",
         body: JSON.stringify({ decision, reason: "Admin review" })
       });

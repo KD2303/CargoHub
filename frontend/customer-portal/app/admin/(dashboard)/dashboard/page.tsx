@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { StatCard } from "@/components/ui/StatCard";
-import { MetricChart } from "@/components/dashboard/MetricChart";
-import { DataTable } from "@/components/ui/DataTable";
-import { fetchApi } from "@/lib/api";
-import { Badge } from "@/components/ui/Badge";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { StatCard } from "@/components/admin/ui/StatCard";
+import { MetricChart } from "@/components/admin/dashboard/MetricChart";
+import { DataTable } from "@/components/admin/ui/DataTable";
+import { adminFetch } from "@/lib/admin/api";
+import { Badge } from "@/components/admin/ui/Badge";
 import { Package, Truck, IndianRupee, FileText, Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -17,7 +17,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetchApi("/admin/dashboard-stats");
+        const res = await adminFetch("/admin/dashboard-stats");
         const json = await res.json();
         if (json.success) {
           setData(json.data);
