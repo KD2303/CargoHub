@@ -92,15 +92,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex" style={{ background: "var(--bg-primary)" }}>
       {/* Left panel — branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-16" style={{
-        background: "linear-gradient(135deg, rgba(2, 89, 221, 0.15), rgba(132, 175, 251, 0.1))",
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-16 overflow-hidden" style={{
+        background: "radial-gradient(circle at 30% 30%, rgba(29, 78, 216, 0.15) 0%, var(--bg-primary) 100%)",
         borderRight: "1px solid var(--border-subtle)",
       }}>
-        <div className="absolute inset-0 bg-grid opacity-30" />
+        {/* Decorative glass orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-grid opacity-20" />
         <div className="relative z-10 max-w-lg">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))" }}>
-              🚛
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src="/logo.png" alt="CargoHub Logo" className="w-full h-full object-contain" />
             </div>
             <span className="font-display text-3xl font-bold">CargoHub</span>
           </div>

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/app/icon.jpeg";
 import { 
   LayoutDashboard, PackagePlus, MapPin, ClipboardList, 
   Wallet, Star, HeadphonesIcon, Settings, LogOut, ChevronLeft, ChevronRight
@@ -82,11 +81,11 @@ export default function Sidebar() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <Image
-            src={logo}
+            src="/logo.png"
             alt="CargoHub Logo"
             width={48}
             height={48}
-            className="rounded-lg object-cover flex-shrink-0 shadow-sm"
+            className="object-contain flex-shrink-0"
           />
           {!isSidebarCollapsed && (
             <motion.span 

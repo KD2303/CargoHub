@@ -162,10 +162,10 @@ router.post('/test-create-order', async (req, res) => {
     // Read logo as base64 to bypass localhost HTTPS mixed-content block in Razorpay iframe
     let logoBase64 = '';
     try {
-      const logoPath = path.resolve(__dirname, '../../../frontend/customer-portal/app/icon.jpeg');
+      const logoPath = path.resolve(__dirname, '../../../frontend/customer-portal/public/logo.png');
       if (fs.existsSync(logoPath)) {
         const data = fs.readFileSync(logoPath);
-        logoBase64 = `data:image/jpeg;base64,${data.toString('base64')}`;
+        logoBase64 = `data:image/png;base64,${data.toString('base64')}`;
       }
     } catch (e) {
       console.error('Failed to read logo', e);

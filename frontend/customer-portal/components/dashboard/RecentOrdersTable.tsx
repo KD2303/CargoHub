@@ -38,16 +38,19 @@ export default function RecentOrdersTable({ orders }: { orders: OrderProps[] }) 
         </div>
         
         {/* Filter Pills */}
-        <div className="flex bg-gray-50 p-1 rounded-xl border w-full sm:w-auto overflow-x-auto" style={{ borderColor: "var(--border-subtle)" }}>
+        <div className="flex p-1 rounded-xl border w-full sm:w-auto overflow-x-auto" style={{ borderColor: "var(--border-subtle)", background: "var(--bg-secondary)" }}>
           {["All", "Active", "Delivered", "Cancelled"].map((f, i) => (
             <button
               key={f}
               className={`px-4 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-all ${
                 i === 0 
                   ? "shadow-sm text-white" 
-                  : "hover:bg-gray-100 text-gray-500"
+                  : "hover:opacity-80"
               }`}
-              style={{ background: i === 0 ? "var(--brand-secondary)" : "transparent" }}
+              style={{ 
+                background: i === 0 ? "var(--brand-secondary)" : "transparent",
+                color: i === 0 ? "white" : "var(--text-secondary)"
+              }}
             >
               {f}
             </button>

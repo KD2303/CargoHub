@@ -121,7 +121,7 @@ export default function QuickBookCard() {
         </div>
 
         {/* Vehicle Selector */}
-        <div className="flex bg-gray-50 p-1 rounded-xl border" style={{ borderColor: "var(--border-subtle)" }}>
+        <div className="flex p-1 rounded-xl border" style={{ borderColor: "var(--border-subtle)", background: "var(--bg-secondary)" }}>
           {["mini", "tempo", "truck"].map((v) => (
             <button
               key={v}
@@ -129,7 +129,7 @@ export default function QuickBookCard() {
               className={`flex-1 py-2 text-xs font-semibold rounded-lg capitalize transition-all ${
                 vehicle === v 
                   ? "shadow-sm" 
-                  : "hover:bg-gray-100"
+                  : "hover:opacity-80"
               }`}
               style={{
                 background: vehicle === v ? "var(--brand-secondary)" : "transparent",

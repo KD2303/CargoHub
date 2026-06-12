@@ -5,12 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Truck, MapPin, Shield, Zap, ChevronRight, Star, Clock,
   ArrowRight, Package, Users, BarChart3, Phone, Globe,
-  CheckCircle2, IndianRupee, Navigation, Smartphone, Play, Image as ImageIcon, Settings, LogOut
+  CheckCircle2, IndianRupee, Navigation, Smartphone, Play, Settings, LogOut
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "./icon.jpeg";
 import { HeroIllustration } from "../components/HeroIllustration";
 import { ThemeToggle } from "../components/ThemeToggle";
 import img1 from "./elements/1.png";
@@ -25,6 +24,7 @@ import img9 from "./elements/9.png";
 import img10 from "./elements/10.png";
 import img11 from "./elements/11.png";
 import img12 from "./elements/12.png";
+import logo from "./icon.jpeg";
 
 // ── Animated Counter ────────────────────────────────────────────────────────
 
@@ -146,11 +146,11 @@ export default function LandingPage() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             <Image
-              src={logo}
+              src="/logo.png"
               alt="CargoHub Logo"
               width={48}
               height={48}
-              className="rounded-full object-cover flex-shrink-0 shadow-sm"
+              className="object-contain flex-shrink-0"
             />
             <span className="font-sans text-[17px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
               CargoHub
