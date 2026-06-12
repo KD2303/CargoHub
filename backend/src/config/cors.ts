@@ -11,6 +11,8 @@ const allowedOrigins = [
   'http://localhost:4001',
   'capacitor://localhost',
   'ionic://localhost',
+  'https://cargo-hub1.vercel.app',
+  'https://cargo-hub-customer-portal-six.vercel.app'
 ];
 
 export const corsOptions: CorsOptions = {
