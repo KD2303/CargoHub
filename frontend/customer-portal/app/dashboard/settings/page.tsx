@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check } from "lucide-react";
+import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check, ChevronLeft, Lock, Mail, Smartphone, ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect, useRef } from "react";
@@ -10,6 +10,7 @@ import { auth as firebaseAuth } from "@/lib/firebase";
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { user, setUser } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<"menu" | "profile" | "notifications" | "security">("menu");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +20,20 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Notifications State
+  const [notifPreferences, setNotifPreferences] = useState({
+    emailAlerts: true,
+    smsAlerts: true,
+    pushAlerts: false,
+  });
+
+  // Security State
+  const [securityData, setSecurityData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // Initialize form when user data loads
   useEffect(() => {
@@ -105,34 +120,114 @@ export default function SettingsPage() {
 
   const initials = user?.name ? user.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U";
 
+  // Menu cards data
+  const menuCards = [
+    {
+      id: "profile" as const,
+      title: "Profile Settings",
+      description: "Manage your avatar, name, email address, and personal phone number details.",
+      icon: User,
+      color: "var(--brand-primary)",
+    },
+    {
+      id: "notifications" as const,
+      title: "Notifications",
+      description: "Customize your alerts for deliveries, order status changes, and promos.",
+      icon: Bell,
+      color: "var(--brand-secondary)",
+    },
+    {
+      id: "security" as const,
+      title: "Security",
+      description: "Update your passwords, session access, and account privacy options.",
+      icon: Shield,
+      color: "#10B981",
+    },
+  ];
+
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-display font-bold">Settings</h1>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>Manage your profile, notifications, and preferences.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Sidebar Nav for Settings */}
-        <div className="col-span-1 space-y-2">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 font-semibold text-sm">
-            <User className="w-4 h-4" /> Profile
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 font-medium text-sm transition-colors">
-            <Bell className="w-4 h-4" /> Notifications
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400 font-medium text-sm transition-colors">
-            <Shield className="w-4 h-4" /> Security
-          </button>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold">Settings</h1>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {activeTab === "menu" && "Manage your profile, notifications, and preferences."}
+            {activeTab === "profile" && "Update your account personal information."}
+            {activeTab === "notifications" && "Choose when and how you want to be notified."}
+            {activeTab === "security" && "Secure your account credentials and monitor active sessions."}
+          </p>
         </div>
 
-        {/* Content Area */}
-        <div className="col-span-1 md:col-span-3 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card"
+        {activeTab !== "menu" && (
+          <button 
+            onClick={() => setActiveTab("menu")}
+            className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border transition-colors hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+            style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
           >
+            <ChevronLeft className="w-4 h-4" /> Back to Settings
+          </button>
+        )}
+      </div>
+
+      {/* Render Main Menu */}
+      {activeTab === "menu" && (
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
+        >
+          {menuCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <motion.button
+                key={card.id}
+                onClick={() => setActiveTab(card.id)}
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="glass-card p-6 text-left flex flex-col justify-between h-56 cursor-pointer group"
+                style={{ 
+                  border: "1px solid var(--border-subtle)",
+                  background: "var(--bg-glass)",
+                  borderRadius: "var(--radius-xl)"
+                }}
+              >
+                <div className="space-y-4">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300"
+                    style={{ 
+                      background: `${card.color}15`, 
+                      color: card.color 
+                    }}
+                  >
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-lg group-hover:text-[var(--brand-primary)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                      {card.title}
+                    </h3>
+                    <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-bold transition-all duration-300 transform translate-x-0 group-hover:translate-x-1" style={{ color: "var(--brand-primary)" }}>
+                  Configure <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </motion.button>
+            );
+          })}
+        </motion.div>
+      )}
+
+      {/* Render Profile Tab */}
+      {activeTab === "profile" && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-6"
+        >
+          <div className="card">
             <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
             <div className="flex items-center gap-6 mb-6">
               {user?.profilePhoto ? (
@@ -200,19 +295,14 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="card"
-          >
+          <div className="card">
             <h3 className="font-semibold text-lg mb-4">Preferences</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center">
                     <Globe className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
@@ -229,7 +319,7 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center">
                     <Moon className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
@@ -245,9 +335,202 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-          </motion.div>
-        </div>
-      </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Render Notifications Tab */}
+      {activeTab === "notifications" && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-6"
+        >
+          <div className="card">
+            <h3 className="font-semibold text-lg mb-4">Notification Channels</h3>
+            <p className="text-xs mb-6" style={{ color: "var(--text-muted)" }}>Configure which channels we can use to send updates about your bookings and deliveries.</p>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[var(--brand-primary)]">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Email Alerts</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>Receive booking confirmations, receipts, and cargo reports.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setNotifPreferences({...notifPreferences, emailAlerts: !notifPreferences.emailAlerts})}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${notifPreferences.emailAlerts ? "bg-blue-600" : "bg-gray-300 dark:bg-neutral-800"}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${notifPreferences.emailAlerts ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-[var(--brand-secondary)]">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">SMS & WhatsApp Notifications</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>Get instant driver arrival alerts and delivery ETAs directly on your phone.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setNotifPreferences({...notifPreferences, smsAlerts: !notifPreferences.smsAlerts})}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${notifPreferences.smsAlerts ? "bg-blue-600" : "bg-gray-300 dark:bg-neutral-800"}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${notifPreferences.smsAlerts ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-500">
+                    <Bell className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">In-App Push Banners</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>Allow live web push banners for active shipment progress.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setNotifPreferences({...notifPreferences, pushAlerts: !notifPreferences.pushAlerts})}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${notifPreferences.pushAlerts ? "bg-blue-600" : "bg-gray-300 dark:bg-neutral-800"}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${notifPreferences.pushAlerts ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t flex justify-end" style={{ borderColor: "var(--border-subtle)" }}>
+              <button 
+                onClick={() => {
+                  setIsSaving(true);
+                  setTimeout(() => {
+                    setIsSaving(false);
+                    setSaveSuccess(true);
+                    setTimeout(() => setSaveSuccess(false), 2000);
+                  }, 800);
+                }}
+                className="btn-primary flex items-center gap-2"
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saveSuccess ? <Check className="w-4 h-4" /> : null}
+                {isSaving ? "Saving..." : saveSuccess ? "Saved!" : "Save Preferences"}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Render Security Tab */}
+      {activeTab === "security" && (
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-6"
+        >
+          <div className="card">
+            <h3 className="font-semibold text-lg mb-4">Reset Password</h3>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (securityData.newPassword !== securityData.confirmPassword) {
+                  alert("Passwords do not match!");
+                  return;
+                }
+                setIsSaving(true);
+                setTimeout(() => {
+                  setIsSaving(false);
+                  setSaveSuccess(true);
+                  setSecurityData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+                  setTimeout(() => setSaveSuccess(false), 2000);
+                }, 1000);
+              }} 
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Current Password</label>
+                <input 
+                  type="password" 
+                  className="input-field py-2 w-full" 
+                  value={securityData.oldPassword}
+                  onChange={(e) => setSecurityData({...securityData, oldPassword: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>New Password</label>
+                  <input 
+                    type="password" 
+                    className="input-field py-2 w-full" 
+                    value={securityData.newPassword}
+                    onChange={(e) => setSecurityData({...securityData, newPassword: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Confirm Password</label>
+                  <input 
+                    type="password" 
+                    className="input-field py-2 w-full" 
+                    value={securityData.confirmPassword}
+                    onChange={(e) => setSecurityData({...securityData, confirmPassword: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end border-t" style={{ borderColor: "var(--border-subtle)" }}>
+                <button type="submit" className="btn-primary flex items-center gap-2" disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saveSuccess ? <Check className="w-4 h-4" /> : null}
+                  {isSaving ? "Updating..." : saveSuccess ? "Updated!" : "Update Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="card">
+            <h3 className="font-semibold text-lg mb-4">Device Sessions</h3>
+            <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>You are currently logged in to the portal on these devices.</p>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-green-500/5 border border-green-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+                    <Globe className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Windows Chrome (This Device)</p>
+                    <p className="text-[10px] text-green-600 font-semibold">Active Now • IP: 103.45.89.21</p>
+                  </div>
+                </div>
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-green-500/20 text-green-600 font-bold uppercase tracking-wider">Current</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center text-neutral-500">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">iPhone 15 Pro Max</p>
+                    <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>Last active: 2 hours ago • New Delhi, India</p>
+                  </div>
+                </div>
+                <button className="text-[10px] px-3 py-1.5 rounded-lg border font-semibold text-red-500 hover:bg-red-500/10 transition-colors" style={{ borderColor: "rgba(239, 68, 68, 0.2)" }}>
+                  Revoke
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
