@@ -1,10 +1,11 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Text, Linking, Image, Alert, Animated, Easing, Dimensions } from 'react-native';
-import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { useDriver } from '../context/DriverContext';
 import { useSocket } from '../context/SocketContext';
+import { useTheme } from '../context/ThemeContext';
 import { StepIndicator } from '../components/StepIndicator';
 import { GradientButton } from '../components/GradientButton';
 import { Header } from '../components/Header';
@@ -27,14 +28,21 @@ const darkMapStyle = [
   { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#090b11" }] }
 ];
 
-export const JobScreen = () => {
+export const JobScreen = ({ navigation }: any) => {
   const { activeBooking, setActiveBooking, driver } = useDriver();
   const { socket } = useSocket();
+  const { themeMode } = useTheme();
   const [deliveryPhoto, setDeliveryPhoto] = useState<string | null>(null);
   
   // Animation values for Completed Celebration Screen
   const checkScale = useRef(new Animated.Value(0)).current;
   const contentFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!activeBooking) {
+      navigation.navigate('Main');
+    }
+  }, [activeBooking]);
 
   // Determine current step index based on activeBooking status and deliveryPhoto
   const getStepFromStatus = () => {
@@ -239,6 +247,7 @@ export const JobScreen = () => {
       
       {/* Mapbox/Google Maps Integration with Ola Maps Tiles */}
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         mapType="none" // Hides Google Maps default layer
         initialRegion={{
@@ -250,8 +259,9 @@ export const JobScreen = () => {
         showsUserLocation
       >
         <UrlTile 
-          urlTemplate={`https://api.olamaps.io/tiles/vector/v1/raster/default-dark-standard/{z}/{x}/{y}.png?api_key=${process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || 'MOCK_KEY'}`}
+          urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${(process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '')}`}
           maximumZ={19}
+          shouldReplaceMapContent={true}
         />
         <Polyline
           coordinates={[

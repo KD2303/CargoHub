@@ -40,7 +40,7 @@ export const DriverProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // Fetch active booking — silently handle KYC_REQUIRED 403
         try {
           const activeResp = await api.get('/bookings/driver/active');
-          if (activeResp.data?.data) setActiveBooking(activeResp.data.data);
+          setActiveBooking(activeResp.data?.data || null);
         } catch (bookingErr: any) {
           // KYC not verified yet — expected for new drivers, not an error
           if (bookingErr?.response?.status === 403) {
@@ -55,6 +55,8 @@ export const DriverProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           const bookingsResp = await api.get('/bookings?limit=1&status=PENDING,ACCEPTED,DRIVER_ARRIVING,ARRIVED,PICKED_UP,IN_TRANSIT');
           if (bookingsResp.data?.data?.length > 0) {
             setActiveBooking(bookingsResp.data.data[0]);
+          } else {
+            setActiveBooking(null);
           }
         } catch (e) {
           console.log('[DriverContext] Customer booking fetch error:', e);

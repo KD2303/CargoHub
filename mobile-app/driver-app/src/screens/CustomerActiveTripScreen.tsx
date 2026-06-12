@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import MapViewOriginal, { Marker as MarkerOriginal, Polyline as PolylineOriginal, UrlTile as UrlTileOriginal } from 'react-native-maps';
+import MapViewOriginal, { Marker as MarkerOriginal, Polyline as PolylineOriginal, UrlTile as UrlTileOriginal, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { api } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 import { useSocket } from '../context/SocketContext';
 import { useDriver } from '../context/DriverContext';
 import { Phone as PhoneIcon, CheckCircle2 as CheckCircle2Icon } from 'lucide-react-native';
@@ -27,6 +28,7 @@ const STEPS = [
 ];
 
 export const CustomerActiveTripScreen = ({ route, navigation }: any) => {
+  const { themeMode } = useTheme();
   // Can get bookingId from route params or context
   const { activeBooking } = useDriver();
   const bookingId = route?.params?.bookingId || activeBooking?.id;
@@ -102,6 +104,7 @@ export const CustomerActiveTripScreen = ({ route, navigation }: any) => {
     <View style={styles.container}>
       <StatusBar style="light" />
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
           latitude: pickupLat,
@@ -112,9 +115,10 @@ export const CustomerActiveTripScreen = ({ route, navigation }: any) => {
         mapType="none"
       >
         <UrlTile
-          urlTemplate="https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/static/{z}/{x}/{y}.png?api_key=YOUR_OLA_KEY"
+          urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${(process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '')}`}
           maximumZ={19}
           flipY={false}
+          shouldReplaceMapContent={true}
         />
         
         <Marker coordinate={{ latitude: pickupLat, longitude: pickupLng }} title="Pickup" />

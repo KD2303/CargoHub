@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Dimensions } from 'react-native';
-import MapViewOriginal, { Marker as MarkerOriginal, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapViewOriginal, { Marker as MarkerOriginal, PROVIDER_GOOGLE, UrlTile as UrlTileOriginal } from 'react-native-maps';
 import { theme } from '../theme/theme';
 import { api } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 import { AvailableJobCard } from '../components/AvailableJobCard';
 import { IncomingJobModal } from './IncomingJobModal';
 import { useSocket } from '../context/SocketContext';
@@ -11,6 +12,7 @@ import { ArrowLeft as ArrowLeftIcon, Loader2 as Loader2Icon, MapPin as MapPinIco
 
 const MapView = MapViewOriginal as any;
 const Marker = MarkerOriginal as any;
+const UrlTile = UrlTileOriginal as any;
 const ArrowLeft = ArrowLeftIcon as any;
 const Loader2 = Loader2Icon as any;
 const MapPin = MapPinIcon as any;
@@ -31,6 +33,7 @@ const darkMapStyle = [
 ];
 
 export const AvailableJobsScreen = ({ navigation }: any) => {
+  const { themeMode } = useTheme();
   const [availableJobs, setAvailableJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [incomingJob, setIncomingJob] = useState<any>(null);
@@ -115,7 +118,7 @@ export const AvailableJobsScreen = ({ navigation }: any) => {
             <MapView
               provider={PROVIDER_GOOGLE}
               style={styles.map}
-              customMapStyle={darkMapStyle}
+              mapType="none"
               initialRegion={{
                 latitude: availableJobs[0]?.pickupLat || 20.5937,
                 longitude: availableJobs[0]?.pickupLng || 78.9629,
@@ -123,6 +126,11 @@ export const AvailableJobsScreen = ({ navigation }: any) => {
                 longitudeDelta: 0.1,
               }}
             >
+              <UrlTile 
+                urlTemplate={`https://api.olamaps.io/tiles/v1/styles/default-${themeMode}-standard/{z}/{x}/{y}.png?api_key=${(process.env.EXPO_PUBLIC_OLA_MAPS_API_KEY || '').replace(/"/g, '')}`}
+                maximumZ={19}
+                shouldReplaceMapContent={true}
+              />
               {availableJobs.map(job => (
                 job.pickupLat && job.pickupLng ? (
                   <Marker 

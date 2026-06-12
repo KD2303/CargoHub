@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TextInput, Alert, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TextInput, Alert, TouchableOpacity, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { theme } from '../theme/theme';
 import { GradientButton } from '../components/GradientButton';
 import { useAuth } from '../context/AuthContext';
@@ -111,7 +111,7 @@ export const LoginScreen = ({ route, navigation }: any) => {
 
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <Truck size={40} color="white" />
+          <Image source={require('../assets/logo.png')} style={{ width: 44, height: 44 }} resizeMode="contain" />
         </View>
         <Text style={styles.title}>CargoHub</Text>
         <Text style={styles.subtitle}>

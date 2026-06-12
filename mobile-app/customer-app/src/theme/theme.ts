@@ -3,12 +3,7 @@
 // Derived from website's globals.css tokens
 // ============================================================================
 
-// ============================================================================
-// CargoHub Driver App — Design System Theme
-// Derived from website's globals.css tokens & Stitch design spec
-// ============================================================================
-
-export const colors = {
+const darkColors = {
   // Brand Colors
   brand: {
     primary: '#378ADD', // Blue primary
@@ -57,6 +52,73 @@ export const colors = {
     active: '#378ADD',
     card: '#2A2D3E',
   },
+};
+
+const lightColors = {
+  // Brand Colors (Cream / Blue / Coral)
+  brand: {
+    primary: '#0259DD', // Blue primary
+    primaryLight: '#4F8DF7',
+    primaryDark: '#0045B5',
+    secondary: '#FF6648', // Coral
+    accent: '#FF6648',
+    success: '#10B981',
+    danger: '#EF4444',
+    warning: '#F59E0B',
+  },
+
+  // Gradient Stops
+  gradient: {
+    start: '#0259DD',
+    mid: '#4F8DF7',
+    end: '#FF6648',
+    coralStart: '#FF6648',
+    coralEnd: '#E5533A',
+  },
+
+  // Background Layers (Soft Warm Cream Base)
+  background: {
+    primary: '#FFFDFB',
+    secondary: '#FFF2EC',
+    tertiary: '#F8F1EB',
+    card: '#FFFFFF',
+    mesh: '#FFFDFB',
+    blueTint: '#E6F1FB',
+  },
+
+  // Text Colors
+  text: {
+    primary: '#0B1C3F', // Deep Navy
+    secondary: '#344A75',
+    muted: '#6C82AB',
+    accent: '#0259DD',
+    inverse: '#FFFFFF',
+    blueTint: '#0045B5',
+  },
+
+  // Borders
+  border: {
+    subtle: 'rgba(2, 89, 221, 0.08)',
+    hover: 'rgba(2, 89, 221, 0.25)',
+    active: 'rgba(2, 89, 221, 0.5)',
+    card: 'rgba(11, 28, 63, 0.06)',
+  },
+};
+
+// Start with darkColors as default
+export let colors = {
+  brand: { ...darkColors.brand },
+  gradient: { ...darkColors.gradient },
+  background: { ...darkColors.background },
+  text: { ...darkColors.text },
+  border: { ...darkColors.border },
+};
+
+export const setThemeMode = (mode: 'light' | 'dark') => {
+  const source = mode === 'light' ? lightColors : darkColors;
+  Object.keys(source).forEach((key) => {
+    Object.assign((colors as any)[key], (source as any)[key]);
+  });
 };
 
 export const spacing = {

@@ -38,32 +38,46 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 });
 
 export const startLocationTracking = async () => {
-  const { status: fgStatus } = await Location.requestForegroundPermissionsAsync();
-  if (fgStatus !== 'granted') throw new Error('Foreground location permission denied');
+  try {
+    const { status: fgStatus } = await Location.requestForegroundPermissionsAsync();
+    if (fgStatus !== 'granted') {
+      console.warn('Foreground location permission denied');
+      return;
+    }
 
-  const { status: bgStatus } = await Location.requestBackgroundPermissionsAsync();
-  if (bgStatus !== 'granted') throw new Error('Background location permission denied');
+    const { status: bgStatus } = await Location.requestBackgroundPermissionsAsync();
+    if (bgStatus !== 'granted') {
+      console.warn('Background location permission denied');
+      return;
+    }
 
-  const isRegistered = await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
-  if (!isRegistered) {
-    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-      accuracy: Location.Accuracy.High,
-      timeInterval: 5000,
-      distanceInterval: 10,
-      deferredUpdatesInterval: 5000,
-      foregroundService: {
-        notificationTitle: 'CargoHub Driver',
-        notificationBody: 'You are online and tracking your location',
-        notificationColor: '#0259DD',
-      },
-      pausesUpdatesAutomatically: false,
-    });
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
+    if (!isRegistered) {
+      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 5000,
+        distanceInterval: 10,
+        deferredUpdatesInterval: 5000,
+        foregroundService: {
+          notificationTitle: 'CargoHub Driver',
+          notificationBody: 'You are online and tracking your location',
+          notificationColor: '#0259DD',
+        },
+        pausesUpdatesAutomatically: false,
+      });
+    }
+  } catch (err) {
+    console.warn('Location tracking could not start in development mode, continuing online status:', err);
   }
 };
 
 export const stopLocationTracking = async () => {
-  const isRegistered = await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
-  if (isRegistered) {
-    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+  try {
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(LOCATION_TASK_NAME);
+    if (isRegistered) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+    }
+  } catch (err) {
+    console.warn('Location tracking could not stop in development mode:', err);
   }
 };

@@ -4,10 +4,11 @@ import { theme } from '../theme/theme';
 import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { useDriver } from '../context/DriverContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   LogOut as LogOutIcon, ChevronRight as ChevronRightIcon, ShieldCheck as ShieldCheckIcon, 
   Bell as BellIcon, HelpCircle as HelpCircleIcon, FileText as FileTextIcon, Camera as CameraIcon, Edit2 as Edit2Icon, 
-  Star as StarIcon, Calendar as CalendarIcon, Truck as TruckIcon, X as XIcon 
+  Star as StarIcon, Calendar as CalendarIcon, Truck as TruckIcon, X as XIcon, Moon as MoonIcon 
 } from 'lucide-react-native';
 
 const LogOut = LogOutIcon as any;
@@ -22,12 +23,14 @@ const Star = StarIcon as any;
 const Calendar = CalendarIcon as any;
 const Truck = TruckIcon as any;
 const X = XIcon as any;
+const Moon = MoonIcon as any;
 import * as ImagePicker from 'expo-image-picker';
 import { api } from '../services/api';
 
 export const ProfileScreen = ({ navigation }: any) => {
   const { logout, updateProfile } = useAuth();
   const { driver, refreshDriverData } = useDriver();
+  const { themeMode, toggleTheme } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   
@@ -217,6 +220,20 @@ export const ProfileScreen = ({ navigation }: any) => {
               </View>
               <ChevronRight size={20} color={theme.colors.text.muted} />
             </TouchableOpacity>
+
+            {/* Theme Toggle Row */}
+            <View style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <Moon size={20} color={theme.colors.text.secondary} />
+                <Text style={styles.settingTitle}>Dark Mode</Text>
+              </View>
+              <Switch
+                value={themeMode === 'dark'}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.colors.border.subtle, true: 'rgba(56, 189, 248, 0.3)' }}
+                thumbColor={themeMode === 'dark' ? theme.colors.brand.primary : '#f4f3f4'}
+              />
+            </View>
 
             {/* Help & Support */}
             <TouchableOpacity style={styles.settingItem} onPress={handleHelpSupport} activeOpacity={0.8}>

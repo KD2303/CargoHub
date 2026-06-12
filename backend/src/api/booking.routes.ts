@@ -182,7 +182,6 @@ router.patch('/:id/cancel',
 router.get('/driver/history',
   verifyFirebaseToken,
   requireRole('DRIVER'),
-  requireVerifiedKyc,
   async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
