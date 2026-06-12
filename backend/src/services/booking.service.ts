@@ -22,7 +22,9 @@ export const bookingService = {
         });
         
         if (olaRes.data?.rows?.[0]?.elements?.[0]?.status === 'OK') {
-          distanceKm = olaRes.data.rows[0].elements[0].distance.value / 1000;
+          const element = olaRes.data.rows[0].elements[0];
+          const dist = typeof element.distance === 'object' ? element.distance.value : element.distance;
+          distanceKm = dist / 1000;
         }
       } catch (err) {
         console.error('OLA Maps API error:', err instanceof Error ? err.message : err);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import {
   Phone, Mail, ArrowRight, Eye, EyeOff, Truck,
@@ -10,8 +11,7 @@ import Link from "next/link";
 import { ThemeToggle } from "../../components/ThemeToggle";
 // @ts-ignore - TS module resolution bug with Firebase 11+
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";import { toast } from '@/store/toastStore';
-
+import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";
 
 export default function RegisterPage() {
   const [mode, setMode] = useState<"user" | "driver">("user");
@@ -40,17 +40,11 @@ export default function RegisterPage() {
       return;
     }
 
-    if (phone.length < 10 || name.length < 2 || password.length < 6 || password !== verifyPassword || !gender) {
-      toast.error("Please fill all fields correctly (Password min 6 chars, Passwords must match, Phone 10 digits).");
+    if (phone.length !== 10 || name.length < 2 || password.length < 6 || password !== verifyPassword || !gender) {
+      toast.error("Please fill all fields correctly (Password min 6 chars, Passwords must match, Phone exactly 10 digits).");
       return;
     }
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing registration for development');
-      setTimeout(() => setStep(2), 800);
-      return;
-    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
@@ -78,12 +72,7 @@ export default function RegisterPage() {
          toast.error('Registration failed in database: ' + (regData.error || 'Unknown error'));
       }
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing registration for development');
-        setStep(2);
-      } else {
-        toast.error('Registration failed: ' + err.message);
-      }
+      toast.error('Registration failed: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -91,12 +80,6 @@ export default function RegisterPage() {
 
   const handleGoogleSignup = async () => {
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing Google signup for development');
-      setTimeout(() => setStep(2), 800);
-      return;
-    }
 
     try {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
@@ -124,12 +107,7 @@ export default function RegisterPage() {
         toast.error('Database registration failed: ' + (regData.message || regData.error));
       }
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing Google signup for development');
-        setStep(2);
-      } else {
-        toast.error("Google signup failed: " + err.message);
-      }
+      toast.error("Google signup failed: " + err.message);
     } finally {
       setLoading(false);
     }

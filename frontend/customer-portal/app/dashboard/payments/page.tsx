@@ -4,11 +4,72 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Wallet, ArrowUpRight, ArrowDownRight, CreditCard, Plus, Receipt } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { toast } from "react-hot-toast";
+import { useTheme } from "next-themes";
+import Script from "next/script";
 
 export default function PaymentsPage() {
   const { user } = useAuthStore();
+  const { theme } = useTheme();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleAddFunds = async () => {
+    try {
+      const response = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/payments/test-create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: 500 }), // default 500 for test
+      });
+      
+      const resData = await response.json();
+
+      if (!resData.success) {
+        toast.error("Server error. Could not create order.");
+        return;
+      }
+
+      const { data } = resData;
+
+      const options = {
+        key: "rzp_test_SzETI5YgX84RSu", 
+        amount: data.amount, 
+        currency: data.currency,
+        name: "CargoHub",
+        description: "Add funds to wallet",
+        image: data.logo || "https://dummyimage.com/100x100/2563eb/ffffff&text=CargoHub",
+        order_id: data.orderId, 
+        handler: async function (response: any) {
+          toast.success("Successfully added funds to wallet! (Test Mode)");
+          // API call to actually update wallet balance would go here
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment was cancelled by the user.");
+          }
+        },
+        prefill: {
+          name: user?.name || "CargoHub Customer",
+          email: user?.email || "customer@cargohub.com",
+          contact: user?.phone || "9999999999",
+        },
+        theme: {
+          color: theme === 'dark' ? "#1e293b" : "#2563eb", 
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      
+      razorpay.on("payment.failed", function (response: any) {
+        toast.error(`Payment Failed: ${response.error.description}`);
+      });
+
+      razorpay.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Failed to initiate payment. Ensure your backend is running.");
+    }
+  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -46,6 +107,7 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-6">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div>
         <h1 className="text-2xl font-display font-bold">Payments & Wallet</h1>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>Manage your wallet balance and view transaction history.</p>
@@ -66,7 +128,7 @@ export default function PaymentsPage() {
             <p className="text-blue-100 font-medium mb-1">Available Balance</p>
             <h2 className="text-4xl font-mono font-bold mb-6">₹{user?.walletBalance || 0}</h2>
             <div className="flex gap-3">
-              <button className="flex-1 bg-white text-blue-900 font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-105 active:scale-95 shadow-sm">
+              <button onClick={handleAddFunds} className="flex-1 bg-white text-blue-900 font-semibold py-2.5 rounded-xl text-sm transition-transform hover:scale-105 active:scale-95 shadow-sm">
                 Add Funds
               </button>
               <button className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md transition-colors hover:bg-white/30">

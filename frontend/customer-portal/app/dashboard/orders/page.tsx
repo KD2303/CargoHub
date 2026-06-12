@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Package, Search, ExternalLink, Calendar, MapPin, CheckCircle2, Clock, Truck, XCircle, Star, X, Download } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { auth as firebaseAuth } from "@/lib/firebase";
-import { generateInvoicePDF } from "@/lib/pdf";import { toast } from '@/store/toastStore';
-
+import { generateInvoicePDF } from "@/lib/pdf";
+import { toast } from "react-hot-toast";
 
 export default function OrdersPage() {
   const { user } = useAuthStore();

@@ -8,8 +8,11 @@ import { useAuthStore } from "@/store/authStore";
 import LocationAutocomplete from "@/components/dashboard/LocationAutocomplete";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
-import Link from "next/link";import { toast } from '@/store/toastStore';
-
+import Link from "next/link";
+import Script from "next/script";
+import { toast } from "react-hot-toast";
+import { useTheme } from "next-themes";
+import { CreditCard } from "lucide-react";
 
 // Dynamically import LiveMap with SSR disabled
 const LiveMap = dynamic(() => import("@/components/dashboard/LiveMap"), { ssr: false });
@@ -19,6 +22,7 @@ export default function BookingPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const { user } = useAuthStore();
+  const { theme } = useTheme();
 
   const {
     pickup,
@@ -97,46 +101,96 @@ export default function BookingPage() {
     if (step < 3) setStep(step + 1);
   };
 
-  const handleConfirmPay = async (paymentMethod: 'UPI' | 'WALLET') => {
+  const handleConfirmPay = async () => {
     if (!pickup || !dropoff) return;
     
-    // In Phase 1 we mock the Razorpay UI, but we DO create the real booking
     try {
-      const { auth } = await import("@/lib/firebase");
-      const idToken = await auth.currentUser?.getIdToken();
-      
-      const payload = {
-        pickupLat: pickup.lat,
-        pickupLng: pickup.lng,
-        pickupAddress: pickup.address || "N/A",
-        dropLat: dropoff.lat,
-        dropLng: dropoff.lng,
-        dropAddress: dropoff.address || "N/A",
-        vehicleType: getVehicleEnum(vehicle),
-        loadType: getLoadTypeEnum(cargoType),
-        helpersRequested: helpers,
-        weight: weight ? Number(weight) : undefined,
-      };
-
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/bookings", {
+      const response = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/payments/test-create-order", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
-        },
-        body: JSON.stringify(payload)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: Number(fareData?.total || 100) }),
       });
       
-      const data = await res.json();
-      if (data.success) {
-        setCreatedBookingId(data.data.booking.id);
-        setIsSuccess(true);
-      } else {
-        toast.error("Failed to create booking: " + data.error);
+      const resData = await response.json();
+
+      if (!resData.success) {
+        toast.error("Server error. Could not create order.");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error confirming booking");
+
+      const { data } = resData;
+
+      const options = {
+        key: "rzp_test_SzETI5YgX84RSu", 
+        amount: data.amount, 
+        currency: data.currency,
+        name: "CargoHub",
+        image: data.logo || "https://dummyimage.com/100x100/2563eb/ffffff&text=CargoHub",
+        order_id: data.orderId, 
+        handler: async function (response: any) {
+          try {
+            const { auth } = await import("@/lib/firebase");
+            const idToken = await auth.currentUser?.getIdToken();
+            
+            const payload = {
+              pickupLat: pickup.lat,
+              pickupLng: pickup.lng,
+              pickupAddress: pickup.address || "N/A",
+              dropLat: dropoff.lat,
+              dropLng: dropoff.lng,
+              dropAddress: dropoff.address || "N/A",
+              vehicleType: getVehicleEnum(vehicle),
+              loadType: getLoadTypeEnum(cargoType),
+              helpersRequested: helpers,
+              weight: weight ? Number(weight) : undefined,
+            };
+
+            const bookRes = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/bookings", {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`
+              },
+              body: JSON.stringify(payload)
+            });
+            
+            const bookData = await bookRes.json();
+            if (bookData.success) {
+              setCreatedBookingId(bookData.data.booking.id);
+              setIsSuccess(true);
+            } else {
+              toast.error("Failed to create booking: " + bookData.error + (bookData.details ? " - " + bookData.details : ""));
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error("Error confirming booking");
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            toast.error("Payment was cancelled by the user.");
+          }
+        },
+        prefill: {
+          name: user?.name || "CargoHub Customer",
+          email: user?.email || "customer@cargohub.com",
+          contact: user?.phone || "9999999999",
+        },
+        theme: {
+          color: theme === 'dark' ? "#1e293b" : "#2563eb", 
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      
+      razorpay.on("payment.failed", function (response: any) {
+        toast.error(`Payment Failed: ${response.error.description}`);
+      });
+
+      razorpay.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Failed to initiate payment. Ensure your backend is running.");
     }
   };
 
@@ -274,6 +328,7 @@ export default function BookingPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="mb-8">
         <h1 className="text-2xl font-display font-bold text-gray-900 mb-6">New Booking</h1>
         
@@ -470,18 +525,12 @@ export default function BookingPage() {
                       ₹{fareData?.total || 0}
                     </span>
                   </div>
-                  <button onClick={handleDownloadReceipt} className="w-full mt-4 border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                    <Download className="w-4 h-4" /> Download Estimation Bill (PDF)
-                  </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => handleConfirmPay('UPI')} className="border-2 border-blue-600 bg-blue-50 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-blue-700">
-                  <IndianRupee className="w-5 h-5" /> Pay via UPI
-                </button>
-                <button onClick={() => handleConfirmPay('WALLET')} className="border border-gray-200 rounded-xl p-4 flex items-center justify-center gap-2 font-semibold text-gray-700 hover:border-gray-300">
-                  Wallet (Bal: ₹{user?.walletBalance || 0})
+              <div className="flex gap-4">
+                <button onClick={() => handleConfirmPay()} className="btn-primary w-full py-4 text-base flex justify-center items-center gap-3">
+                  <CreditCard className="w-5 h-5 opacity-80" /> Pay Here
                 </button>
               </div>
             </motion.div>

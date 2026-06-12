@@ -11,6 +11,50 @@ import jwt from 'jsonwebtoken';
 
 const router = Router();
 
+// ── Admin Auth Flow ─────────────────────────────────────────────────────────
+router.post('/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Check credentials
+    if (email === 'admin@cargohub.com' && password === 'admin123') {
+      const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_for_development_only';
+      const token = jwt.sign(
+        { uid: 'admin_master_123', email, role: 'ADMIN' }, 
+        jwtSecret, 
+        { expiresIn: '7d' }
+      );
+      
+      // Ensure admin exists in DB as requested
+      try {
+        const existing = await db.users.findByFirebaseUid('admin_master_123');
+        if (!existing) {
+          const { v4: uuidv4 } = require('uuid');
+          await db.users.create({
+            id: uuidv4(),
+            firebaseUid: 'admin_master_123',
+            email: 'admin@cargohub.com',
+            phone: '+910000000000',
+            name: 'Master Admin',
+            role: 'ADMIN',
+            accountType: 'STANDARD',
+            isActive: true,
+            createdAt: new Date().toISOString()
+          } as any);
+        }
+      } catch (e) {
+        console.error('Failed to seed admin in DB:', e);
+      }
+      
+      res.json({ success: true, data: { token, user: { email, role: 'ADMIN' } } });
+    } else {
+      res.status(401).json({ success: false, error: 'INVALID_CREDENTIALS', message: 'Invalid admin credentials' });
+    }
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 // ── New Signup / Profile Completion Flow ─────────────────────────────────────
 
 // Register or complete profile for a USER

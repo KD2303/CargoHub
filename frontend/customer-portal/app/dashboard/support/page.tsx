@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { HeadphonesIcon, MessageSquare, Phone, Mail, FileText, ChevronRight, X, Send, Loader2, Bot, User } from "lucide-react";
-import { useState, useRef, useEffect } from "react";import { toast } from '@/store/toastStore';
-
+import { useState, useRef, useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 const faqs = [
   { q: "How do I track my shipment?", a: "You can track your shipment by entering the Order ID in the Track Shipment page or from your Orders list." },

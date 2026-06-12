@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/admin/ui/PageHeader";
-import { StatCard } from "@/components/admin/ui/StatCard";
-import { MetricChart } from "@/components/admin/dashboard/MetricChart";
-import { DataTable } from "@/components/admin/ui/DataTable";
-import { Badge } from "@/components/admin/ui/Badge";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatCard } from "@/components/ui/StatCard";
+import { MetricChart } from "@/components/dashboard/MetricChart";
+import { DataTable } from "@/components/ui/DataTable";
+import { fetchApi } from "@/lib/api";
+import { Badge } from "@/components/ui/Badge";
 import { Package, Truck, IndianRupee, FileText, Loader2 } from "lucide-react";
-import { adminFetch } from "@/lib/admin/api";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -15,17 +15,22 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadData() {
+    const fetchData = async () => {
       try {
-        const res = await adminFetch("/api/admin/dashboard-stats");
-        setData(res.data);
+        const res = await fetchApi("/admin/dashboard-stats");
+        const json = await res.json();
+        if (json.success) {
+          setData(json.data);
+        } else {
+          setError(json.error || "Failed to fetch data");
+        }
       } catch (err: any) {
-        setError(err.message || "Failed to load dashboard stats");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
-    }
-    loadData();
+    };
+    fetchData();
   }, []);
   const icons = [
     <Package key="1" className="w-6 h-6" />,
@@ -90,7 +95,7 @@ export default function DashboardPage() {
             {/* Main Content Area */}
             <div className="flex-1 space-y-8">
               {/* Chart Section */}
-              <div className="bg-[var(--bg-primary)] p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm">
+              <div className="bg-[var(--bg-surface)] p-6 rounded-lg border border-gray-100 shadow-sm">
                 <h2 className="text-[16px] font-semibold mb-6 text-[var(--text-primary)] tracking-tight">Booking Trends (Last 7 Days)</h2>
                 <MetricChart data={data.bookingTrends} />
               </div>
@@ -103,8 +108,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Live Feed Sidebar */}
-            <div className="w-full xl:w-[320px] bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-subtle)] shadow-sm flex flex-col shrink-0">
-              <div className="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+            <div className="w-full xl:w-[320px] bg-[var(--bg-surface)] rounded-lg border border-gray-100 shadow-sm flex flex-col shrink-0">
+              <div className="p-5 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-[15px] font-semibold text-[var(--text-primary)] flex items-center tracking-tight">
                   <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
                   Live Activity
@@ -114,11 +119,11 @@ export default function DashboardPage() {
                 <div className="space-y-6">
                   {data.liveEvents.map((event: any) => {
                 const colors = {
-                  purple: "bg-purple-500",
-                  green: "bg-green-500",
-                  blue: "bg-blue-500",
-                  red: "bg-red-500",
-                  warning: "bg-orange-500",
+                  purple: "bg-[var(--admin-primary-mid)]",
+                  green: "bg-[var(--green-text)]",
+                  blue: "bg-[var(--blue-text)]",
+                  red: "bg-[var(--red-text)]",
+                  warning: "bg-[var(--amber-text)]",
                 };
 
                 return (

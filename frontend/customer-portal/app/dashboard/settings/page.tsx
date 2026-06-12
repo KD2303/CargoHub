@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check, ChevronLeft, Lock, Mail, Smartphone, ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
+import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect, useRef } from "react";
-import { auth as firebaseAuth } from "@/lib/firebase";import { toast } from '@/store/toastStore';
-
+import { auth as firebaseAuth } from "@/lib/firebase";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -49,6 +49,11 @@ export default function SettingsPage() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseAuth.currentUser) return;
+    
+    if (formData.phone && formData.phone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits.");
+      return;
+    }
 
     setIsSaving(true);
     setSaveSuccess(false);
@@ -285,7 +290,7 @@ export default function SettingsPage() {
                     type="tel" 
                     className="input-field py-2 w-full" 
                     value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                    onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10)})}
                   />
                 </div>
               </div>

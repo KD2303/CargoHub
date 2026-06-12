@@ -10,7 +10,7 @@ export default function AIDrawer() {
   const firstName = user?.name ? user.name.split(' ')[0] : 'there';
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(() => [
-    { role: "ai", text: `Hi ${firstName}! I'm your CargoHub AI. How can I help you today?` }
+    { role: "model", content: `Hi ${firstName}! I'm your CargoHub AI. How can I help you today?` }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -21,24 +21,32 @@ export default function AIDrawer() {
     "Estimate Mumbai → Thane"
   ];
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     if (!text.trim()) return;
     
-    setMessages(prev => [...prev, { role: "user", text }]);
+    const userMessage = { role: "user", content: text };
+    setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
-    // Mock AI response
-    setTimeout(() => {
-      setIsTyping(false);
-      let response = "I can help with that. Please contact support for more detailed assistance.";
-      if (text.includes("800kg")) {
-        response = "For 800kg, I'd recommend a Tempo (up to 1 ton). It's the most cost-effective for that weight class.";
-      } else if (text.includes("Mumbai")) {
-        response = "A trip from Mumbai to Thane typically takes ~45 mins and costs around ₹480 - ₹550 depending on the vehicle.";
+    try {
+      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/support/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, userMessage] })
+      });
+      const data = await res.json();
+      
+      if (data.success && data.data) {
+        setMessages(prev => [...prev, { role: "model", content: data.data }]);
+      } else {
+        setMessages(prev => [...prev, { role: "model", content: "Sorry, I am having trouble connecting right now." }]);
       }
-      setMessages(prev => [...prev, { role: "ai", text: response }]);
-    }, 1500);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: "model", content: "Sorry, a network error occurred." }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -104,7 +112,7 @@ export default function AIDrawer() {
                       color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)'
                     }}
                   >
-                    {msg.text}
+                    {msg.content}
                   </div>
                 </div>
               ))}

@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { Package, MapPin, Navigation, ArrowRight } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
 import LocationAutocomplete from "./LocationAutocomplete";
-import { useRouter } from "next/navigation";import { toast } from '@/store/toastStore';
-
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function QuickBookCard() {
   const router = useRouter();

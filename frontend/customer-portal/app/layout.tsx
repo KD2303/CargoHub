@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Providers } from "./providers";
-import { ToastProvider } from "@/components/ToastProvider";
 
 export const metadata: Metadata = {
   title: "CargoHub — India's Smart Cargo Logistics Platform",
@@ -15,6 +14,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,7 +25,7 @@ export default function RootLayout({
     <html lang="en" className="light" suppressHydrationWarning>
       <body className="grain" suppressHydrationWarning>
         <Providers>
-          <ToastProvider />
+          <Toaster position="top-center" />
           {children}
         </Providers>
       </body>

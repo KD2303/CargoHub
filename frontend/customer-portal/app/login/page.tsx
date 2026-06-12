@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import {
   Mail, Lock, ArrowRight, Truck,
@@ -10,8 +11,7 @@ import Link from "next/link";
 import { ThemeToggle } from "../../components/ThemeToggle";
 // @ts-ignore - TS module resolution bug with Firebase 11+
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";import { toast } from '@/store/toastStore';
-
+import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"user" | "driver">("user");
@@ -28,30 +28,17 @@ export default function LoginPage() {
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
+      alert("Please enter a valid email address.");
       return;
     }
 
     setLoading(true);
 
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing login for development');
-      setTimeout(() => {
-        window.location.href = mode === "user" ? "/dashboard" : "/driver";
-      }, 800);
-      return;
-    }
-
     try {
       await signInWithEmailAndPassword(firebaseAuth, email, password);
       window.location.href = mode === "user" ? "/dashboard" : "/driver";
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing login for development');
-        window.location.href = mode === "user" ? "/dashboard" : "/driver";
-      } else {
-        toast.error("Login failed: " + err.message);
-      }
+      toast.error("Login failed: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -59,14 +46,6 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing Google login for development');
-      setTimeout(() => {
-        window.location.href = mode === "user" ? "/dashboard" : "/driver";
-      }, 800);
-      return;
-    }
 
     try {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
@@ -86,12 +65,7 @@ export default function LoginPage() {
       });
       window.location.href = mode === "user" ? "/dashboard" : "/driver";
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing Google login for development');
-        window.location.href = mode === "user" ? "/dashboard" : "/driver";
-      } else {
-        toast.error("Google login failed: " + err.message);
-      }
+      toast.error("Google login failed: " + err.message);
     } finally {
       setLoading(false);
     }

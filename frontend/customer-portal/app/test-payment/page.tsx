@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import Script from "next/script";
 import { useTheme } from "next-themes";
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreditCard, ShieldCheck, CheckCircle2, ChevronRight, Lock, Sun, Moon, AlertCircle } from "lucide-react";
-import { useAuthStore } from "@/store/authStore";import { toast } from '@/store/toastStore';
-
+import { useAuthStore } from "@/store/authStore";
 
 export default function PremiumCheckoutPage() {
   const router = useRouter();
