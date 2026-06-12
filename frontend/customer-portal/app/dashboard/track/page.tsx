@@ -45,8 +45,16 @@ function TrackingContent() {
         if (json.success && json.data) {
           const b = json.data;
           setBooking(b);
-          setPickup(b.pickupLocation);
-          setDropoff(b.dropoffLocation);
+          setPickup({
+            lat: b.pickupLat,
+            lng: b.pickupLng,
+            address: b.pickupAddress || "Pickup"
+          });
+          setDropoff({
+            lat: b.dropLat,
+            lng: b.dropLng,
+            address: b.dropAddress || "Dropoff"
+          });
           
           // Connect to Socket.IO for real-time driver tracking
           socket = io((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`));
@@ -123,7 +131,7 @@ function TrackingContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Column */}
         <div className="lg:col-span-2 rounded-xl border border-gray-200 overflow-hidden h-[500px] relative bg-gray-50">
-          <LiveMap />
+          <LiveMap readonly={true} />
         </div>
 
         {/* Info Column */}

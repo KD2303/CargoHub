@@ -5,6 +5,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Avatar } from "@/components/ui/Avatar";
 import { Modal } from "@/components/ui/Modal";
 import { Check, X, Eye, FileText, FileImage, Loader2 } from "lucide-react";
+import { fetchApi } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 export default function KycReviewPage() {
   const [activeTab, setActiveTab] = useState("Pending");
@@ -18,10 +20,12 @@ export default function KycReviewPage() {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/admin/drivers");
+      const res = await fetchApi("/admin/drivers");
       const json = await res.json();
       if (json.success) {
         setDrivers(json.data);
+      } else {
+        toast.error("Failed to load applications");
       }
     } catch (err) {
       console.error(err);
@@ -37,21 +41,21 @@ export default function KycReviewPage() {
   const handleDecision = async (id: string, decision: 'VERIFIED' | 'REJECTED') => {
     try {
       setActionLoading(id);
-      const res = await fetch(`http://localhost:5000/api/admin/drivers/${id}/verify`, {
+      const res = await fetchApi(`/admin/drivers/${id}/verify`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ decision, reason: "Admin review" })
       });
       const json = await res.json();
       if (json.success) {
         setDrivers(drivers.map(d => d.id === id || d.firebaseUid === id ? { ...d, kycStatus: decision } : d));
         if (selectedDoc) setSelectedDoc(null);
+        toast.success(`Application ${decision.toLowerCase()}`);
       } else {
-        alert(json.error || "Failed to update status");
+        toast.error(json.error || "Failed to update status");
       }
     } catch (err) {
       console.error(err);
-      alert("Network error");
+      toast.error("Network error");
     } finally {
       setActionLoading(null);
     }

@@ -6,7 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { Navigation } from "lucide-react";
 import { useBookingStore } from "@/store/bookingStore";
 
-export default function LiveMap() {
+export default function LiveMap({ readonly = false }: { readonly?: boolean }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const pickupMarker = useRef<maplibregl.Marker | null>(null);
@@ -113,23 +113,27 @@ export default function LiveMap() {
       return marker;
     }
 
-    el.className = 'w-5 h-5 rounded-full border-2 border-white shadow-lg cursor-pointer transition-transform hover:scale-110';
+    el.className = `w-5 h-5 rounded-full border-2 border-white shadow-lg transition-transform hover:scale-110 ${readonly ? '' : 'cursor-pointer'}`;
     el.style.backgroundColor = type === 'pickup' ? 'var(--brand-success)' : 'var(--brand-secondary)';
-    el.title = `Drag to change ${type}`;
+    if (!readonly) {
+      el.title = `Drag to change ${type}`;
+    }
 
-    const marker = new maplibregl.Marker({ element: el, draggable: true })
+    const marker = new maplibregl.Marker({ element: el, draggable: !readonly })
       .setLngLat([location.lng, location.lat])
       .addTo(map.current!);
 
-    marker.on('dragend', async () => {
-      const lngLat = marker.getLngLat();
-      const address = await reverseGeocode(lngLat.lng, lngLat.lat);
-      if (type === 'pickup') {
-        setPickup({ lng: lngLat.lng, lat: lngLat.lat, address });
-      } else {
-        setDropoff({ lng: lngLat.lng, lat: lngLat.lat, address });
-      }
-    });
+    if (!readonly) {
+      marker.on('dragend', async () => {
+        const lngLat = marker.getLngLat();
+        const address = await reverseGeocode(lngLat.lng, lngLat.lat);
+        if (type === 'pickup') {
+          setPickup({ lng: lngLat.lng, lat: lngLat.lat, address });
+        } else {
+          setDropoff({ lng: lngLat.lng, lat: lngLat.lat, address });
+        }
+      });
+    }
 
     return marker;
   };
@@ -217,6 +221,18 @@ export default function LiveMap() {
     initMap();
 
     return () => {
+      if (pickupMarker.current) {
+        pickupMarker.current.remove();
+        pickupMarker.current = null;
+      }
+      if (dropoffMarker.current) {
+        dropoffMarker.current.remove();
+        dropoffMarker.current = null;
+      }
+      if (driverMarker.current) {
+        driverMarker.current.remove();
+        driverMarker.current = null;
+      }
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -295,7 +311,7 @@ export default function LiveMap() {
           <span className="w-1 h-1 rounded-full bg-gray-300" />
           <div className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full animate-pulse-ring" style={{ background: "var(--brand-primary)" }} />
-            <span className="text-xs font-semibold text-gray-600">Drag markers to select points</span>
+            <span className="text-xs font-semibold text-gray-600">{readonly ? 'Live Tracking' : 'Drag markers to select points'}</span>
           </div>
         </div>
         

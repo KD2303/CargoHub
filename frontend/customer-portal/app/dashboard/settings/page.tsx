@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { User, Bell, Shield, Key, Moon, Globe, Loader2, Check, ChevronLeft, Lock, Mail, Smartphone, ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
+import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect, useRef } from "react";
 import { auth as firebaseAuth } from "@/lib/firebase";
@@ -48,6 +49,11 @@ export default function SettingsPage() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseAuth.currentUser) return;
+    
+    if (formData.phone && formData.phone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits.");
+      return;
+    }
 
     setIsSaving(true);
     setSaveSuccess(false);
@@ -72,11 +78,11 @@ export default function SettingsPage() {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        alert(data.error || "Failed to update profile");
+        toast.error(data.error || "Failed to update profile");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile");
+      toast.error("Failed to update profile");
     } finally {
       setIsSaving(false);
     }
@@ -107,7 +113,7 @@ export default function SettingsPage() {
         if (data.success && data.url) {
           setUser({ ...user!, profilePhoto: data.url });
         } else {
-          alert(data.error || "Failed to upload avatar");
+          toast.error(data.error || "Failed to upload avatar");
         }
         setIsUploading(false);
       };
@@ -284,7 +290,7 @@ export default function SettingsPage() {
                     type="tel" 
                     className="input-field py-2 w-full" 
                     value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                    onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10)})}
                   />
                 </div>
               </div>
@@ -440,7 +446,7 @@ export default function SettingsPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (securityData.newPassword !== securityData.confirmPassword) {
-                  alert("Passwords do not match!");
+                  toast.error("Passwords do not match!");
                   return;
                 }
                 setIsSaving(true);

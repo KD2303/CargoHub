@@ -1,13 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable } from "@/components/ui/DataTable";
-import { RECENT_BOOKINGS } from "@/lib/mockData";
 import { Badge } from "@/components/ui/Badge";
-import { Download, Search, Filter } from "lucide-react";
+import { Download, Search, Filter, Loader2 } from "lucide-react";
+import { fetchApi } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 export default function BookingsPage() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const res = await fetchApi("/admin/bookings?limit=50");
+        const json = await res.json();
+        if (json.success) {
+          const formatted = json.data.map((b: any) => ({
+            id: b.bookingRef || b.id.substring(0,8).toUpperCase(),
+            customer: "Customer",
+            driver: b.driverId ? "Assigned" : "-",
+            route: `${b.pickupAddress?.split(',')[0] || 'Pickup'} → ${b.dropAddress?.split(',')[0] || 'Drop'}`,
+            amount: `₹${b.fareEstimate || 0}`,
+            status: b.status,
+            time: new Date(b.createdAt).toLocaleDateString(),
+            rawId: b.id
+          }));
+          setBookings(formatted);
+          setTotal(json.total || formatted.length);
+        } else {
+          toast.error("Failed to load bookings");
+        }
+      } catch (e) {
+        toast.error("Network error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
   const columns = [
     { key: "id", label: "Booking ID" },
     { key: "customer", label: "Customer" },
@@ -19,15 +53,49 @@ export default function BookingsPage() {
       label: "Status",
       render: (row: any) => {
         let variant: any = "default";
-        if (row.status === "Ongoing") variant = "info";
-        if (row.status === "Completed") variant = "success";
-        if (row.status === "Cancelled") variant = "error";
-        if (row.status === "Finding Driver") variant = "warning";
-        return <Badge label={row.status} variant={variant} />;
+        if (row.status === "ONGOING" || row.status === "IN_TRANSIT" || row.status === "ACCEPTED") variant = "info";
+        if (row.status === "COMPLETED" || row.status === "DELIVERED") variant = "success";
+        if (row.status === "CANCELLED") variant = "error";
+        if (row.status === "PENDING" || row.status === "FINDING_DRIVER") variant = "warning";
+        return <Badge label={row.status.replace(/_/g, ' ')} variant={variant} />;
       }
     },
-    { key: "time", label: "Date" }
+    { key: "time", label: "Date" },
+    {
+      key: "actions",
+      label: "",
+      render: (row: any) => (
+        row.status !== 'CANCELLED' && row.status !== 'COMPLETED' && row.status !== 'DELIVERED' ? (
+          <button 
+            onClick={() => handleCancel(row.rawId)}
+            className="text-red-600 hover:text-red-800 text-sm font-medium"
+          >
+            Cancel
+          </button>
+        ) : null
+      )
+    }
   ];
+
+  const handleCancel = async (id: string) => {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+    
+    try {
+      const res = await fetchApi(`/admin/bookings/${id}/cancel`, {
+        method: "PATCH",
+        body: JSON.stringify({ reason: "Admin requested cancellation" })
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success("Booking cancelled");
+        setBookings(bookings.map(b => b.rawId === id ? { ...b, status: "CANCELLED" } : b));
+      } else {
+        toast.error(json.error || "Failed to cancel");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    }
+  };
 
   return (
     <div>
@@ -46,23 +114,22 @@ export default function BookingsPage() {
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-[var(--text-secondary)]">Total Bookings</p>
-            <p className="text-2xl font-bold mt-1">2,847</p>
+            <p className="text-2xl font-bold mt-1">{total}</p>
           </div>
           <Badge label="All time" variant="default" />
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-[var(--blue-text)]">
           <div>
             <p className="text-sm font-medium text-[var(--text-secondary)]">Ongoing</p>
-            <p className="text-2xl font-bold mt-1">89</p>
+            <p className="text-2xl font-bold mt-1">{bookings.filter(b => b.status === 'ONGOING' || b.status === 'IN_TRANSIT').length}</p>
           </div>
           <Badge label="In transit" variant="info" />
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-[var(--red-text)]">
           <div>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">Cancelled Rate</p>
-            <p className="text-2xl font-bold mt-1">4.2%</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">Cancelled</p>
+            <p className="text-2xl font-bold mt-1">{bookings.filter(b => b.status === 'CANCELLED').length}</p>
           </div>
-          <Badge label="-0.5%" variant="success" />
         </div>
       </div>
 
@@ -86,11 +153,18 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      <DataTable columns={columns} rows={[...RECENT_BOOKINGS, ...RECENT_BOOKINGS, ...RECENT_BOOKINGS].slice(0, 8)} />
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      ) : (
+        <DataTable columns={columns} rows={bookings} />
+      )}
       
       {/* Pagination Footer */}
-      <div className="flex items-center justify-between mt-6 px-1">
-        <p className="text-sm text-[var(--text-secondary)]">Showing <span className="font-semibold text-[var(--text-primary)]">1-8</span> of 2,847 results</p>
+      {!loading && bookings.length > 0 && (
+        <div className="flex items-center justify-between mt-6 px-1">
+          <p className="text-sm text-[var(--text-secondary)]">Showing <span className="font-semibold text-[var(--text-primary)]">1-{bookings.length}</span> of {total} results</p>
         <div className="flex items-center space-x-2">
           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm font-medium text-[var(--text-secondary)] hover:bg-gray-50" disabled>Previous</button>
           <button className="px-3 py-1 bg-[var(--admin-primary)] text-white rounded-md text-sm font-medium">1</button>
@@ -99,7 +173,8 @@ export default function BookingsPage() {
           <span className="text-[var(--text-secondary)]">...</span>
           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm font-medium text-[var(--text-secondary)] hover:bg-gray-50">Next</button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

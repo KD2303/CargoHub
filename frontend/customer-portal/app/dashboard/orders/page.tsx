@@ -7,6 +7,7 @@ import { Package, Search, ExternalLink, Calendar, MapPin, CheckCircle2, Clock, T
 import { useAuthStore } from "@/store/authStore";
 import { auth as firebaseAuth } from "@/lib/firebase";
 import { generateInvoicePDF } from "@/lib/pdf";
+import { toast } from "react-hot-toast";
 
 export default function OrdersPage() {
   const { user } = useAuthStore();
@@ -81,13 +82,13 @@ export default function OrdersPage() {
       });
       const json = await res.json();
       if (json.success) {
-        alert("Thank you for your rating!");
+        toast.success("Thank you for your rating!");
       } else {
-        alert(json.error === "ALREADY_RATED" ? "You have already rated this trip." : json.message || "Failed to submit rating.");
+        toast.error(json.error === "ALREADY_RATED" ? "You have already rated this trip." : json.message || "Failed to submit rating.");
       }
     } catch (err) {
       console.error(err);
-      alert("Network error");
+      toast.error("Network error");
     } finally {
       setRatingSubmitting(false);
       setRatingModal({ isOpen: false, orderId: "" });

@@ -44,8 +44,9 @@ export default function Sidebar() {
   
   const handleLogout = async () => {
     try {
-      const { auth } = await import('@/lib/firebase');
+      const { auth } = await import("@/lib/firebase");
       await auth.signOut();
+      useAuthStore.getState().setUser(null);
       window.location.href = '/';
     } catch (err) {
       console.error(err);

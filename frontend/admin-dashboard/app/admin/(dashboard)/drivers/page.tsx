@@ -1,13 +1,69 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable } from "@/components/ui/DataTable";
-import { DRIVERS } from "@/lib/mockData";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Filter, Eye, Ban, MessageSquare } from "lucide-react";
+import { Search, Filter, Eye, Ban, CheckCircle, Loader2 } from "lucide-react";
+import { fetchApi } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 export default function DriversPage() {
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDrivers = async () => {
+    try {
+      const res = await fetchApi("/admin/drivers");
+      const json = await res.json();
+      if (json.success) {
+        const formatted = json.data.map((d: any) => ({
+          rawId: d.id || d.firebaseUid,
+          name: d.name || 'Unknown',
+          phone: d.phone || '-',
+          vehicle: d.vehicleType?.replace('_', ' ') || '-',
+          plate: d.vehicleNumber || '-',
+          status: !d.isActive ? 'Suspended' : (d.kycStatus === 'VERIFIED' ? (d.isAvailable ? 'Online' : 'Offline') : 'Pending KYC'),
+          rating: d.rating?.toFixed(1) || '0.0',
+          jobs: d.totalTrips || 0,
+          joined: new Date(d.createdAt || Date.now()).toLocaleDateString()
+        }));
+        setDrivers(formatted);
+      } else {
+        toast.error("Failed to load drivers");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const isSuspending = currentStatus !== 'Suspended';
+    if (!confirm(`Are you sure you want to ${isSuspending ? 'suspend' : 'reinstate'} this driver?`)) return;
+
+    try {
+      const res = await fetchApi(`/admin/drivers/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive: !isSuspending, reason: "Admin action" })
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Driver ${isSuspending ? 'suspended' : 'reinstated'}`);
+        fetchDrivers();
+      } else {
+        toast.error(json.error || "Action failed");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    }
+  };
+
   const columns = [
     { key: "name", label: "Driver" },
     { key: "phone", label: "Phone" },
@@ -33,14 +89,12 @@ export default function DriversPage() {
       label: "Actions",
       render: (row: any) => (
         <div className="flex items-center space-x-2">
-          <button className="p-1.5 text-gray-400 hover:text-[var(--admin-primary)] hover:bg-[var(--admin-primary-light)] rounded-md transition-colors" title="View Profile">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Message Driver">
-            <MessageSquare className="w-4 h-4" />
-          </button>
-          <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Suspend">
-            <Ban className="w-4 h-4" />
+          <button 
+            onClick={() => handleToggleStatus(row.rawId, row.status)}
+            className={`p-1.5 rounded-md transition-colors ${row.status === 'Suspended' ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`} 
+            title={row.status === 'Suspended' ? 'Reinstate' : 'Suspend'}
+          >
+            {row.status === 'Suspended' ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
           </button>
         </div>
       )
@@ -55,19 +109,19 @@ export default function DriversPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
           <p className="text-sm font-medium text-[var(--text-secondary)]">Total Drivers</p>
-          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">312</p>
+          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{drivers.length}</p>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm border-l-4 border-l-[var(--green-text)]">
           <p className="text-sm font-medium text-[var(--text-secondary)]">Online Now</p>
-          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">89</p>
+          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{drivers.filter(d => d.status === 'Online').length}</p>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm border-l-4 border-l-[var(--amber-text)]">
           <p className="text-sm font-medium text-[var(--text-secondary)]">Pending KYC</p>
-          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">3</p>
+          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{drivers.filter(d => d.status === 'Pending KYC').length}</p>
         </div>
         <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm border-l-4 border-l-[var(--red-text)]">
           <p className="text-sm font-medium text-[var(--text-secondary)]">Suspended</p>
-          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">7</p>
+          <p className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{drivers.filter(d => d.status === 'Suspended').length}</p>
         </div>
       </div>
 
@@ -95,7 +149,13 @@ export default function DriversPage() {
         </div>
       </div>
 
-      <DataTable columns={columns} rows={DRIVERS} />
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      ) : (
+        <DataTable columns={columns} rows={drivers} />
+      )}
     </div>
   );
 }

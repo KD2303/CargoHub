@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { DataTable } from "@/components/ui/DataTable";
+import { fetchApi } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
 import { Package, Truck, IndianRupee, FileText, Loader2 } from "lucide-react";
 
@@ -16,10 +17,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Mocking token or we could use real auth if configured
-        const res = await fetch("http://localhost:5000/api/admin/dashboard-stats", {
-          // Headers would include auth in production
-        });
+        const res = await fetchApi("/admin/dashboard-stats");
         const json = await res.json();
         if (json.success) {
           setData(json.data);

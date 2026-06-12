@@ -26,8 +26,7 @@ router.post('/',
         data: { booking, fareBreakdown },
       });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: 'INTERNAL_ERROR' });
+      res.status(500).json({ success: false, error: 'INTERNAL_ERROR', details: err instanceof Error ? err.message : JSON.stringify(err) });
     }
   }
 );

@@ -8,6 +8,7 @@
 import { Router } from 'express';
 import { v4 as uuid } from 'uuid';
 import { db } from '../config/database';
+import { redis } from '../config/redis';
 import { verifyFirebaseToken } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
 import { validate } from '../middlewares/validate.middleware';
@@ -40,6 +41,29 @@ router.get('/drivers', async (req, res) => {
   }
 
   res.json({ success: true, data: drivers, total: drivers.length });
+});
+
+// Get all customers/users
+router.get('/customers', async (req, res) => {
+  try {
+    const users = await db.users.getAll();
+    
+    // Attach stats (spent, bookings) for each user
+    const usersWithStats = await Promise.all(
+      users.map(async (user) => {
+        try {
+          const stats = await db.bookings.getUserStats(user.firebaseUid);
+          return { ...user, totalBookings: stats.totalBookings, spent: stats.totalSpent };
+        } catch {
+          return { ...user, totalBookings: 0, spent: 0 };
+        }
+      })
+    );
+
+    res.json({ success: true, data: usersWithStats, total: users.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch customers' });
+  }
 });
 
 // Approve/reject driver KYC
@@ -165,7 +189,30 @@ router.get('/analytics/revenue', async (_req, res) => {
 // Dashboard stats
 router.get('/dashboard-stats', async (_req, res) => {
   try {
-    const stats = await db.analytics.getDashboardStats();
+    const cacheKey = 'admin:dashboard_stats';
+    let stats: any = null;
+
+    if (redis) {
+      try {
+        stats = await redis.get(cacheKey);
+      } catch (e) {
+        console.warn('Redis cache get failed for dashboard stats');
+      }
+    }
+
+    if (!stats) {
+      stats = await db.analytics.getDashboardStats();
+      if (redis) {
+        try {
+          await redis.setex(cacheKey, 60, JSON.stringify(stats));
+        } catch (e) {
+          console.warn('Redis cache set failed for dashboard stats');
+        }
+      }
+    } else if (typeof stats === 'string') {
+      stats = JSON.parse(stats);
+    }
+
     res.json({ success: true, data: stats });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch dashboard stats' });

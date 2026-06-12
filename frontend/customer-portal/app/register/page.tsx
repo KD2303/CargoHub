@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import {
   Phone, Mail, ArrowRight, Eye, EyeOff, Truck,
@@ -35,21 +36,15 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
 
-    if (phone.length < 10 || name.length < 2 || password.length < 6 || password !== verifyPassword || !gender) {
-      alert("Please fill all fields correctly (Password min 6 chars, Passwords must match, Phone 10 digits).");
+    if (phone.length !== 10 || name.length < 2 || password.length < 6 || password !== verifyPassword || !gender) {
+      toast.error("Please fill all fields correctly (Password min 6 chars, Passwords must match, Phone exactly 10 digits).");
       return;
     }
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing registration for development');
-      setTimeout(() => setStep(2), 800);
-      return;
-    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
@@ -74,15 +69,10 @@ export default function RegisterPage() {
       if (regData.success || regRes.ok) {
          setStep(2);
       } else {
-         alert('Registration failed in database: ' + (regData.error || 'Unknown error'));
+         toast.error('Registration failed in database: ' + (regData.error || 'Unknown error'));
       }
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing registration for development');
-        setStep(2);
-      } else {
-        alert('Registration failed: ' + err.message);
-      }
+      toast.error('Registration failed: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -90,12 +80,6 @@ export default function RegisterPage() {
 
   const handleGoogleSignup = async () => {
     setLoading(true);
-
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY === 'dummy' || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      console.warn('Firebase API key missing, bypassing Google signup for development');
-      setTimeout(() => setStep(2), 800);
-      return;
-    }
 
     try {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
@@ -120,15 +104,10 @@ export default function RegisterPage() {
       if (regData.success || regRes.ok) {
         setStep(2);
       } else {
-        alert('Database registration failed: ' + (regData.message || regData.error));
+        toast.error('Database registration failed: ' + (regData.message || regData.error));
       }
     } catch (err: any) {
-      if (err.message && err.message.includes('api-key')) {
-        console.warn('Firebase API key error detected, bypassing Google signup for development');
-        setStep(2);
-      } else {
-        alert("Google signup failed: " + err.message);
-      }
+      toast.error("Google signup failed: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -164,11 +143,11 @@ export default function RegisterPage() {
       
       const data = await res.json();
       if (!data.success) {
-        alert("Failed to upload avatar, proceeding without it.");
+        toast.error("Failed to upload avatar, proceeding without it.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error uploading avatar, proceeding without it.");
+      toast.error("Error uploading avatar, proceeding without it.");
     } finally {
       setUploadingAvatar(false);
       proceedToDashboard();
