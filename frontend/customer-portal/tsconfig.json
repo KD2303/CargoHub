@@ -28,6 +28,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@cargohub/shared": [
+        "../../backend/src/shared/src"
       ]
     }
   },
