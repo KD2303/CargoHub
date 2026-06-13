@@ -289,5 +289,16 @@ export const db = {
       console.log(`Setting notification tokens for ${uid}`, tokens);
       return true;
     }
+  },
+
+  notifications: {
+    getAllForUser: async (uid: string) => {
+      // Return empty mock array as table doesn't exist yet
+      return [];
+    },
+    markAsRead: async (id: string, uid: string) => {
+      // Mock success
+      return true;
+    }
   }
 };
