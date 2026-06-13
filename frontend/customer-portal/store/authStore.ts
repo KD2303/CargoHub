@@ -27,17 +27,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setUser: (user) => set({ user, isAuthenticated: !!user, loading: false }),
 
   setAdminLogin: (token, user) => {
-    localStorage.setItem('adminToken', token);
+    localStorage.setItem('admin_token', token);
     set({ adminToken: token, adminUser: user, isAuthenticated: true, loading: false });
   },
 
   logoutAdmin: () => {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem('admin_token');
     set({ adminToken: null, adminUser: null, isAuthenticated: false });
   },
 
   verifyAdminSession: async () => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('admin_token');
     if (!token) {
       // Not an admin session
       return;
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initializeAuthListener: () => {
     // First check if there's an admin session in local storage
-    if (typeof window !== 'undefined' && localStorage.getItem('adminToken')) {
+    if (typeof window !== 'undefined' && localStorage.getItem('admin_token')) {
       get().verifyAdminSession();
     }
 
