@@ -49,14 +49,110 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
   return <span>{count.toLocaleString("en-IN")}{suffix}</span>;
 }
 
+// ── Vehicle Icons ───────────────────────────────────────────────────────────
+
+const TataAceIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className={className} 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth={1.5} 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {/* Cabin */}
+    <path d="M 9 15 L 9 7 L 6 7 L 3.5 10.5 L 3.5 15 L 9 15" />
+    <path d="M 6.5 8.5 L 8.5 8.5 L 8.5 11 L 5 11 Z" />
+    {/* Cargo Box */}
+    <path d="M 9.5 15 L 9.5 8 L 20.5 8 L 20.5 15 Z" />
+    {/* Wheels */}
+    <circle cx="6" cy="17" r="2" />
+    <circle cx="17" cy="17" r="2" />
+  </svg>
+);
+
+const PickupIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className={className} 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth={1.5} 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {/* Cabin */}
+    <path d="M 10 15 L 10 8 L 7 8 L 4 11 L 4 15 L 10 15" />
+    <path d="M 7 9.5 L 9.5 9.5 L 9.5 12 L 5.5 12 Z" />
+    {/* Open Bed */}
+    <path d="M 10 15 L 21 15 L 21 11 L 10 11" />
+    {/* Cargo box inside bed */}
+    <path d="M 12 11 L 12 8 L 17 8 L 17 11 Z" />
+    {/* Wheels */}
+    <circle cx="6.5" cy="17" r="2" />
+    <circle cx="17.5" cy="17" r="2" />
+  </svg>
+);
+
+const Tempo407Icon = ({ className = "w-12 h-12" }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className={className} 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth={1.5} 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {/* Cabin */}
+    <path d="M 9 15 L 9 7 L 6.5 7 L 5 9 L 4 9 L 4 15 L 9 15" />
+    <path d="M 6 8.5 L 8.5 8.5 L 8.5 11 L 5 11 Z" />
+    {/* High Cargo Box */}
+    <path d="M 9.5 15 L 9.5 5 L 21 5 L 21 15 Z" />
+    {/* Wheels */}
+    <circle cx="6.5" cy="17" r="2" />
+    <circle cx="17" cy="17" r="2" />
+  </svg>
+);
+
+const LargeTruckIcon = ({ className = "w-12 h-12" }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className={className} 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth={1.5} 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {/* Cab */}
+    <path d="M 3.5 15 L 3.5 6 L 7.5 6 L 7.5 15 L 3.5 15" />
+    <path d="M 4.5 7.5 L 7 7.5 L 7 10.5 L 4.5 10.5 Z" />
+    {/* Chassis link */}
+    <path d="M 7.5 15 L 8.5 15" />
+    {/* Container */}
+    <path d="M 8.5 15 L 8.5 5 L 22.5 5 L 22.5 15 Z" />
+    {/* Container Ridges */}
+    <path d="M 12 5 L 12 15" />
+    <path d="M 16 5 L 16 15" />
+    <path d="M 20 5 L 20 15" />
+    {/* Wheels */}
+    <circle cx="5" cy="17" r="2" />
+    <circle cx="15" cy="17" r="2" />
+    <circle cx="19.5" cy="17" r="2" />
+  </svg>
+);
+
 // ── Vehicle Card ────────────────────────────────────────────────────────────
 
 const vehicles = [
-  { type: "Tata Ace", icon: "🛻", capacity: "750 kg", price: "₹299", desc: "Perfect for small moves" },
-  { type: "Tempo 407", icon: "🚛", capacity: "2.5 tons", price: "₹599", desc: "Furniture & appliances" },
-  { type: "Pickup Truck", icon: "🚚", capacity: "1.5 tons", price: "₹449", desc: "Open-bed for bulk goods" },
-  { type: "Large Truck", icon: "🚛", capacity: "7 tons", price: "₹999", desc: "Heavy-duty relocations" },
+  { type: "Tata Ace", icon: TataAceIcon, capacity: "750 kg", price: "₹299", desc: "Perfect for small moves" },
+  { type: "Tempo 407", icon: Tempo407Icon, capacity: "2.5 tons", price: "₹599", desc: "Furniture & appliances" },
+  { type: "Pickup Truck", icon: PickupIcon, capacity: "1.5 tons", price: "₹449", desc: "Open-bed for bulk goods" },
+  { type: "Large Truck", icon: LargeTruckIcon, capacity: "7 tons", price: "₹999", desc: "Heavy-duty relocations" },
 ];
+
 
 // ── Feature Card ────────────────────────────────────────────────────────────
 
@@ -159,9 +255,7 @@ export default function LandingPage() {
 
           {/* Center Nav Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Features</a>
-            <a href="#vehicles"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Vehicles</a>
-            <a href="#how-it-works" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>How It Works</a>
+            <a href="/"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Home</a>
             <Link href="/download"  className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Download App</Link>
             <Link href="/developer" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Developers</Link>
           </div>
@@ -378,10 +472,11 @@ export default function LandingPage() {
             {vehicles.map((v, i) => (
               <motion.div
                 key={v.type}
-                className="card card-hover cursor-pointer text-center flex flex-col h-full justify-between gap-2"
+                className="card card-hover cursor-pointer text-center flex flex-col h-full justify-between gap-4 group"
                 onClick={() => setActiveVehicle(i)}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover="hover"
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 style={{
@@ -389,12 +484,46 @@ export default function LandingPage() {
                   boxShadow: activeVehicle === i ? "var(--shadow-glow)" : undefined,
                 }}
               >
-                <span className="text-5xl mb-4 block">{v.icon}</span>
-                <h3 className="font-display text-lg font-bold mb-1" style={{ color: "var(--text-primary)" }}>{v.type}</h3>
-                <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>{v.desc}</p>
-                <div className="flex items-center justify-center gap-4">
-                  <span className="badge badge-delivered">{v.capacity}</span>
-                  <span className="font-mono font-bold" style={{ color: "var(--brand-primary-light)" }}>from {v.price}</span>
+                <div className="flex justify-center mb-2">
+                  <div 
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 border text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] dark:group-hover:text-[var(--brand-primary-light)] group-hover:scale-105 group-hover:border-[var(--brand-primary)]/30 group-hover:bg-[var(--brand-primary)]/5"
+                    style={{
+                      background: activeVehicle === i 
+                        ? "linear-gradient(135deg, rgba(2, 89, 221, 0.15), rgba(132, 175, 251, 0.15))"
+                        : "var(--bg-tertiary)",
+                      borderColor: activeVehicle === i
+                        ? "var(--brand-primary)"
+                        : "var(--border-subtle)",
+                      color: activeVehicle === i ? "var(--brand-primary)" : undefined
+                    }}
+                  >
+                    <motion.div
+                      variants={{
+                        hover: {
+                          x: [0, 4, -2, 2, 0],
+                          y: [0, -2, 0, -1, 0],
+                          transition: {
+                            duration: 0.5,
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                            repeatType: "mirror" as const
+                          }
+                        }
+                      }}
+                    >
+                      <v.icon />
+                    </motion.div>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col justify-between gap-2">
+                  <div>
+                    <h3 className="font-display text-lg font-bold mb-1" style={{ color: "var(--text-primary)" }}>{v.type}</h3>
+                    <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>{v.desc}</p>
+                  </div>
+                  <div className="flex items-center justify-center gap-4 mt-auto">
+                    <span className="badge badge-delivered">{v.capacity}</span>
+                    <span className="font-mono font-bold" style={{ color: "var(--brand-primary-light)" }}>from {v.price}</span>
+                  </div>
                 </div>
               </motion.div>
             ))}

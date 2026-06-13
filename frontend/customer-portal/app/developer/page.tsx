@@ -9,6 +9,7 @@ import {
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import Image from "next/image";
+import logo from "../icon.jpeg";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface TeamMember {
@@ -393,9 +394,9 @@ export default function DeveloperPage() {
         <div className="container-wide">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 mb-12 px-4 md:px-0 text-center sm:text-left">
             <div>
-              <div className="flex items-center gap-2.5 mb-4 justify-center sm:justify-start">
+              <div className="flex items-center gap-2.5 mb-4">
                 <Image
-                  src="/logo.png"
+                  src={logo}
                   alt="CargoHub Logo"
                   width={48}
                   height={48}
@@ -410,9 +411,8 @@ export default function DeveloperPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Product</h4>
               <div className="space-y-3">
-                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</Link>
-                <Link href="/tracking" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</Link>
-                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Fare Calculator</Link>
+                <Link href={user ? "/dashboard/book" : "/login"} className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</Link>
+                <Link href={user ? "/dashboard/track" : "/login"} className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</Link>
                 <Link href="/b2b-portal" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Business Account</Link>
               </div>
             </div>
@@ -420,19 +420,14 @@ export default function DeveloperPage() {
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
                 <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Our Team (Panchayat)</Link>
-                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Careers</a>
-                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Blog</a>
                 <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
               </div>
             </div>
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Download</h4>
               <div className="space-y-3">
-                <Link href="/download" className="flex items-center justify-center sm:justify-start gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                <Link href="/download" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
                   <Smartphone className="w-4 h-4" /> Android App APK
-                </Link>
-                <Link href="/download" className="flex items-center justify-center sm:justify-start gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <Smartphone className="w-4 h-4" /> iOS App APK
                 </Link>
               </div>
             </div>
