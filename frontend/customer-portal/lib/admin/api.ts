@@ -26,7 +26,18 @@ const _fetch = async (endpoint: string, options: RequestInit = {}) => {
 
 // Named exports — both names used across codebase
 export const fetchApi = _fetch;
-export const adminFetch = _fetch;
+export const adminFetch = async (endpoint: string, options: RequestInit = {}) => {
+  const res = await _fetch(endpoint, options);
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = {};
+  }
+  if (!res.ok) throw new Error(data.message || 'API error');
+  return data;
+};
 
 // Cache for GET requests
 const CACHE = new Map<string, { data: any; ts: number }>();
