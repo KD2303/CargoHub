@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { auth as firebaseAuth } from "@/lib/firebase";
-import { FileText, Download, Loader2, Search } from "lucide-react";
+import { FileText, Download, Loader2, Search, ArrowUpRight, DollarSign, AlertTriangle } from "lucide-react";
 import { generateInvoicePDF } from "@/lib/pdf";
+import { toast } from "react-hot-toast";
 
 export default function B2BInvoicesPage() {
   const { user } = useAuthStore();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -36,48 +38,110 @@ export default function B2BInvoicesPage() {
     fetchInvoices();
   }, [user]);
 
+  const filteredInvoices = invoices.filter(inv => 
+    inv.bookingRef?.toLowerCase().includes(search.toLowerCase()) || 
+    inv.pickup?.toLowerCase().includes(search.toLowerCase()) || 
+    inv.drop?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const exportAllCSV = () => {
+    if (filteredInvoices.length === 0) {
+      toast.error("No invoices to export");
+      return;
+    }
+    const headers = ['Booking Ref', 'Date', 'Pickup', 'Drop', 'Vehicle', 'Amount (INR)'];
+    const rows = filteredInvoices.map(inv => [
+      inv.bookingRef,
+      new Date(inv.date).toLocaleDateString(),
+      `"${inv.pickup}"`,
+      `"${inv.drop}"`,
+      inv.vehicleType,
+      inv.amount
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `cargohub_invoices_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+    return (
+      <div className="flex flex-col justify-center items-center h-64">
+        <Loader2 className="w-10 h-10 animate-spin text-orange-500 mb-4" />
+        <p className="text-[var(--text-secondary)] font-medium tracking-wide animate-pulse">Loading invoices...</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">Invoices & Billing</h1>
-          <p className="text-gray-500">Manage your B2B account statements and download tax invoices.</p>
+          <h1 className="text-3xl font-display font-bold text-[var(--text-primary)] mb-2">Invoices & Billing</h1>
+          <p className="text-[var(--text-secondary)]">Manage your B2B account statements and download tax invoices.</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <Download className="w-4 h-4" /> Export All
+        <button 
+          onClick={exportAllCSV}
+          className="px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-outline)] hover:bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-semibold rounded-xl transition-all shadow-sm flex items-center gap-2"
+        >
+          <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Export CSV
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-outline)] shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
+            <DollarSign className="w-6 h-6 text-orange-500" />
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-secondary)] font-medium">Total Spent</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">₹{invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0).toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-outline)] shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+            <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-secondary)] font-medium">Total Invoices</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{invoices.length}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-outline)] overflow-hidden">
+        <div className="p-5 border-b border-[var(--border-outline)] flex gap-4 bg-[var(--bg-secondary)]">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
             <input 
               type="text" 
-              placeholder="Search by Booking Ref..." 
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by Booking Ref or Location..." 
+              className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-input)] text-[var(--text-primary)] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm shadow-sm"
             />
           </div>
         </div>
 
         {error && (
-          <div className="p-8 text-center text-red-500 font-medium">{error}</div>
+          <div className="p-8 text-center bg-red-500/10">
+            <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-3" />
+            <p className="text-red-500 font-medium">{error}</p>
+          </div>
         )}
 
-        {!error && invoices.length === 0 ? (
-          <div className="p-16 text-center text-gray-500">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-gray-900 mb-1">No Invoices Found</h3>
-            <p>You haven't completed any B2B shipments yet.</p>
+        {!error && filteredInvoices.length === 0 ? (
+          <div className="p-16 text-center text-[var(--text-muted)]">
+            <FileText className="w-16 h-16 opacity-30 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">No Invoices Found</h3>
+            <p>You haven't completed any matching B2B shipments yet.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 border-b border-gray-100">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-[var(--bg-card)] border-b border-[var(--border-outline)] text-[var(--text-secondary)]">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Booking Ref</th>
                   <th className="px-6 py-4 font-semibold">Date</th>
@@ -86,22 +150,34 @@ export default function B2BInvoicesPage() {
                   <th className="px-6 py-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
-                {invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-gray-900">{inv.bookingRef}</td>
-                    <td className="px-6 py-4 text-gray-600">{new Date(inv.date).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-900 font-medium truncate max-w-[200px]">{inv.pickup}</p>
-                      <p className="text-gray-500 text-xs truncate max-w-[200px]">→ {inv.drop}</p>
+              <tbody className="divide-y divide-[var(--border-outline)]">
+                {filteredInvoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-[var(--bg-secondary)] transition-colors group">
+                    <td className="px-6 py-4 font-mono font-semibold text-[var(--text-primary)]">
+                      <div className="flex items-center gap-2">
+                        {inv.bookingRef}
+                        <ArrowUpRight className="w-3 h-3 text-[var(--text-muted)] group-hover:text-orange-500 transition-colors" />
+                      </div>
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-gray-900">₹{inv.amount}</td>
+                    <td className="px-6 py-4 text-[var(--text-secondary)]">
+                      <div className="font-medium text-[var(--text-primary)]">{new Date(inv.date).toLocaleDateString()}</div>
+                      <div className="text-xs">{new Date(inv.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-[var(--text-primary)] font-medium truncate max-w-[200px]" title={inv.pickup}>{inv.pickup}</p>
+                      <p className="text-[var(--text-muted)] text-xs truncate max-w-[200px]" title={inv.drop}>→ {inv.drop}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-bold text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded-md">
+                        ₹{inv.amount?.toLocaleString()}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <button 
                         onClick={() => generateInvoicePDF(inv)}
-                        className="text-blue-600 font-semibold hover:text-blue-700 hover:underline flex items-center justify-end gap-1 ml-auto"
+                        className="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 ml-auto text-xs"
                       >
-                        <Download className="w-4 h-4" /> PDF
+                        <Download className="w-3.5 h-3.5" /> PDF
                       </button>
                     </td>
                   </tr>

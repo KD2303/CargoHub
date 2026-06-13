@@ -300,5 +300,41 @@ export const db = {
       // Mock success
       return true;
     }
+  },
+
+  b2bApiKeys: {
+    findByUserId: async (userId: string) => {
+      const { data, error } = await supabase.from('b2b_api_keys').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map(toCamel);
+    },
+    create: async (keyData: any) => {
+      const { data, error } = await supabase.from('b2b_api_keys').insert(toSnake(keyData)).select().single();
+      if (error) throw error;
+      return toCamel(data);
+    },
+    delete: async (id: string, userId: string) => {
+      const { error } = await supabase.from('b2b_api_keys').delete().eq('id', id).eq('user_id', userId);
+      if (error) throw error;
+      return true;
+    }
+  },
+
+  b2bWebhooks: {
+    findByUserId: async (userId: string) => {
+      const { data, error } = await supabase.from('b2b_webhooks').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map(toCamel);
+    },
+    create: async (webhookData: any) => {
+      const { data, error } = await supabase.from('b2b_webhooks').insert(toSnake(webhookData)).select().single();
+      if (error) throw error;
+      return toCamel(data);
+    },
+    delete: async (id: string, userId: string) => {
+      const { error } = await supabase.from('b2b_webhooks').delete().eq('id', id).eq('user_id', userId);
+      if (error) throw error;
+      return true;
+    }
   }
 };

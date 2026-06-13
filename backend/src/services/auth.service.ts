@@ -17,6 +17,7 @@ export const authService = {
       gender?: string;
       profilePictureUrl?: string;
       role?: 'USER' | 'DRIVER' | 'ADMIN';
+      accountType?: 'STANDARD' | 'B2B';
     }
   ): Promise<UserProfile> {
     
@@ -49,7 +50,7 @@ export const authService = {
       gender: data.gender,
       profilePhoto: data.profilePictureUrl,
       role: data.role || 'USER',
-      accountType: 'STANDARD',
+      accountType: data.accountType || 'STANDARD',
       emailVerified: false, // will update based on Firebase later
       profileCompleted: true,
       isActive: true,

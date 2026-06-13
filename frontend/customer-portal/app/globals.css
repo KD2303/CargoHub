@@ -73,7 +73,7 @@
   --border-hover: rgba(2, 89, 221, 0.25);
   --border-active: rgba(2, 89, 221, 0.5);
   --border-card: rgba(11, 28, 63, 0.06);
-  --border-outline: transparent;
+  --border-outline: rgba(11, 28, 63, 0.12);
   --border-input: rgba(2, 89, 221, 0.15);
 
   /* Shadows */

@@ -85,6 +85,27 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 7. B2B API Keys
+CREATE TABLE IF NOT EXISTS b2b_api_keys (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(firebase_uid) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  key TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_used_at TIMESTAMPTZ
+);
+
+-- 8. B2B Webhooks
+CREATE TABLE IF NOT EXISTS b2b_webhooks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(firebase_uid) ON DELETE CASCADE,
+  endpoint_url TEXT NOT NULL,
+  events TEXT[] NOT NULL DEFAULT '{}',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ==========================================
 -- 🚀 PERFORMANCE OPTIMIZATIONS (INDEXES)
 -- ==========================================

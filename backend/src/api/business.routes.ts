@@ -109,4 +109,130 @@ router.get('/invoices', async (req, res) => {
   });
 });
 
+// ==========================================
+// 🚀 Live Fleet Tracking
+// ==========================================
+
+router.get('/fleet', async (req, res) => {
+  try {
+    // Fetch all active bookings for this B2B user
+    const result = await db.bookings.findByUserId(req.user!.uid, 1, 100);
+    
+    // Filter active ones (In Transit, Delayed, Delivered, Picked Up)
+    const activeBookings = result.data.filter((b: any) => 
+      ['IN_TRANSIT', 'DELAYED', 'DELIVERED', 'PICKED_UP'].includes(b.status)
+    );
+
+    // Format them for the Fleet Map
+    const fleet = await Promise.all(activeBookings.map(async (b: any) => {
+      // In a real app we would join the drivers table. 
+      // For now, we do a fallback if driverId is missing.
+      let driverName = "Unassigned";
+      if (b.driverId) {
+        const driver = await db.drivers.findByFirebaseUid(b.driverId);
+        if (driver) driverName = driver.name;
+      }
+      
+      return {
+        id: b.bookingRef,
+        status: b.status === 'IN_TRANSIT' || b.status === 'PICKED_UP' ? 'In Transit' : 
+                b.status === 'DELAYED' ? 'Delayed' : 'Delivered',
+        driver: driverName,
+        from: b.pickupAddress.split(',')[0],
+        to: b.dropAddress.split(',')[0],
+        eta: b.status === 'DELIVERED' ? 'Arrived' : 'In Progress',
+        lat: b.pickupLat + (b.dropLat - b.pickupLat) * 0.5, // Mock current lat
+        lng: b.pickupLng + (b.dropLng - b.pickupLng) * 0.5, // Mock current lng
+        pickup: { lat: b.pickupLat, lng: b.pickupLng },
+        dropoff: { lat: b.dropLat, lng: b.dropLng },
+        progress: b.status === 'DELIVERED' ? 100 : 50,
+        type: b.vehicleType
+      };
+    }));
+
+    res.json({ success: true, data: fleet });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ==========================================
+// 🚀 Developer API Hub
+// ==========================================
+
+router.get('/developer/keys', async (req, res) => {
+  try {
+    const keys = await db.b2bApiKeys.findByUserId(req.user!.uid);
+    res.json({ success: true, data: keys });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/developer/keys', async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Name is required' });
+    
+    // Generate a secure API key prefix + random string
+    const key = `sk_live_${uuid().replace(/-/g, '')}`;
+    
+    const newKey = await db.b2bApiKeys.create({
+      userId: req.user!.uid,
+      name,
+      key
+    });
+    
+    res.status(201).json({ success: true, data: newKey });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/developer/keys/:id', async (req, res) => {
+  try {
+    await db.b2bApiKeys.delete(req.params.id, req.user!.uid);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/developer/webhooks', async (req, res) => {
+  try {
+    const webhooks = await db.b2bWebhooks.findByUserId(req.user!.uid);
+    res.json({ success: true, data: webhooks });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/developer/webhooks', async (req, res) => {
+  try {
+    const { endpointUrl, events } = req.body;
+    if (!endpointUrl || !events || !Array.isArray(events)) {
+      return res.status(400).json({ success: false, message: 'Invalid payload' });
+    }
+    
+    const newWebhook = await db.b2bWebhooks.create({
+      userId: req.user!.uid,
+      endpointUrl,
+      events
+    });
+    
+    res.status(201).json({ success: true, data: newWebhook });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/developer/webhooks/:id', async (req, res) => {
+  try {
+    await db.b2bWebhooks.delete(req.params.id, req.user!.uid);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 export default router;

@@ -69,13 +69,36 @@ router.post('/register-user', strictLimiter, decodeFirebaseToken, validate(Regis
       phone: req.body.phone,
       gender: req.body.gender,
       profilePictureUrl: req.body.profilePictureUrl,
-      role: 'USER'
+      role: 'USER',
+      accountType: 'STANDARD'
     });
 
     res.status(200).json({ success: true, data: user, message: 'Profile completed successfully' });
   } catch (error: any) {
     console.error('Register User Error:', error);
     res.status(500).json({ success: false, error: error.message || 'Failed to register user' });
+  }
+});
+
+// Register or complete profile for a B2B USER
+router.post('/register-b2b', strictLimiter, decodeFirebaseToken, validate(RegisterUserSchema), async (req, res) => {
+  try {
+    const firebaseUid = req.user!.uid;
+    const email = req.user!.email;
+
+    const user = await authService.registerUser(firebaseUid, email, {
+      name: req.body.name,
+      phone: req.body.phone,
+      gender: req.body.gender,
+      profilePictureUrl: req.body.profilePictureUrl,
+      role: 'USER',
+      accountType: 'B2B'
+    });
+
+    res.status(200).json({ success: true, data: user, message: 'B2B Profile completed successfully' });
+  } catch (error: any) {
+    console.error('Register B2B Error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to register B2B user' });
   }
 });
 
