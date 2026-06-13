@@ -8,9 +8,11 @@ import { useAuthStore } from "@/store/authStore";
 import { auth as firebaseAuth } from "@/lib/firebase";
 import { generateInvoicePDF } from "@/lib/pdf";
 import { toast } from "react-hot-toast";
+import { useLanguageStore } from "@/store/languageStore";
 
 export default function OrdersPage() {
   const { user } = useAuthStore();
+  const { t } = useLanguageStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,7 +148,7 @@ export default function OrdersPage() {
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold">My Orders</h1>
+          <h1 className="text-2xl font-display font-bold">{t('myOrders')}</h1>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>View and manage all your past and current shipments.</p>
         </div>
         
@@ -167,12 +169,12 @@ export default function OrdersPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="ACCEPTED">Accepted</option>
-            <option value="IN_TRANSIT">In Transit</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="ALL">{t('allStatus')}</option>
+            <option value="PENDING">{t('pending')}</option>
+            <option value="ACCEPTED">{t('accepted')}</option>
+            <option value="IN_TRANSIT">{t('inTransit')}</option>
+            <option value="DELIVERED">{t('delivered')}</option>
+            <option value="CANCELLED">{t('cancelled')}</option>
           </select>
         </div>
       </div>
@@ -186,12 +188,12 @@ export default function OrdersPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Route</th>
-                <th>Vehicle Type</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th className="text-right">Action</th>
+                <th>{t('orderId')}</th>
+                <th>{t('route')}</th>
+                <th>{t('vehicleType')}</th>
+                <th>{t('amount')}</th>
+                <th>{t('status')}</th>
+                <th className="text-right">{t('action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -259,7 +261,7 @@ export default function OrdersPage() {
               ))}
               {filteredOrders.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-500">No orders found.</td>
+                  <td colSpan={6} className="text-center py-8 text-gray-500">{t('noOrders')}</td>
                 </tr>
               )}
             </tbody>

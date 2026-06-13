@@ -11,7 +11,8 @@ interface Driver {
 }
 
 interface ShipmentProps {
-  id: string;
+  id: string;       // full UUID for track link
+  displayId: string; // short ref for display
   status: string;
   pickup: string;
   drop: string;
@@ -26,7 +27,7 @@ function ShipmentRow({ shipment }: { shipment: ShipmentProps }) {
     <div className="p-4 rounded-xl mb-4 bg-white border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all group">
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-sm font-bold text-gray-900">{shipment.id}</span>
+          <span className="font-mono text-sm font-bold text-gray-900">{shipment.displayId || shipment.id.substring(0,8)}</span>
           <span className="text-gray-400 text-xs">•</span>
           <span className="text-sm font-medium text-gray-600">{shipment.vehicle}</span>
         </div>

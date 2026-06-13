@@ -8,9 +8,12 @@ import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect, useRef } from "react";
 import { auth as firebaseAuth } from "@/lib/firebase";
 
+import { useLanguageStore } from "@/store/languageStore";
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { user, setUser } = useAuthStore();
+  const { language, setLanguage, t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<"menu" | "profile" | "notifications" | "security">("menu");
   
   const [formData, setFormData] = useState({
@@ -156,9 +159,9 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold">Settings</h1>
+          <h1 className="text-2xl font-display font-bold">{t('settings')}</h1>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {activeTab === "menu" && "Manage your profile, notifications, and preferences."}
+            {activeTab === "menu" && t('manage')}
             {activeTab === "profile" && "Update your account personal information."}
             {activeTab === "notifications" && "Choose when and how you want to be notified."}
             {activeTab === "security" && "Secure your account credentials and monitor active sessions."}
@@ -171,7 +174,7 @@ export default function SettingsPage() {
             className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl border transition-colors hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
             style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
           >
-            <ChevronLeft className="w-4 h-4" /> Back to Settings
+            <ChevronLeft className="w-4 h-4" /> {t('backToSettings')}
           </button>
         )}
       </div>
@@ -210,15 +213,15 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-lg group-hover:text-[var(--brand-primary)] transition-colors" style={{ color: "var(--text-primary)" }}>
-                      {card.title}
+                      {t(card.id)}
                     </h3>
                     <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                      {card.description}
+                      {t(card.id + 'Desc')}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-bold transition-all duration-300 transform translate-x-0 group-hover:translate-x-1" style={{ color: "var(--brand-primary)" }}>
-                  Configure <ArrowRight className="w-3.5 h-3.5" />
+                  {t('configure')} <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </motion.button>
             );
@@ -312,14 +315,22 @@ export default function SettingsPage() {
                     <Globe className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Language</p>
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>Select your preferred language</p>
+                    <p className="font-medium text-sm">{t('language')}</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t('languageDesc')}</p>
                   </div>
                 </div>
-                <select className="input-field py-1 px-3 w-auto text-sm bg-transparent border-none">
-                  <option>English (IN)</option>
-                  <option>Hindi</option>
-                  <option>Marathi</option>
+                <select 
+                  className="input-field py-1.5 px-3 w-auto text-sm"
+                  value={language}
+                  onChange={(e) => {
+                    const lang = e.target.value as "en" | "hi" | "mr";
+                    setLanguage(lang);
+                    toast.success(lang === "en" ? "Language set to English" : lang === "hi" ? "भाषा हिंदी में बदली गई" : "भाषा मराठीमध्ये बदलली");
+                  }}
+                >
+                  <option value="en">English (IN)</option>
+                  <option value="hi">हिंदी (Hindi)</option>
+                  <option value="mr">मराठी (Marathi)</option>
                 </select>
               </div>
 
@@ -329,8 +340,8 @@ export default function SettingsPage() {
                     <Moon className="w-4 h-4 text-gray-500" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Dark Mode</p>
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>Toggle dark appearance</p>
+                    <p className="font-medium text-sm">{t('darkMode')}</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t('darkModeDesc')}</p>
                   </div>
                 </div>
                 <button 

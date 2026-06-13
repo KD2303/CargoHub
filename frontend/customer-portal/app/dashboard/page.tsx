@@ -23,7 +23,8 @@ export default function DashboardOverview() {
   const activeShipmentsData = recentBookings
     .filter(b => ['PENDING', 'ACCEPTED', 'DRIVER_ARRIVING', 'PICKED_UP', 'IN_TRANSIT'].includes(b.status))
     .map(b => ({
-      id: b.bookingRef || b.id.substring(0, 8),
+      id: b.id,  // full UUID for track link
+      displayId: b.bookingRef || b.id.substring(0, 8),
       status: b.status.replace('_', ' '),
       pickup: b.pickupAddress || 'Unknown',
       drop: b.dropAddress || 'Unknown',

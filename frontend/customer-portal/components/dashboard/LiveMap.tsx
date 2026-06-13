@@ -55,6 +55,8 @@ export default function LiveMap({ readonly = false }: { readonly?: boolean }) {
     if (pickup && dropoff) {
       const geometry = await getOSRMRoute(pickup, dropoff);
       
+      if (!map.current) return; // Component might have unmounted during await
+      
       const geojson = {
         type: 'Feature',
         properties: {},
@@ -307,7 +309,7 @@ export default function LiveMap({ readonly = false }: { readonly?: boolean }) {
       {/* Map Header */}
       <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
         <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
-          <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Interactive Map</span>
+          <span className="text-sm font-bold text-gray-900">Interactive Map</span>
           <span className="w-1 h-1 rounded-full bg-gray-300" />
           <div className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full animate-pulse-ring" style={{ background: "var(--brand-primary)" }} />
@@ -328,7 +330,7 @@ export default function LiveMap({ readonly = false }: { readonly?: boolean }) {
           title="Recenter"
           className="bg-white/90 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center pointer-events-auto hover:bg-gray-50 transition-colors shadow-md border border-gray-100"
         >
-          <Navigation className="w-4 h-4" style={{ color: "var(--brand-primary)" }} />
+          <Navigation className="w-4 h-4 text-blue-600" />
         </button>
       </div>
 

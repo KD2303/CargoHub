@@ -25,7 +25,7 @@ export function NotificationPopover() {
 
   useEffect(() => {
     if (!user) return;
-    
+
     // Fetch initial notifications
     const fetchNotifications = async () => {
       try {
@@ -42,7 +42,7 @@ export function NotificationPopover() {
         console.error("Failed to fetch notifications", err);
       }
     };
-    
+
     fetchNotifications();
 
     // Listen to socket for new notifications
@@ -111,7 +111,7 @@ export function NotificationPopover() {
 
   return (
     <div className="relative" ref={popoverRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
       >
@@ -155,7 +155,7 @@ export function NotificationPopover() {
               ) : (
                 <div className="divide-y divide-[var(--border-subtle)]">
                   {notifications.map((notif) => (
-                    <div 
+                    <div
                       key={notif.id}
                       onClick={() => markAsRead(notif.id)}
                       className={`p-4 hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer flex gap-3 ${!notif.isRead ? 'bg-purple-50/50 dark:bg-purple-900/10' : ''}`}
@@ -181,7 +181,7 @@ export function NotificationPopover() {
                         {!notif.isRead && (
                           <div className="flex-shrink-0 w-2 h-2 rounded-full bg-purple-500 mb-2"></div>
                         )}
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); markAsRead(notif.id); }}
                           className="flex-shrink-0 p-1 rounded text-[var(--text-muted)] hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                           title="Mark as read and remove"
@@ -194,7 +194,7 @@ export function NotificationPopover() {
                 </div>
               )}
             </div>
-            
+
             <div className="p-3 border-t border-[var(--border-subtle)] text-center bg-[var(--bg-secondary)]">
               <button className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium transition-colors">
                 View all notifications

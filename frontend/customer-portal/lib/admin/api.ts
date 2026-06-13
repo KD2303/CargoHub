@@ -21,7 +21,19 @@ const _fetch = async (endpoint: string, options: RequestInit = {}) => {
     window.location.href = '/admin/login';
   }
   
-  return res;
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = text;
+  }
+
+  if (!res.ok) {
+    throw new Error(data.message || data.error || typeof data === 'string' ? data : 'API Request Failed');
+  }
+
+  return data;
 };
 
 // Named exports — both names used across codebase
@@ -46,8 +58,7 @@ const CACHE_TTL = 30_000;
 export async function adminFetchCached(endpoint: string): Promise<any> {
   const cached = CACHE.get(endpoint);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
-  const res = await _fetch(endpoint);
-  const data = await res.json();
+  const data = await _fetch(endpoint);
   CACHE.set(endpoint, { data, ts: Date.now() });
   return data;
 }

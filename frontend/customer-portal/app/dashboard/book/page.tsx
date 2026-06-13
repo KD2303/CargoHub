@@ -13,6 +13,7 @@ import Script from "next/script";
 import { toast } from "react-hot-toast";
 import { useTheme } from "next-themes";
 import { CreditCard } from "lucide-react";
+import { useLanguageStore } from "@/store/languageStore";
 
 // Dynamically import LiveMap with SSR disabled
 const LiveMap = dynamic(() => import("@/components/dashboard/LiveMap"), { ssr: false });
@@ -23,6 +24,7 @@ export default function BookingPage() {
   const [estimating, setEstimating] = useState(false);
   const { user } = useAuthStore();
   const { theme } = useTheme();
+  const { t } = useLanguageStore();
 
   const {
     pickup,
@@ -155,11 +157,13 @@ export default function BookingPage() {
             });
             
             const bookData = await bookRes.json();
+            console.log('Booking response:', bookData);
             if (bookData.success) {
-              setCreatedBookingId(bookData.data.booking.id);
+              setCreatedBookingId(bookData.data?.booking?.id || bookData.data?.id || "CH-" + Date.now());
               setIsSuccess(true);
             } else {
-              toast.error("Failed to create booking: " + bookData.error + (bookData.details ? " - " + bookData.details : ""));
+              const errDetail = bookData.details || bookData.message || bookData.error || bookData;
+              toast.error("Booking failed: " + (typeof errDetail === 'object' ? JSON.stringify(errDetail) : errDetail));
             }
           } catch (err) {
             console.error(err);
@@ -241,6 +245,7 @@ export default function BookingPage() {
     doc.text(`Vehicle: ${vehicle.toUpperCase()}`, 20, cargoY + 6);
     doc.text(`Type: ${cargoType}`, 20, cargoY + 12);
     doc.text(`Weight: ${weight || 0} kg`, 20, cargoY + 18);
+    doc.text(`Helpers: ${helpers} (₹${helpers * 300})`, 20, cargoY + 24);
     
     // Fare Breakdown
     const fareY = cargoY + 30;
@@ -330,7 +335,7 @@ export default function BookingPage() {
     <div className="max-w-5xl mx-auto">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="mb-8">
-        <h1 className="text-2xl font-display font-bold text-gray-900 mb-6">New Booking</h1>
+        <h1 className="text-2xl font-display font-bold text-gray-900 mb-6">{t('newBooking')}</h1>
         
         {/* Step Indicator */}
         <div className="flex items-center justify-between relative max-w-2xl mx-auto">
@@ -374,17 +379,15 @@ export default function BookingPage() {
               className="grid grid-cols-1 md:grid-cols-2 gap-8"
             >
               <div>
-                <h2 className="text-lg font-bold mb-4 text-gray-900">Pickup & Drop Details</h2>
+                <h2 className="text-lg font-bold mb-4 text-gray-900">{t('pickupDetails')}</h2>
                 <div className="space-y-4 relative">
-                  <div className="absolute left-[17px] top-[42px] h-[80px] w-px bg-gray-300 z-10 pointer-events-none" />
-                  
                   <div className="relative z-20">
                     <label className="block text-xs font-semibold text-gray-500 mb-1">Pickup Location</label>
                     <LocationAutocomplete 
                       type="pickup"
                       placeholder="Search pickup address..."
                       icon={
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 animate-pulse bg-white z-20" />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-blue-500 bg-white z-20" />
                       }
                     />
                   </div>
@@ -414,19 +417,26 @@ export default function BookingPage() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              <h2 className="text-lg font-bold mb-4 text-gray-900">Cargo Details</h2>
+              <h2 className="text-lg font-bold mb-4 text-gray-900">{t('cargoDetails')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                {["mini", "tempo", "truck"].map((v) => (
+                {[
+                  { key: "mini", label: "Mini", capacity: "Up to 750kg" },
+                  { key: "tempo", label: "Tempo", capacity: "Up to 2.5 Ton" },
+                  { key: "truck", label: "Truck", capacity: "Up to 7 Ton" },
+                ].map((v) => (
                   <button 
-                    key={v} 
-                    onClick={() => setVehicle(v)}
-                    className={`border-2 rounded-xl p-4 text-left transition-colors ${
-                      vehicle === v ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-blue-400"
-                    }`}
+                    key={v.key} 
+                    onClick={() => setVehicle(v.key)}
+                    className={`border-2 rounded-xl p-4 text-left transition-all`}
+                    style={{
+                      borderColor: vehicle === v.key ? "#2563eb" : "var(--border-subtle)",
+                      background: vehicle === v.key ? "#eff6ff" : "var(--bg-card)",
+                      boxShadow: vehicle === v.key ? "0 0 0 3px rgba(37,99,235,0.1)" : "none",
+                    }}
                   >
-                    <Truck className={`w-6 h-6 mb-2 ${vehicle === v ? "text-blue-600" : "text-gray-600"}`} />
-                    <h3 className="font-bold text-gray-900 capitalize">{v}</h3>
-                    <p className="text-xs text-gray-500">Up to {v === 'mini' ? '750kg' : v === 'tempo' ? '2.5 Ton' : '7 Ton'}</p>
+                    <Truck className="w-6 h-6 mb-2" style={{ color: vehicle === v.key ? "#2563eb" : "var(--text-muted)" }} />
+                    <h3 className="font-bold capitalize" style={{ color: "#111827" }}>{v.label}</h3>
+                    <p className="text-xs" style={{ color: "#6b7280" }}>{v.capacity}</p>
                   </button>
                 ))}
               </div>
@@ -460,15 +470,15 @@ export default function BookingPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Helpers Needed</label>
-                  <select 
+                  <input 
+                    type="number"
                     className="input-field bg-white w-full"
                     value={helpers}
-                    onChange={(e) => setHelpers(Number(e.target.value))}
-                  >
-                    <option value="0">0 (Driver only)</option>
-                    <option value="1">1 Helper (₹300)</option>
-                    <option value="2">2 Helpers (₹600)</option>
-                  </select>
+                    min={0}
+                    onChange={(e) => setHelpers(Math.max(0, Number(e.target.value)))}
+                    placeholder="0"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">₹300 per helper</p>
                 </div>
               </div>
               
@@ -484,14 +494,14 @@ export default function BookingPage() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              <h2 className="text-lg font-bold mb-4 text-gray-900">Review & Pay</h2>
+              <h2 className="text-lg font-bold mb-4 text-gray-900">{t('reviewPay')}</h2>
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-6">
                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
                   <div className="flex items-center gap-2">
                     <Package className="w-5 h-5 text-gray-500" />
                     <span className="font-bold text-gray-700 capitalize">{vehicle}</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-500">{cargoType}, ~{weight || 0}kg</span>
+                  <span className="text-sm font-semibold text-gray-500">{cargoType}, ~{weight || 0}kg{helpers > 0 ? `, ${helpers} helper${helpers > 1 ? 's' : ''}` : ''}</span>
                 </div>
                 
                 <div className="space-y-3 text-sm text-gray-600">
@@ -515,6 +525,12 @@ export default function BookingPage() {
                       <span className="font-mono">₹{fareData.tollCharge}</span>
                     </div>
                   ) : null}
+                  {helpers > 0 && (
+                    <div className="flex justify-between text-blue-600 bg-blue-50 -mx-2 px-2 py-1 rounded-lg">
+                      <span className="font-medium">👷 Helpers ({helpers} × ₹300)</span>
+                      <span className="font-mono font-semibold">₹{helpers * 300}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>GST (18%)</span>
                     <span className="font-mono">₹{fareData?.gst || 0}</span>

@@ -15,7 +15,7 @@ export default function AuditLogsPage() {
     async function loadLogs() {
       try {
         const res = await adminFetch("/api/admin/audit-logs");
-        setLogs(res.data || []);
+        setLogs(res.data || res || []);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -26,7 +26,7 @@ export default function AuditLogsPage() {
 
     import("socket.io-client").then(({ io }) => {
       import("@/lib/firebase").then(({ auth }) => {
-        auth.currentUser?.getIdToken().then(token => {
+        auth.currentUser?.getIdToken().then((token: string) => {
           const socket = io("http://localhost:5000", {
             auth: { token }
           });

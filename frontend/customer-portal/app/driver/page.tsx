@@ -13,7 +13,8 @@ import {
   Bell, MapIcon, Zap, CreditCard, MessageSquare, Database,
   Shield, Cloud, Lock, GitBranch, Loader2, X
 } from "lucide-react";
-import Link from "next/link";import { toast } from '@/store/toastStore';
+import Link from "next/link";
+import { toast } from '@/store/toastStore';
 
 
 const mockEarnings = {
@@ -31,13 +32,13 @@ const recentTrips = [
 
 // ── API Tag colors matching fleetora_rbac_workflow ──────────────────────────
 const tagStyles: Record<string, { bg: string; color: string; border: string }> = {
-  "api-auth":   { bg: "#FAEEDA", color: "#854F0B", border: "#F0D0A0" },
-  "api-sec":    { bg: "#FCEBEB", color: "#A32D2D", border: "#F5B0B0" },
-  "api-db":     { bg: "#E6F1FB", color: "#185FA5", border: "#B4D6F6" },
-  "api-map":    { bg: "#E1F5EE", color: "#0F6E56", border: "#A2E2C8" },
+  "api-auth": { bg: "#FAEEDA", color: "#854F0B", border: "#F0D0A0" },
+  "api-sec": { bg: "#FCEBEB", color: "#A32D2D", border: "#F5B0B0" },
+  "api-db": { bg: "#E6F1FB", color: "#185FA5", border: "#B4D6F6" },
+  "api-map": { bg: "#E1F5EE", color: "#0F6E56", border: "#A2E2C8" },
   "api-notify": { bg: "#EAF3DE", color: "#3B6D11", border: "#C1DF9E" },
-  "api-pay":    { bg: "#FAECE7", color: "#993C1D", border: "#F0C4B4" },
-  "api-media":  { bg: "#E6F1FB", color: "#185FA5", border: "#B4D6F6" },
+  "api-pay": { bg: "#FAECE7", color: "#993C1D", border: "#F0C4B4" },
+  "api-media": { bg: "#E6F1FB", color: "#185FA5", border: "#B4D6F6" },
 };
 
 interface ApiTag { label: string; type: keyof typeof tagStyles; icon: React.ReactNode }
@@ -56,7 +57,7 @@ const driverSteps: WorkflowStep[] = [
     desc: "Email / Password auth. Role stored in PostgreSQL.",
     tags: [
       { label: "Firebase Auth", type: "api-auth", icon: <Smartphone className="w-3 h-3" /> },
-      { label: "Abstract API", type: "api-sec",  icon: <CheckCircle2 className="w-3 h-3" /> },
+      { label: "Abstract API", type: "api-sec", icon: <CheckCircle2 className="w-3 h-3" /> },
     ],
   },
   {
@@ -64,8 +65,8 @@ const driverSteps: WorkflowStep[] = [
     title: "Complete KYC",
     desc: "Driver uploads Aadhaar, License, RC, Insurance. Images are compressed on device, uploaded to CDN. Status: Pending Admin Approval.",
     tags: [
-      { label: "Cloudinary",  type: "api-media", icon: <Cloud className="w-3 h-3" /> },
-      { label: "Supabase",    type: "api-db",    icon: <Database className="w-3 h-3" /> },
+      { label: "Cloudinary", type: "api-media", icon: <Cloud className="w-3 h-3" /> },
+      { label: "Supabase", type: "api-db", icon: <Database className="w-3 h-3" /> },
     ],
   },
   {
@@ -73,7 +74,7 @@ const driverSteps: WorkflowStep[] = [
     title: "Go Online & Background GPS",
     desc: "Driver marks online. Background location task starts fetching GPS every 3s. Location cached in Redis to avoid hitting PostgreSQL too hard.",
     tags: [
-      { label: "expo-location",       type: "api-map", icon: <MapIcon className="w-3 h-3" /> },
+      { label: "expo-location", type: "api-map", icon: <MapIcon className="w-3 h-3" /> },
       { label: "Upstash Redis (GEOADD)", type: "api-db", icon: <Zap className="w-3 h-3" /> },
     ],
   },
@@ -82,9 +83,9 @@ const driverSteps: WorkflowStep[] = [
     title: "Accept & Navigate Job",
     desc: "FCM push wakes device. Driver accepts job. Mapbox navigation SDK starts turn-by-turn. Driver uploads photo of cargo before departure.",
     tags: [
-      { label: "FCM Push",          type: "api-notify", icon: <Bell className="w-3 h-3" /> },
-      { label: "Mapbox Navigation", type: "api-map",    icon: <Navigation className="w-3 h-3" /> },
-      { label: "Cloudinary",        type: "api-media",  icon: <Camera className="w-3 h-3" /> },
+      { label: "FCM Push", type: "api-notify", icon: <Bell className="w-3 h-3" /> },
+      { label: "Mapbox Navigation", type: "api-map", icon: <Navigation className="w-3 h-3" /> },
+      { label: "Cloudinary", type: "api-media", icon: <Camera className="w-3 h-3" /> },
     ],
   },
   {
@@ -92,8 +93,8 @@ const driverSteps: WorkflowStep[] = [
     title: "Job Complete & Payout",
     desc: "Driver taps \"Delivered\". Customer pays. Platform commission (15%) deducted automatically, 85% payout sent instantly to Driver's bank account. SMS confirmation sent.",
     tags: [
-      { label: "Razorpay Route", type: "api-pay",  icon: <GitBranch className="w-3 h-3" /> },
-      { label: "MSG91 SMS",      type: "api-auth", icon: <MessageSquare className="w-3 h-3" /> },
+      { label: "Razorpay Route", type: "api-pay", icon: <GitBranch className="w-3 h-3" /> },
+      { label: "MSG91 SMS", type: "api-auth", icon: <MessageSquare className="w-3 h-3" /> },
     ],
     isLast: true,
   },
@@ -244,9 +245,9 @@ export default function DriverDashboard() {
         const token = await firebaseAuth.currentUser.getIdToken();
         const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/drivers/availability", {
           method: "PATCH",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}` 
+            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({ available: newStatus })
         });
@@ -266,9 +267,9 @@ export default function DriverDashboard() {
 
   const tabs = [
     { key: "dashboard", label: "Dashboard" },
-    { key: "earnings",  label: "Earnings"  },
-    { key: "kyc",       label: "KYC Status"},
-    { key: "workflow",  label: "My Workflow"},
+    { key: "earnings", label: "Earnings" },
+    { key: "kyc", label: "KYC Status" },
+    { key: "workflow", label: "My Workflow" },
   ] as const;
 
   return (
@@ -335,7 +336,7 @@ export default function DriverDashboard() {
                     <p className="text-2xl font-mono font-bold text-gray-900">₹{incomingBooking.fareEstimate}</p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3 mb-6 bg-gray-50 p-4 rounded-xl">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 text-brand-success mt-0.5" />
@@ -424,9 +425,9 @@ export default function DriverDashboard() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { label: "Today's Earnings", value: `₹${earnings.today.toLocaleString()}`, icon: <IndianRupee className="w-5 h-5" />, color: "var(--brand-success)" },
-                { label: "Trips Today",      value: earnings.tripCount.toString(),          icon: <Truck className="w-5 h-5" />,       color: "var(--brand-primary)" },
-                { label: "This Week",        value: `₹${earnings.thisWeek.toLocaleString()}`, icon: <TrendingUp className="w-5 h-5" />, color: "var(--brand-secondary)" },
-                { label: "This Month",       value: `₹${earnings.thisMonth.toLocaleString()}`, icon: <Calendar className="w-5 h-5" />, color: "var(--brand-accent)" },
+                { label: "Trips Today", value: earnings.tripCount.toString(), icon: <Truck className="w-5 h-5" />, color: "var(--brand-primary)" },
+                { label: "This Week", value: `₹${earnings.thisWeek.toLocaleString()}`, icon: <TrendingUp className="w-5 h-5" />, color: "var(--brand-secondary)" },
+                { label: "This Month", value: `₹${earnings.thisMonth.toLocaleString()}`, icon: <Calendar className="w-5 h-5" />, color: "var(--brand-accent)" },
               ].map((stat, i) => (
                 <motion.div key={stat.label} className="glass-card p-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                   <div className="flex items-center justify-between mb-4">
@@ -471,7 +472,7 @@ export default function DriverDashboard() {
                       <p className="font-mono font-bold text-gray-900 text-lg text-emerald-600">₹{activeBooking.fareEstimate}</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100">
                     <div className="flex items-start gap-3">
                       <MapPin className="w-4 h-4 text-brand-success mt-0.5" />
@@ -666,3 +667,4 @@ export default function DriverDashboard() {
     </div>
   );
 }
+

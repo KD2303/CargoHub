@@ -12,10 +12,13 @@ import { VEHICLE_CONFIG, LOAD_CONFIG, FARE_CONSTANTS } from "@cargohub/shared";
 import { calculateSmartFare, formatCurrency } from "@cargohub/shared";
 import type { VehicleType, LoadType, FareBreakdown } from "@cargohub/shared";
 
+import { useAuthStore } from "@/store/authStore";
+
 const vehicleTypes = Object.entries(VEHICLE_CONFIG) as [VehicleType, typeof VEHICLE_CONFIG[VehicleType]][];
 const loadTypes = Object.entries(LOAD_CONFIG) as [LoadType, typeof LOAD_CONFIG[LoadType]][];
 
 export default function BookingPage() {
+  const { user, loading } = useAuthStore();
   const [step, setStep] = useState(1);
   const [pickup, setPickup] = useState("Hazratganj, Lucknow");
   const [drop, setDrop] = useState("Gomti Nagar, Lucknow");
@@ -45,7 +48,7 @@ export default function BookingPage() {
       <header className="sticky top-0 z-50 glass" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
         <div className="container-wide flex items-center justify-between h-20">
           <div className="flex items-center gap-4">
-            <Link href="/" className="w-10 h-10 rounded-xl bg-white border border-gray-150 flex items-center justify-center text-gray-700 hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
+            <Link href="/" className="w-10 h-10 rounded-xl bg-white border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:text-[var(--brand-primary)] hover:border-[var(--brand-primary)] hover:shadow-sm transition-all">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <span className="font-display text-2xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>Book a Truck</span>
@@ -54,7 +57,7 @@ export default function BookingPage() {
             {[1, 2, 3].map((s) => (
               <div key={s} className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all shadow-sm" style={{
-                  background: step >= s ? "var(--brand-primary)" : "white",
+                  background: step >= s ? "var(--brand-primary)" : "var(--bg-secondary)",
                   color: step >= s ? "white" : "var(--text-muted)",
                   border: step >= s ? "1px solid var(--brand-primary)" : "1px solid var(--border-subtle)"
                 }}>
@@ -68,8 +71,31 @@ export default function BookingPage() {
       </header>
 
       <div className="container-wide py-12">
-        <div className="grid lg:grid-cols-3 gap-8 items-start">
-          {/* Main Content */}
+        {loading ? (
+          <div className="flex justify-center items-center py-32">
+            <div className="w-8 h-8 rounded-full border-4 border-[var(--brand-primary)] border-t-transparent animate-spin"></div>
+          </div>
+        ) : !user ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-20 h-20 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] rounded-full flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-3">Login Required</h2>
+            <p className="text-[var(--text-secondary)] mb-8 max-w-md text-center leading-relaxed">
+              You need to be logged in to book a vehicle. Please log in or create a new account to proceed with your booking.
+            </p>
+            <div className="flex gap-4">
+              <Link href="/login?redirect=/book" className="px-8 py-3 bg-[var(--brand-primary)] text-white font-bold rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
+                Log In
+              </Link>
+              <Link href="/register?redirect=/book" className="px-8 py-3 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold rounded-xl hover:bg-[var(--bg-tertiary)] transition-all">
+                Create Account
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-8 items-start">
+            {/* Main Content */}
           <div className="lg:col-span-2">
             <AnimatePresence mode="wait">
               {/* Step 1: Locations */}
@@ -435,6 +461,7 @@ export default function BookingPage() {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
