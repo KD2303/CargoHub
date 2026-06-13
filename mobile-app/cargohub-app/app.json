@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "CargoHub",
+    "slug": "cargohub-app",
+    "version": "1.0.0",
+    "newArchEnabled": false,
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cargohub.driver",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.cargohub",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow CargoHub Driver to use your location for trip tracking."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow CargoHub Driver to access your camera for delivery proof."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you upload KYC documents."
+        }
+      ],
+      "expo-font",
+      "@react-native-google-signin/google-signin"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9ba05d04-7e91-4482-badf-4f5970149525"
+      }
+    }
+  }
+}

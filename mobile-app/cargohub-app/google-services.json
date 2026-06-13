@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "443821391360",
+    "project_id": "cargo-hub-app",
+    "storage_bucket": "cargo-hub-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443821391360:android:179597721af2cf44e022e5",
+        "android_client_info": {
+          "package_name": "com.cargohub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "443821391360-pjd7ms2n2heis5odhaal6ohjl0sqtekn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjKAcjV950Kk-P3LeLTbwurURBrrTKMak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "443821391360-pjd7ms2n2heis5odhaal6ohjl0sqtekn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
