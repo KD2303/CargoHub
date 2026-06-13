@@ -44,7 +44,7 @@ router.get('/drivers', async (req, res) => {
 });
 
 // Get all customers/users
-router.get('/customers', async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
     const users = await db.users.getAll();
     
@@ -64,6 +64,19 @@ router.get('/customers', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to fetch customers' });
   }
+});
+
+// Mock endpoints for features not yet fully implemented in DB
+router.get('/broadcasts', async (req, res) => {
+  res.json({ success: true, data: [] });
+});
+
+router.get('/promo-codes', async (req, res) => {
+  res.json({ success: true, data: [] });
+});
+
+router.get('/settings', async (req, res) => {
+  res.json({ success: true, data: { platformFee: 10, supportEmail: 'support@cargohub.com' } });
 });
 
 // Approve/reject driver KYC
