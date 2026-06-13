@@ -13,7 +13,6 @@ import { useBookingStore } from "@/store/bookingStore";
 function TrackingContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const { user } = useAuthStore();
   const setPickup = useBookingStore(state => state.setPickup);
   const setDropoff = useBookingStore(state => state.setDropoff);
   const setDriverLocation = useBookingStore(state => state.setDriverLocation);
@@ -24,8 +23,8 @@ function TrackingContent() {
   const [driverLoc, setLocalDriverLoc] = useState<any>(null);
 
   useEffect(() => {
-    if (!id || !user || !firebaseAuth.currentUser) {
-      if (!id) setError("No booking ID provided.");
+    if (!id) {
+      setError("No booking ID provided.");
       setLoading(false);
       return;
     }
@@ -34,8 +33,19 @@ function TrackingContent() {
 
     const fetchAndConnect = async () => {
       try {
+        // Wait for Firebase auth to be ready (up to 3s)
+        let attempts = 0;
+        while (!firebaseAuth.currentUser && attempts < 30) {
+          await new Promise(r => setTimeout(r, 100));
+          attempts++;
+        }
+        
         const token = await firebaseAuth.currentUser?.getIdToken();
-        if (!token) return;
+        if (!token) {
+          setError("You must be logged in to track a shipment.");
+          setLoading(false);
+          return;
+        }
 
         // Fetch booking
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings/${id}`, {
@@ -63,9 +73,7 @@ function TrackingContent() {
           });
 
           socket.on("driver:location", (loc: any) => {
-            // Update global store for the map
             setDriverLocation({ lng: loc.lng, lat: loc.lat });
-            // Update local state for the UI
             setLocalDriverLoc(loc);
           });
         } else {
@@ -83,7 +91,7 @@ function TrackingContent() {
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [id, user, setPickup, setDropoff, setDriverLocation]);
+  }, [id, setPickup, setDropoff, setDriverLocation]);
 
   if (loading) {
     return (
@@ -130,32 +138,36 @@ function TrackingContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Column */}
-        <div className="lg:col-span-2 rounded-xl border border-gray-200 overflow-hidden h-[500px] relative bg-gray-50">
+        <div className="lg:col-span-2 rounded-xl overflow-hidden h-[500px] relative glass" style={{ border: "1px solid var(--border-subtle)" }}>
           <LiveMap readonly={true} />
         </div>
 
         {/* Info Column */}
         <div className="flex flex-col gap-6">
           {/* Timeline */}
-          <div className="card bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Navigation className="w-4 h-4 text-blue-600" /> Journey Status
+          <div className="card glass p-6 rounded-xl border shadow-sm" style={{ borderColor: "var(--border-subtle)" }}>
+            <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+              <Navigation className="w-4 h-4" style={{ color: "var(--brand-primary)" }} /> Journey Status
             </h3>
             
             <div className="relative pl-6 space-y-6">
-              <div className="absolute left-2.5 top-2 bottom-2 w-0.5 bg-gray-100" />
+              <div className="absolute left-2.5 top-2 bottom-2 w-0.5" style={{ background: "var(--border-subtle)" }} />
               
               {steps.map((step, idx) => (
                 <div key={idx} className={`relative z-10 flex gap-4 ${step.done ? 'opacity-100' : 'opacity-40'}`}>
-                  <div className={`absolute -left-6 w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center
-                    ${step.done ? 'border-blue-600' : 'border-gray-300'}
-                    ${idx === currentStepIdx ? 'ring-4 ring-blue-50' : ''}
-                  `}>
-                    {step.done && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                  <div className={`absolute -left-6 w-5 h-5 rounded-full border-2 flex items-center justify-center
+                    ${step.done ? 'border-blue-600' : ''}
+                    ${idx === currentStepIdx ? 'ring-4 ring-blue-500/20' : ''}
+                  `}
+                  style={{ 
+                    background: "var(--bg-card)",
+                    borderColor: step.done ? "var(--brand-primary)" : "var(--border-subtle)" 
+                  }}>
+                    {step.done && <div className="w-2 h-2 rounded-full" style={{ background: "var(--brand-primary)" }} />}
                   </div>
                   <div className="flex-1 pb-1">
-                    <p className={`font-semibold text-sm ${step.done ? 'text-gray-900' : 'text-gray-500'}`}>{step.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 font-mono">{step.time}</p>
+                    <p className="font-semibold text-sm" style={{ color: step.done ? "var(--text-primary)" : "var(--text-secondary)" }}>{step.title}</p>
+                    <p className="text-xs mt-0.5 font-mono" style={{ color: "var(--text-muted)" }}>{step.time}</p>
                   </div>
                 </div>
               ))}
@@ -164,39 +176,45 @@ function TrackingContent() {
 
           {/* Driver Info */}
           {booking.driver ? (
-            <div className="card bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Driver Details</h3>
+            <div className="card glass p-6 rounded-xl border shadow-sm" style={{ borderColor: "var(--border-subtle)" }}>
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: "var(--text-muted)" }}>Driver Details</h3>
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ background: "rgba(37,99,235,0.1)", color: "var(--brand-primary)" }}>
                   {booking.driver.name.charAt(0)}
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-gray-900 flex items-center gap-2">
+                  <p className="font-bold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
                     {booking.driver.name}
-                    <span className="bg-green-50 text-green-700 text-[10px] px-1.5 py-0.5 rounded border border-green-100">Verified</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded border" style={{ background: "rgba(16,185,129,0.1)", color: "var(--brand-success)", borderColor: "rgba(16,185,129,0.2)" }}>Verified</span>
                   </p>
-                  <p className="text-xs text-yellow-500 font-bold">★ {booking.driver.rating || '4.8'} <span className="text-gray-400 font-normal ml-1">({booking.driver.vehicleNumber})</span></p>
+                  <p className="text-xs text-yellow-500 font-bold">★ {booking.driver.rating || '4.8'} <span className="font-normal ml-1" style={{ color: "var(--text-muted)" }}>({booking.driver.vehicleNumber})</span></p>
                 </div>
-                <button className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:border-blue-500 text-gray-600 transition-colors shadow-sm">
-                  <Phone className="w-4 h-4" />
+                <button 
+                  className="w-10 h-10 rounded-full border flex items-center justify-center transition-colors shadow-sm"
+                  style={{ background: "var(--bg-primary)", borderColor: "var(--border-subtle)" }}
+                >
+                  <Phone className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
                 </button>
               </div>
               
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-white p-2 rounded border border-gray-100">
-                  <p className="text-gray-400 font-semibold mb-0.5">Speed</p>
-                  <p className="font-mono font-bold text-gray-900 text-sm">~{driverLoc ? '32 km/h' : '--'}</p>
+                <div className="p-2 rounded border" style={{ background: "var(--bg-primary)", borderColor: "var(--border-subtle)" }}>
+                  <p className="font-semibold mb-0.5" style={{ color: "var(--text-muted)" }}>Speed</p>
+                  <p className="font-mono font-bold text-sm" style={{ color: "var(--text-primary)" }}>~{driverLoc ? '32 km/h' : '--'}</p>
                 </div>
-                <div className="bg-white p-2 rounded border border-gray-100">
-                  <p className="text-gray-400 font-semibold mb-0.5">Fare</p>
-                  <p className="font-mono font-bold text-gray-900 text-sm">₹{booking.fareEstimate}</p>
+                <div className="p-2 rounded border" style={{ background: "var(--bg-primary)", borderColor: "var(--border-subtle)" }}>
+                  <p className="font-semibold mb-0.5" style={{ color: "var(--text-muted)" }}>Fare</p>
+                  <p className="font-mono font-bold text-sm" style={{ color: "var(--text-primary)" }}>₹{booking.fareEstimate}</p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-4 flex items-center gap-3">
-              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-              <p className="text-sm font-semibold text-gray-600">Finding nearest driver...</p>
+            <div 
+              className="glass p-4 rounded-xl mt-4 flex items-center gap-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(37,99,235,0.25)] border border-gray-200 dark:border-gray-800 hover:border-blue-500/50"
+              style={{ background: "transparent" }}
+            >
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--brand-primary)" }} />
+              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Finding nearest driver...</p>
             </div>
           )}
         </div>

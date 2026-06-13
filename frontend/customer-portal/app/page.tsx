@@ -224,11 +224,11 @@ export default function LandingPage() {
               </Link>
             )}
             <Link
-              href={user ? "/dashboard" : "/book"}
+              href={user ? "/dashboard/book" : "/login"}
               className="text-[13px] md:text-[14px] font-bold text-white px-4 md:px-5 py-2 md:py-2.5 shadow-sm transition-opacity hover:opacity-90 whitespace-nowrap"
               style={{ background: "var(--brand-primary)", borderRadius: "4px" }}
             >
-              {user ? "Dashboard" : "Book Now"}
+              Book Now
             </Link>
           </div>
         </div>
@@ -334,17 +334,25 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
-                className="glass-card p-6 flex flex-col h-full"
+                className="relative p-8 rounded-2xl flex flex-col h-full bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-black/5 dark:border-white/10 transition-all duration-500 hover:-translate-y-2 hover:bg-white/60 dark:hover:bg-white/10 hover:shadow-2xl hover:shadow-[var(--brand-primary)]/20 overflow-hidden group cursor-pointer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${feature.color}15`, color: feature.color }}>
-                  {feature.icon}
+                {/* Hover gradient background effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:from-[var(--brand-primary)]/5 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                
+                {/* Top accent line */}
+                <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] group-hover:w-full transition-all duration-500 ease-out" />
+
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" style={{ background: `${feature.color}15`, color: feature.color }}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="font-display text-xl font-bold mb-3 transition-colors duration-300" style={{ color: "var(--text-primary)" }}>{feature.title}</h3>
+                  <p className="text-sm leading-relaxed transition-colors duration-300" style={{ color: "var(--text-secondary)" }}>{feature.desc}</p>
                 </div>
-                <h3 className="font-display text-lg font-bold mb-2" style={{ color: "var(--text-primary)" }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{feature.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -460,10 +468,10 @@ export default function LandingPage() {
                 Join thousands of businesses and individuals who trust CargoHub for their cargo needs.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">
-                <Link href="/book" className="btn-primary text-base transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex justify-center items-center mx-auto" style={{ padding: "16px 40px" }}>
+                <Link href={user ? "/dashboard/book" : "/login"} className="btn-primary text-base transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex justify-center items-center" style={{ padding: "16px 40px" }}>
                   Start Shipping <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
-                <Link href="/register" className="flex justify-center items-center gap-2 text-base font-bold rounded-xl transition-all duration-300 border shadow-sm hover:shadow-xl hover:-translate-y-1 bg-[var(--bg-glass)] hover:bg-black/5 dark:hover:bg-white/10 mx-auto" style={{ padding: "16px 40px", backdropFilter: "blur(12px)", borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+                <Link href="/register" className="flex justify-center items-center gap-2 text-base font-bold rounded-xl transition-all duration-300 border shadow-sm hover:shadow-xl hover:-translate-y-1 bg-[var(--bg-glass)] hover:bg-black/5 dark:hover:bg-white/10" style={{ padding: "16px 40px", backdropFilter: "blur(12px)", borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
                   <Truck className="w-5 h-5" /> Become a Driver
                 </Link>
               </div>
@@ -494,9 +502,8 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Product</h4>
               <div className="space-y-3">
-                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</Link>
-                <Link href="/tracking" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</Link>
-                <Link href="/book" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Fare Calculator</Link>
+                <Link href={user ? "/dashboard/book" : "/login"} className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Book a Truck</Link>
+                <Link href={user ? "/dashboard/track" : "/login"} className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Track Shipment</Link>
                 <Link href="/b2b-portal" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Business Account</Link>
               </div>
             </div>
@@ -504,8 +511,6 @@ export default function LandingPage() {
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
                 <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Our Team (Panchayat)</Link>
-                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Careers</a>
-                <a href="#" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Blog</a>
                 <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
               </div>
             </div>
@@ -514,9 +519,6 @@ export default function LandingPage() {
               <div className="space-y-3">
                 <Link href="/download" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
                   <Smartphone className="w-4 h-4" /> Android App APK
-                </Link>
-                <Link href="/download" className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <Smartphone className="w-4 h-4" /> iOS App APK
                 </Link>
               </div>
             </div>

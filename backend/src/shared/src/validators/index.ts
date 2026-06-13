@@ -59,7 +59,7 @@ export const CreateBookingSchema = z.object({
   dropAddress: z.string().min(5).max(500),
   vehicleType: VehicleTypeSchema,
   loadType: LoadTypeSchema,
-  helpersRequested: z.number().int().min(0).max(3),
+  helpersRequested: z.number().int().min(0),
   weight: z.number().min(0).optional(),
   scheduledAt: z.string().datetime().optional(),
 });
@@ -77,7 +77,7 @@ export const FareEstimateSchema = z.object({
   dropLng: lngSchema,
   vehicleType: VehicleTypeSchema,
   loadType: LoadTypeSchema,
-  helpersRequested: z.number().int().min(0).max(3),
+  helpersRequested: z.number().int().min(0),
   weight: z.number().min(0).optional(),
 });
 
@@ -137,7 +137,7 @@ export const BulkBookingRowSchema = z.object({
   dropAddress: z.string().min(5),
   vehicleType: VehicleTypeSchema,
   loadType: LoadTypeSchema,
-  helpers: z.number().int().min(0).max(3).default(0),
+  helpers: z.number().int().min(0).default(0),
   scheduledTime: z.string().datetime().optional(),
 });
 

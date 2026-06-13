@@ -12,16 +12,17 @@ import {
 import { useDashboardStore } from "@/store/dashboardStore";
 import { useAuthStore } from "@/store/authStore";
 import { useBookingStore } from "@/store/bookingStore";
+import { useLanguageStore } from "@/store/languageStore";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", route: "/dashboard" },
-  { icon: PackagePlus, label: "New Booking", route: "/dashboard/book" },
-  { icon: MapPin, label: "Track Shipment", route: "/dashboard/track" },
-  { icon: ClipboardList, label: "My Orders", route: "/dashboard/orders" },
-  { icon: Wallet, label: "Payments", route: "/dashboard/payments" },
-  { icon: Star, label: "Saved Addresses", route: "/dashboard/addresses" },
-  { icon: HeadphonesIcon, label: "Support", route: "/dashboard/support" },
-  { icon: Settings, label: "Settings", route: "/dashboard/settings" },
+  { icon: LayoutDashboard, label: "Overview", id: "overview", route: "/dashboard" },
+  { icon: PackagePlus, label: "New Booking", id: "bookShipment", route: "/dashboard/book" },
+  { icon: MapPin, label: "Track Shipment", id: "trackShipment", route: "/dashboard/track" },
+  { icon: ClipboardList, label: "My Orders", id: "myOrders", route: "/dashboard/orders" },
+  { icon: Wallet, label: "Payments", id: "payments", route: "/dashboard/payments" },
+  { icon: Star, label: "Saved Addresses", id: "savedAddresses", route: "/dashboard/addresses" },
+  { icon: HeadphonesIcon, label: "Support", id: "support", route: "/dashboard/support" },
+  { icon: Settings, label: "Settings", id: "settings", route: "/dashboard/settings" },
 ];
 
 export default function Sidebar() {
@@ -29,6 +30,7 @@ export default function Sidebar() {
   const { isSidebarCollapsed, toggleSidebar, stats } = useDashboardStore();
   const { user } = useAuthStore();
   const resetBooking = useBookingStore(state => state.resetBooking);
+  const { t } = useLanguageStore();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -66,10 +68,15 @@ export default function Sidebar() {
       {/* Collapse Toggle */}
       <button 
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 bg-white dark:bg-gray-800 border shadow-sm rounded-full w-6 h-6 flex items-center justify-center z-50 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
-        style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
+        className="absolute -right-3 top-6 border shadow-sm rounded-full w-6 h-6 flex items-center justify-center z-50 transition-all hover:scale-110"
+        style={{ 
+          background: "var(--bg-primary)", 
+          borderColor: "var(--border-subtle)", 
+          color: "var(--brand-primary)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}
       >
-        {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        {isSidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
       </button>
 
       {/* Logo Area */}
@@ -131,7 +138,7 @@ export default function Sidebar() {
                 )}
                 <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: isActive ? "var(--brand-primary)" : "var(--text-muted)" }} />
                 {!isSidebarCollapsed && (
-                  <span className="text-sm whitespace-nowrap">{item.label}</span>
+                  <span className="text-sm whitespace-nowrap">{t(item.id)}</span>
                 )}
               </motion.div>
             </Link>

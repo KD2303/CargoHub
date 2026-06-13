@@ -36,7 +36,10 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(firebaseAuth, email, password);
-      window.location.href = mode === "user" ? "/dashboard" : "/driver";
+      
+      const redirectParams = new URLSearchParams(window.location.search);
+      const redirectUrl = redirectParams.get("redirect") || (mode === "user" ? "/dashboard" : "/driver");
+      window.location.href = redirectUrl;
     } catch (err: any) {
       toast.error("Login failed: " + err.message);
     } finally {
@@ -51,7 +54,7 @@ export default function LoginPage() {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
       // We optionally try to register the user in case this is their first time logging in
       const idToken = await result.user.getIdToken();
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +66,9 @@ export default function LoginPage() {
           phone: result.user.phoneNumber || '+910000000000'
         })
       });
-      window.location.href = mode === "user" ? "/dashboard" : "/driver";
+      const redirectParams = new URLSearchParams(window.location.search);
+      const redirectUrl = redirectParams.get("redirect") || (mode === "user" ? "/dashboard" : "/driver");
+      window.location.href = redirectUrl;
     } catch (err: any) {
       toast.error("Google login failed: " + err.message);
     } finally {
@@ -98,36 +103,48 @@ export default function LoginPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Feature 1 */}
-                <div className="p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-tertiary)] transition-colors hover:border-[var(--brand-primary)]">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
-                        <Zap className="w-4 h-4" />
+                <div className="relative p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-glass)] dark:bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--bg-card)] dark:hover:bg-white/10 hover:border-[var(--brand-primary)] hover:shadow-xl hover:shadow-[var(--brand-primary)]/10 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:from-[var(--brand-primary)]/5 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
+                            <Zap className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Smart Route Optimization</h3>
+                        <p className="text-xs text-[var(--text-muted)]">AI-powered routing to ensure fastest delivery times and lower fuel costs.</p>
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Smart Route Optimization</h3>
-                    <p className="text-xs text-[var(--text-muted)]">AI-powered routing to ensure fastest delivery times and lower fuel costs.</p>
                 </div>
                 {/* Feature 2 */}
-                <div className="p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-tertiary)] transition-colors hover:border-[var(--brand-primary)]">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
-                        <Truck className="w-4 h-4" />
+                <div className="relative p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-glass)] dark:bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--bg-card)] dark:hover:bg-white/10 hover:border-[var(--brand-primary)] hover:shadow-xl hover:shadow-[var(--brand-primary)]/10 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:from-[var(--brand-primary)]/5 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
+                            <Truck className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Live GPS Tracking</h3>
+                        <p className="text-xs text-[var(--text-muted)]">Monitor your shipments in real-time with updates every 3 seconds.</p>
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Live GPS Tracking</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Monitor your shipments in real-time with updates every 3 seconds.</p>
                 </div>
                 {/* Feature 3 */}
-                <div className="p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-tertiary)] transition-colors hover:border-[var(--brand-primary)]">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <div className="relative p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-glass)] dark:bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--bg-card)] dark:hover:bg-white/10 hover:border-[var(--brand-primary)] hover:shadow-xl hover:shadow-[var(--brand-primary)]/10 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:from-[var(--brand-primary)]/5 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        </div>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Instant Fleet Matching</h3>
+                        <p className="text-xs text-[var(--text-muted)]">Map your shipments to available verified drivers instantly.</p>
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Instant Fleet Matching</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Map your shipments to available verified drivers instantly.</p>
                 </div>
                 {/* Feature 4 */}
-                <div className="p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-tertiary)] transition-colors hover:border-[var(--brand-primary)]">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
-                        <Shield className="w-4 h-4" />
+                <div className="relative p-5 rounded-2xl border border-[var(--border-outline)] bg-[var(--bg-glass)] dark:bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--bg-card)] dark:hover:bg-white/10 hover:border-[var(--brand-primary)] hover:shadow-xl hover:shadow-[var(--brand-primary)]/10 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:from-[var(--brand-primary)]/5 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100" />
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: "color-mix(in srgb, var(--brand-primary) 10%, transparent)", color: "var(--brand-primary)" }}>
+                            <Shield className="w-4 h-4" />
+                        </div>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Secure & Verified</h3>
+                        <p className="text-xs text-[var(--text-muted)]">Every driver is KYC-verified. Goods are insured and secured.</p>
                     </div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Secure & Verified</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Every driver is KYC-verified. Goods are insured and secured.</p>
                 </div>
             </div>
         </div>

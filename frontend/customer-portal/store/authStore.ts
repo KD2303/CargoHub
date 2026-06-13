@@ -75,15 +75,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           'Authorization': `Bearer ${idToken}`
         }
       });
-      
       const data = await res.json();
       if (data.success && data.data) {
         set({ user: data.data, isAuthenticated: true, loading: false });
+      } else if (res.status === 404 || data.error === 'USER_NOT_FOUND' || data.error === 'UNAUTHORIZED') {
+        // Auto-register if user exists in Firebase but not in the database
+        const email = currentUser.email;
+        if (email) {
+          try {
+            const regRes = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/auth/register-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+              },
+              body: JSON.stringify({
+                name: email.split('@')[0],
+                email: email,
+                phone: '+910000000000',
+                gender: 'other',
+                role: 'CUSTOMER' // Default to customer for auto-sync
+              })
+            });
+            const regData = await regRes.json();
+            if (regData.success && regData.data) {
+              set({ user: regData.data, isAuthenticated: true, loading: false });
+              return;
+            }
+          } catch (e) {
+            console.error('Auto-registration failed during profile fetch:', e);
+          }
+        }
+        await firebaseAuth.signOut();
+        set({ user: null, isAuthenticated: false, loading: false });
       } else {
+        await firebaseAuth.signOut();
         set({ user: null, isAuthenticated: false, loading: false });
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error);
+      await firebaseAuth.signOut();
       set({ user: null, isAuthenticated: false, loading: false });
     }
   },
