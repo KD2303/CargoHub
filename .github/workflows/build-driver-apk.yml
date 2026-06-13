@@ -28,6 +28,9 @@ jobs:
         working-directory: ./mobile-app/driver-app
         run: npx expo prebuild -p android
 
+      - name: Patch Expo Task Manager
+        run: node patch-expo-task-manager.js
+
       - name: Build APK with Gradle
         working-directory: ./mobile-app/driver-app/android
         run: chmod +x gradlew && ./gradlew assembleRelease --stacktrace --info
