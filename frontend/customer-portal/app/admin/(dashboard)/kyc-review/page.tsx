@@ -20,10 +20,9 @@ export default function KycReviewPage() {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const res = await adminFetch("/admin/drivers");
-      const json = await res.json();
-      if (json.success) {
-        setDrivers(json.data);
+      const res = await adminFetch("/api/admin/drivers");
+      if (res.success) {
+        setDrivers(res.data);
       } else {
         toast.error("Failed to load applications");
       }
@@ -41,7 +40,7 @@ export default function KycReviewPage() {
   const handleDecision = async (id: string, decision: 'VERIFIED' | 'REJECTED') => {
     try {
       setActionLoading(id);
-      const res = await adminFetch(`/admin/drivers/${id}/verify`, {
+      const res = await adminFetch(`/api/admin/drivers/${id}/verify`, {
         method: "PATCH",
         body: JSON.stringify({ decision, reason: "Admin review" })
       });

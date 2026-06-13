@@ -17,12 +17,11 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await adminFetch("/admin/dashboard-stats");
-        const json = await res.json();
-        if (json.success) {
-          setData(json.data);
+        const res = await adminFetch("/api/admin/dashboard-stats");
+        if (res.success) {
+          setData(res.data);
         } else {
-          setError(json.error || "Failed to fetch data");
+          setError(res.error || "Failed to fetch data");
         }
       } catch (err: any) {
         setError(err.message);
