@@ -12,9 +12,11 @@ import AIDrawer from "@/components/dashboard/AIDrawer";
 import { staggerGrid } from "@/lib/animations";
 import { useEffect } from "react";
 import { useDashboardStore } from "@/store/dashboardStore";
+import { useAddressStore } from "@/store/addressStore";
 
 export default function DashboardOverview() {
   const { stats, recentBookings, error, isLoading, fetchDashboardData } = useDashboardStore();
+  const { addresses } = useAddressStore();
 
   useEffect(() => {
     fetchDashboardData();
@@ -107,10 +109,9 @@ export default function DashboardOverview() {
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
           <StatCard 
             label="Saved Addresses" 
-            value={stats?.savedAddresses || 0} 
+            value={addresses.length} 
             change="In address book" 
             isPositive={true} 
-
             icon={<MapPin className="w-6 h-6" />} 
             color="#8B5CF6" 
           />

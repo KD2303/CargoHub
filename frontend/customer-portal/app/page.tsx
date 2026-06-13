@@ -237,7 +237,7 @@ export default function LandingPage() {
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
         style={{ background: "var(--bg-glass)", borderColor: "var(--border-subtle)" }}
       >
-        <div className="container mx-auto px-6 md:px-12 flex items-center justify-between h-[68px]">
+        <div className="container mx-auto px-6 md:px-12 flex items-center justify-between h-[68px] relative">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
@@ -254,7 +254,7 @@ export default function LandingPage() {
           </Link>
 
           {/* Center Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <a href="/"     className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Home</a>
             <Link href="/download"  className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Download App</Link>
             <Link href="/developer" className="text-[14px] font-semibold transition-colors" style={{ color: "var(--text-secondary)" }}>Developers</Link>
@@ -346,16 +346,18 @@ export default function LandingPage() {
                 Uncertain World, Working Every Day To Earn Our Customers&apos;
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 w-full sm:w-auto px-6">
-                <Link href="/register" className="group flex items-stretch text-sm font-bold rounded-xl overflow-hidden transition-all duration-300 border shadow-sm hover:shadow-xl hover:-translate-y-1 bg-[var(--bg-glass)] hover:bg-black/5 dark:hover:bg-white/10 mx-auto" style={{ backdropFilter: "blur(12px)", borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
-                  <span className="px-8 py-4 flex items-center">Get Started</span>
-                  <div className="px-5 flex items-center justify-center border-l transition-colors duration-300 bg-[rgba(0,0,0,0.02)] dark:bg-[rgba(255,255,255,0.02)] group-hover:bg-[rgba(0,0,0,0.06)] dark:group-hover:bg-[rgba(255,255,255,0.08)]" style={{ borderColor: "var(--border-subtle)" }}>
-                    <Play className="w-4 h-4" style={{ fill: "var(--text-primary)" }} />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full sm:w-auto px-6">
+                <Link href="/register" className="group flex items-stretch text-[14px] font-bold rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 bg-[var(--bg-glass)] hover:bg-[var(--brand-primary)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] hover:text-white mx-auto sm:mx-0" style={{ backdropFilter: "blur(12px)" }}>
+                  <span className="px-6 py-3 flex items-center">Get Started</span>
+                  <div className="px-4 flex items-center justify-center border-l border-gray-200 dark:border-gray-800 transition-colors duration-300 bg-black/5 dark:bg-white/5 group-hover:bg-blue-700 group-hover:border-blue-700">
+                    <Play className="w-4 h-4 fill-current" />
                   </div>
                 </Link>
-                <a href="#features" className="group flex items-center justify-center gap-3 text-[15px] font-semibold transition-all duration-300 hover:opacity-100 mx-auto" style={{ color: "var(--text-primary)" }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center border shadow-sm backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-md bg-[var(--bg-glass)] group-hover:bg-black/5 dark:group-hover:bg-white/10" style={{ borderColor: "var(--border-subtle)" }}>
-                    <Play className="w-3.5 h-3.5 translate-x-[1px]" style={{ fill: "var(--text-primary)" }} />
+                <a href="#features" className="relative group flex items-center justify-center gap-2.5 text-[14px] font-bold transition-all duration-300 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 bg-[var(--bg-glass)] hover:border-orange-500/50 hover:text-orange-500 text-[var(--text-primary)] mx-auto sm:mx-0" style={{ backdropFilter: "blur(12px)" }}>
+                  {/* Orange Glow */}
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-orange-500 to-amber-500 opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500 rounded-xl" />
+                  <div className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-800 group-hover:border-orange-500 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+                    <Play className="w-3.5 h-3.5 translate-x-[1px] fill-current" />
                   </div>
                   Watch more
                 </a>
@@ -428,7 +430,7 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
-                className="relative p-8 rounded-2xl flex flex-col h-full bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-black/5 dark:border-white/10 transition-all duration-500 hover:-translate-y-2 hover:bg-white/60 dark:hover:bg-white/10 hover:shadow-2xl hover:shadow-[var(--brand-primary)]/20 overflow-hidden group cursor-pointer"
+                className="relative p-8 rounded-2xl flex flex-col h-full bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-gray-800 transition-all duration-500 hover:-translate-y-2 hover:bg-white/60 dark:hover:bg-white/10 hover:shadow-2xl hover:shadow-[var(--brand-primary)]/20 overflow-hidden group cursor-pointer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -546,17 +548,18 @@ export default function LandingPage() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 px-4 md:px-0">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 px-4 md:px-0">
             {steps.map((s, i) => (
               <motion.div
                 key={s.step}
-                className="relative text-center"
+                className="relative text-center p-6 md:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/40 dark:bg-white/5 backdrop-blur-xl transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand-primary)]/10 hover:-translate-y-1 group"
+                style={{ zIndex: steps.length - i }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
               >
-                <div className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center" style={{
+                <div className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" style={{
                   background: "linear-gradient(135deg, rgba(2, 89, 221, 0.1), rgba(132, 175, 251, 0.1))",
                   border: "1px solid var(--border-subtle)",
                   color: "var(--brand-primary-light)",
@@ -564,11 +567,11 @@ export default function LandingPage() {
                   {s.icon}
                 </div>
                 <span className="font-mono text-xs font-bold block mb-2" style={{ color: "var(--brand-primary)" }}>{s.step}</span>
-                <h3 className="font-display text-lg font-bold mb-2" style={{ color: "var(--text-primary)" }}>{s.title}</h3>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{s.desc}</p>
+                <h3 className="font-display text-lg font-bold mb-2 transition-colors duration-300" style={{ color: "var(--text-primary)" }}>{s.title}</h3>
+                <p className="text-sm transition-colors duration-300" style={{ color: "var(--text-secondary)" }}>{s.desc}</p>
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-10 right-0 translate-x-1/2">
-                    <ChevronRight className="w-5 h-5" style={{ color: "var(--text-muted)" }} />
+                  <div className="hidden md:flex absolute top-1/2 -right-6 translate-x-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center bg-[var(--bg-card)] rounded-full border border-gray-200 dark:border-gray-800 shadow-sm" style={{ zIndex: 10 }}>
+                    <ChevronRight className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
                   </div>
                 )}
               </motion.div>
@@ -639,8 +642,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
-                <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Our Team (Panchayat)</Link>
-                <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
+                <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Developer</Link>
               </div>
             </div>
             <div>

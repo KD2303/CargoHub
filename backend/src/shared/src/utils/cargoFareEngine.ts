@@ -26,7 +26,7 @@ export const SURGE_MULTIPLIERS = {
 export type SurgeCondition = keyof typeof SURGE_MULTIPLIERS;
 
 const SMART_FARE_CONSTANTS = {
-  HELPER_CHARGE: 100,
+  HELPER_CHARGE: 300,
   GST_RATE: 0.18,
 };
 

@@ -52,6 +52,7 @@ export default function BookingPage() {
   };
 
   const getVehicleEnum = (v: string) => {
+    if (v === "micro") return "MINI_PICKUP";
     if (v === "mini") return "TATA_ACE";
     if (v === "tempo") return "TEMPO_407";
     return "LARGE_TRUCK";
@@ -418,8 +419,9 @@ export default function BookingPage() {
               className="max-w-2xl mx-auto"
             >
               <h2 className="text-lg font-bold mb-4 text-gray-900">{t('cargoDetails')}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 {[
+                  { key: "micro", label: "Small", capacity: "Up to 350kg" },
                   { key: "mini", label: "Mini", capacity: "Up to 750kg" },
                   { key: "tempo", label: "Tempo", capacity: "Up to 2.5 Ton" },
                   { key: "truck", label: "Truck", capacity: "Up to 7 Ton" },
@@ -429,14 +431,14 @@ export default function BookingPage() {
                     onClick={() => setVehicle(v.key)}
                     className={`border-2 rounded-xl p-4 text-left transition-all`}
                     style={{
-                      borderColor: vehicle === v.key ? "#2563eb" : "var(--border-subtle)",
-                      background: vehicle === v.key ? "#eff6ff" : "var(--bg-card)",
+                      borderColor: vehicle === v.key ? "var(--brand-primary)" : "var(--border-subtle)",
+                      background: vehicle === v.key ? "rgba(37, 99, 235, 0.08)" : "var(--bg-card)",
                       boxShadow: vehicle === v.key ? "0 0 0 3px rgba(37,99,235,0.1)" : "none",
                     }}
                   >
-                    <Truck className="w-6 h-6 mb-2" style={{ color: vehicle === v.key ? "#2563eb" : "var(--text-muted)" }} />
-                    <h3 className="font-bold capitalize" style={{ color: "#111827" }}>{v.label}</h3>
-                    <p className="text-xs" style={{ color: "#6b7280" }}>{v.capacity}</p>
+                    <Truck className="w-6 h-6 mb-2" style={{ color: vehicle === v.key ? "var(--brand-primary)" : "var(--text-muted)" }} />
+                    <h3 className="font-bold capitalize" style={{ color: vehicle === v.key ? "var(--brand-primary)" : "var(--text-primary)" }}>{v.label}</h3>
+                    <p className="text-xs" style={{ color: vehicle === v.key ? "var(--text-secondary)" : "var(--text-muted)" }}>{v.capacity}</p>
                   </button>
                 ))}
               </div>

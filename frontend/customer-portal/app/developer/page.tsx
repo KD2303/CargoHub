@@ -419,8 +419,7 @@ export default function DeveloperPage() {
             <div>
               <h4 className="font-display font-bold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Company</h4>
               <div className="space-y-3">
-                <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Our Team (Panchayat)</Link>
-                <a href="mailto:support@cargohub.in" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Contact</a>
+                <Link href="/developer" className="block text-sm hover:underline" style={{ color: "var(--text-secondary)" }}>Developer</Link>
               </div>
             </div>
             <div>

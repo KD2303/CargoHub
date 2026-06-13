@@ -19,7 +19,7 @@
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "@types/react": "^18.2.79",
+    "@types/react": "18.2.79",
     "concurrently": "^9.1.2",
     "expo": "~52.0.49",
     "expo-asset": "~11.0.5",

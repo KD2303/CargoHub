@@ -25,6 +25,7 @@ export default function QuickBookCard() {
   }, [pickup, dropoff, vehicle, weight]);
 
   const getVehicleEnum = (v: string) => {
+    if (v === "micro") return "MINI_PICKUP";
     if (v === "mini") return "TATA_ACE";
     if (v === "tempo") return "TEMPO_407";
     return "LARGE_TRUCK";
@@ -123,23 +124,25 @@ export default function QuickBookCard() {
 
         {/* Vehicle Selector */}
         <div className="flex p-1 rounded-xl border" style={{ borderColor: "var(--border-subtle)", background: "var(--bg-secondary)" }}>
-          {["mini", "tempo", "truck"].map((v) => (
+          {["small", "mini", "tempo", "truck"].map((v) => {
+            const val = v === "small" ? "micro" : v;
+            return (
             <button
               key={v}
-              onClick={() => setVehicle(v)}
+              onClick={() => setVehicle(val)}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg capitalize transition-all ${
-                vehicle === v 
+                vehicle === val 
                   ? "shadow-sm" 
                   : "hover:opacity-80"
               }`}
               style={{
-                background: vehicle === v ? "var(--brand-secondary)" : "transparent",
-                color: vehicle === v ? "white" : "var(--text-secondary)"
+                background: vehicle === val ? "var(--brand-secondary)" : "transparent",
+                color: vehicle === val ? "white" : "var(--text-secondary)"
               }}
             >
               {v}
             </button>
-          ))}
+          )})}
         </div>
 
         {/* Cargo Weight Input */}
@@ -176,15 +179,15 @@ export default function QuickBookCard() {
               <div className="text-[10px] text-gray-400 mb-1 px-1">
                 Base Fare + Distance + {weight && Number(weight) > 50 ? `₹${(Number(weight) - 50) * 1} Weight Surcharge` : 'No Weight Surcharge'}
               </div>
-              <div className="p-4 rounded-xl mb-4 bg-blue-50/50 border border-blue-100">
+              <div className="p-4 rounded-xl mb-4 border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border-subtle)" }}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-600">Estimated Fare</span>
-                  <span className="text-xl font-bold font-mono text-gray-900">₹{fareData?.total}</span>
+                  <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Estimated Fare</span>
+                  <span className="text-xl font-bold font-mono" style={{ color: "var(--brand-primary)" }}>₹{fareData?.total}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
                   <Navigation className="w-3 h-3" />
                   <span>{fareData?.distanceKm} km</span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300" />
+                  <span className="w-1 h-1 rounded-full" style={{ background: "var(--border-subtle)" }} />
                   <span>~{fareData?.durationMin} min</span>
                 </div>
               </div>

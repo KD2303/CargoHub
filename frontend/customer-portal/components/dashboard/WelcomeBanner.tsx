@@ -19,7 +19,7 @@ export default function WelcomeBanner() {
     else if (hour >= 17) greeting = "Good evening";
     
     const firstName = user?.name ? user.name.split(' ')[0] : 'Guest';
-    const fullText = `${greeting}, ${firstName} 👋`;
+    const fullText = `${greeting}, ${firstName}`;
     
     let i = 0;
     const timer = setInterval(() => {
