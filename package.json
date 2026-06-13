@@ -16,7 +16,8 @@
     "dev:driver": "npm run start --workspace=driver-app",
     "dev:mobile-customer": "npm run start --workspace=customer-app",
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "postinstall": "node patch-expo-task-manager.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
