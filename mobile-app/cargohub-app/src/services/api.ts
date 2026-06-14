@@ -6,11 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Fallback to localhost/10.0.2.2 for emulator testing
 export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ 
   ? Platform.OS === 'android' ? 'http://10.0.2.2:5000/api' : 'http://localhost:5000/api'
-  : 'https://api.cargohub.com/api'); // Production URL
+  : 'https://cargohub-roof.onrender.com/api'); // Production URL
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000, // 30 seconds timeout
+  timeout: 90000, // 90 seconds timeout (to handle Render free-tier cold start)
   headers: {
     'Content-Type': 'application/json',
     'X-Platform': Platform.OS,

@@ -1,0 +1,143 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext {
+        buildToolsVersion = findProperty('android.buildToolsVersion') ?: '35.0.0'
+        minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '24')
+        compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
+        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
+        kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
+        ndkVersion = "26.1.10909125"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.4.1'
+        classpath('com.android.tools.build:gradle')
+        classpath('com.facebook.react:react-native-gradle-plugin')
+        classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        maven {
+            url(new File(['node', '--print', "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), '../android'))
+        }
+        maven {
+            url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
+        }
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
+}
+
+// FORCE PATCH FOR EXPO-TASK-MANAGER
+def applyExpoTaskPatch = {
+    def path = "D:/CargoHub/node_modules/expo-task-manager/android/src/main/java/expo/modules/taskManager/TaskManagerUtils.java"
+    def taskFile = file(path)
+    if (taskFile.exists()) {
+        println "--------------------------------------------------------"
+        println "PATCH_SYSTEM: Adding 'cancelScheduledJob' to TaskManagerUtils.java..."
+        taskFile.text = """package expo.modules.taskManager;
+
+import android.app.PendingIntent;
+import android.app.job.JobParameters;
+import android.content.Context;
+import android.os.Bundle;
+import android.os.PersistableBundle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import expo.modules.interfaces.taskManager.TaskInterface;
+import expo.modules.interfaces.taskManager.TaskExecutionCallback;
+import expo.modules.interfaces.taskManager.TaskManagerUtilsInterface;
+
+public class TaskManagerUtils implements TaskManagerUtilsInterface {
+  @Override
+  public void executeTask(TaskInterface task, Bundle options, TaskExecutionCallback callback) {
+    task.execute(options, null, callback);
+  }
+
+  @Override
+  public PendingIntent createTaskIntent(Context context, TaskInterface task) {
+    return null;
+  }
+
+  @Override
+  public void cancelTaskIntent(Context context, String appId, String taskName) {
+    // No-op stub to satisfy the interface.
+  }
+
+  @Override
+  public void scheduleJob(Context context, TaskInterface task, List<PersistableBundle> data) {
+    // No-op stub to satisfy the interface.
+  }
+
+  @Override
+  public void cancelScheduledJob(Context context, int jobId) {
+    // No-op stub to satisfy the interface.
+  }
+
+  @Override
+  public List<PersistableBundle> extractDataFromJobParams(JobParameters params) {
+    List<PersistableBundle> data = new ArrayList<>();
+    if (params != null && params.getExtras() != null) {
+      data.add(params.getExtras());
+    }
+    return data;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Bundle mapToBundle(Map<String, Object> map) {
+    Bundle bundle = new Bundle();
+    if (map == null) return bundle;
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      if (value instanceof String) {
+        bundle.putString(key, (String) value);
+      } else if (value instanceof Boolean) {
+        bundle.putBoolean(key, (Boolean) value);
+      } else if (value instanceof Integer) {
+        bundle.putInt(key, (Integer) value);
+      } else if (value instanceof Double) {
+        bundle.putDouble(key, (Double) value);
+      } else if (value instanceof Bundle) {
+        bundle.putBundle(key, (Bundle) value);
+      } else if (value instanceof Map) {
+        bundle.putBundle(key, mapToBundle((Map<String, Object>) value));
+      } else if (value instanceof ArrayList) {
+          bundle.putParcelableArrayList(key, (ArrayList<? extends android.os.Parcelable>) value);
+      } else if (value != null) {
+          System.err.println("WARNING: Unhandled type in mapToBundle for key " + key + ": " + value.getClass().getName());
+      }
+    }
+    return bundle;
+  }
+
+  public static boolean notifyTaskJobCancelled(TaskInterface task) {
+    return false;
+  }
+}
+"""
+        println "PATCH_SYSTEM: File overwritten successfully with 'cancelScheduledJob'."
+        println "--------------------------------------------------------"
+    }
+}
+
+applyExpoTaskPatch()
+
+subprojects {
+    tasks.withType(JavaCompile) {
+        doFirst {
+            applyExpoTaskPatch()
+        }
+    }
+}

@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SOCKET_URL = __DEV__
   ? Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000'
-  : 'https://api.cargohub.com';
+  : 'https://cargohub-roof.onrender.com';
 
 let socket: Socket | null = null;
 

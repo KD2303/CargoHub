@@ -89,8 +89,15 @@ export const RegisterScreen = ({ route, navigation }: any) => {
         token = await userCredential.user.getIdToken();
       } catch (firebaseErr: any) {
         if (firebaseErr.code === 'auth/email-already-in-use') {
-          const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-          token = await userCredential.user.getIdToken();
+          try {
+            const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
+            token = await userCredential.user.getIdToken();
+          } catch (signInErr: any) {
+            if (signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+              throw new Error('This email is already registered with a different password. Please use a different email to sign up, or log in with this email on the Login screen.');
+            }
+            throw signInErr;
+          }
         } else {
           throw firebaseErr;
         }

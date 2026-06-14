@@ -57,8 +57,15 @@ export const LoginScreen = ({ route, navigation }: any) => {
           if (firebaseErr.code === 'auth/email-already-in-use') {
             // They created the Firebase account but maybe the backend registration failed previously.
             // Let's log them in and try registering again.
-            const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-            token = await userCredential.user.getIdToken();
+            try {
+              const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
+              token = await userCredential.user.getIdToken();
+            } catch (signInErr: any) {
+              if (signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                throw new Error('This email is already registered with a different password. Please use a different email to sign up, or log in with this email on the Login screen.');
+              }
+              throw signInErr;
+            }
           } else {
             throw firebaseErr;
           }
