@@ -18,17 +18,17 @@ export function AdminClientLayout({ children }: { children: React.ReactNode }) {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex font-sans">
+    <div className="min-h-screen bg-[var(--bg-primary)] font-sans relative">
       <Sidebar />
       <div 
         className={cn(
-          "flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 w-full",
-          "ml-0", // mobile margin
-          sidebarCollapsed ? "md:ml-[80px]" : "md:ml-[220px]"
+          "flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
+          "pl-0", // mobile padding
+          sidebarCollapsed ? "md:pl-[80px]" : "md:pl-[220px]"
         )}
       >
         <Topbar />
-        <main className="flex-1 mt-16 p-6 lg:p-8 overflow-auto bg-[var(--bg-secondary)]">
+        <main className="flex-1 mt-16 p-6 lg:p-8 overflow-auto bg-[var(--bg-secondary)] w-full">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

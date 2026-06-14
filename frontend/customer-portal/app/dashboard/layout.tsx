@@ -16,15 +16,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { isSidebarCollapsed } = useDashboardStore();
-  const { isAuthenticated, loading } = useAuthStore();
+  const { isAuthenticated, loading, user } = useAuthStore();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!loading && (!isAuthenticated || !user)) {
       router.replace('/login');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, user, router]);
 
-  if (loading || !isAuthenticated) {
+  if (loading || !isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-mesh" style={{ background: "var(--bg-primary)" }}>
         <div className="w-10 h-10 border-4 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin shadow-glow"></div>

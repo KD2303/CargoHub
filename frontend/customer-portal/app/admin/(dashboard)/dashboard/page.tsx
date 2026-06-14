@@ -92,7 +92,7 @@ export default function DashboardPage() {
 
           <div className="flex flex-col xl:flex-row gap-6 mb-8">
             {/* Main Content Area */}
-            <div className="flex-1 space-y-8">
+            <div className="flex-1 space-y-8 min-w-0">
               {/* Chart Section */}
               <div className="bg-[var(--bg-surface)] p-6 rounded-lg border border-gray-100 shadow-sm">
                 <h2 className="text-[16px] font-semibold mb-6 text-[var(--text-primary)] tracking-tight">Booking Trends (Last 7 Days)</h2>

@@ -205,6 +205,16 @@ export default function LiveMap({ readonly = false }: { readonly?: boolean }) {
 
         map.current.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
+        map.current.on('styleimagemissing', (e) => {
+          const id = e.id;
+          const width = 1;
+          const height = 1;
+          const data = new Uint8Array(width * height * 4);
+          if (map.current && !map.current.hasImage(id)) {
+            map.current.addImage(id, { width, height, data: data });
+          }
+        });
+
         map.current.on('load', () => {
           if (!map.current) return;
 

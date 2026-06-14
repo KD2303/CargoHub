@@ -29,7 +29,7 @@ export default function OrdersPage() {
         const idToken = await auth.currentUser?.getIdToken();
         if (!idToken) return;
 
-        let url = (`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/bookings";
+        let url = (`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/bookings";
         if (statusFilter !== "ALL") {
           url += `?status=${statusFilter}`;
         }
@@ -74,7 +74,7 @@ export default function OrdersPage() {
     setRatingSubmitting(true);
     try {
       const idToken = await firebaseAuth.currentUser?.getIdToken();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/ratings/${ratingModal.orderId}`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/ratings/${ratingModal.orderId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

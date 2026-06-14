@@ -54,7 +54,23 @@ export default function B2BLoginPage() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const idToken = await result.user.getIdToken();
+      
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      await fetch(`${baseUrl}/api/auth/register-b2b`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          name: result.user.displayName || email.split('@')[0],
+          email: result.user.email || email,
+          phone: result.user.phoneNumber || '+910000000000'
+        })
+      });
+
       window.location.href = "/b2b-portal";
     } catch (err: any) {
       toast.error("Login failed: " + err.message);
@@ -70,7 +86,8 @@ export default function B2BLoginPage() {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
       const idToken = await result.user.getIdToken();
       // Call our new B2B registration endpoint just in case it's a first time login
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/register-b2b`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      await fetch(`${baseUrl}/api/auth/register-b2b`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

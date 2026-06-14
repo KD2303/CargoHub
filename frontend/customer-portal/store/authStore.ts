@@ -44,7 +44,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     
     try {
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/admin/auth/verify', {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const res = await fetch(baseUrl + '/api/admin/auth/verify', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -70,7 +71,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const idToken = await currentUser.getIdToken();
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/auth/me', {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const res = await fetch(baseUrl + '/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${idToken}`
         }
@@ -83,7 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const email = currentUser.email;
         if (email) {
           try {
-            const regRes = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/auth/register-user', {
+            const regRes = await fetch(baseUrl + '/api/auth/register-user', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

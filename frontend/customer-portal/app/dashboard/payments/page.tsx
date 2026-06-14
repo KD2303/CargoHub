@@ -16,7 +16,7 @@ export default function PaymentsPage() {
 
   const handleAddFunds = async () => {
     try {
-      const response = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/payments/test-create-order", {
+      const response = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/payments/test-create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: 500 }), // default 500 for test
@@ -78,7 +78,7 @@ export default function PaymentsPage() {
         const idToken = await auth.currentUser?.getIdToken();
         if (!idToken) return;
 
-        const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/bookings", {
+        const res = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/bookings", {
           headers: { "Authorization": `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -91,6 +91,7 @@ export default function PaymentsPage() {
             date: new Date(b.createdAt).toLocaleDateString(),
             description: `Payment for ${b.bookingRef || "Booking"}`,
             amount: `-₹${b.finalFare || b.fareEstimate || 0}`,
+            amountValue: b.finalFare || b.fareEstimate || 0,
             type: "debit"
           }));
           setTransactions(txns);
@@ -104,6 +105,9 @@ export default function PaymentsPage() {
 
     fetchTransactions();
   }, []);
+
+  const totalSpent = transactions.reduce((acc, txn) => txn.type === 'debit' ? acc + txn.amountValue : acc, 0);
+  const totalAdded = transactions.reduce((acc, txn) => txn.type === 'credit' ? acc + txn.amountValue : acc, 0) + (user?.walletBalance || 0);
 
   return (
     <div className="space-y-6">
@@ -149,13 +153,13 @@ export default function PaymentsPage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="stat-label">Total Spent</p>
-                <h3 className="stat-value mt-2">₹12,480</h3>
+                <h3 className="stat-value mt-2">₹{totalSpent.toLocaleString()}</h3>
               </div>
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-100 dark:bg-red-900/30">
                 <ArrowUpRight className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="stat-change negative mt-2"><ArrowUpRight className="w-3 h-3" /> +12% vs last month</p>
+            <p className="stat-change text-neutral-500 mt-2">Based on bookings</p>
           </motion.div>
 
           <motion.div 
@@ -167,13 +171,13 @@ export default function PaymentsPage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="stat-label">Total Added</p>
-                <h3 className="stat-value mt-2">₹12,730</h3>
+                <h3 className="stat-value mt-2">₹{totalAdded.toLocaleString()}</h3>
               </div>
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 dark:bg-green-900/30">
                 <ArrowDownRight className="w-5 h-5 text-green-600" />
               </div>
             </div>
-            <p className="stat-change positive mt-2"><ArrowDownRight className="w-3 h-3" /> 2 top-ups this month</p>
+            <p className="stat-change text-neutral-500 mt-2">Wallet history</p>
           </motion.div>
         </div>
       </div>
@@ -185,9 +189,8 @@ export default function PaymentsPage() {
         transition={{ delay: 0.3 }}
         className="card p-0 overflow-hidden"
       >
-        <div className="p-5 border-b flex justify-between items-center" style={{ borderColor: "var(--border-subtle)" }}>
+        <div className="p-5 border-b" style={{ borderColor: "var(--border-subtle)" }}>
           <h3 className="font-semibold text-lg">Transaction History</h3>
-          <button className="text-sm font-medium" style={{ color: "var(--brand-primary)" }}>View All</button>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">

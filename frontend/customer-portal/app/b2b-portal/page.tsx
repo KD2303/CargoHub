@@ -99,7 +99,7 @@ export default function BulkBookingPage() {
 
     try {
       const token = await firebaseAuth.currentUser.getIdToken();
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/business/bookings/bulk", {
+      const res = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/business/bookings/bulk", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

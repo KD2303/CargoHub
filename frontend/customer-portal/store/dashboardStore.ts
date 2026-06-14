@@ -40,11 +40,12 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       }
       const idToken = await currentUser.getIdToken();
       
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
       const [statsRes, bookingsRes] = await Promise.all([
-        fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/bookings/stats', {
+        fetch(baseUrl + '/api/bookings/stats', {
           headers: { 'Authorization': `Bearer ${idToken}` }
         }),
-        fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/bookings?limit=5', {
+        fetch(baseUrl + '/api/bookings?limit=5', {
           headers: { 'Authorization': `Bearer ${idToken}` }
         })
       ]);

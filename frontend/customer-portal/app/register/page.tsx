@@ -52,7 +52,8 @@ export default function RegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      const regRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const regRes = await fetch(`${baseUrl}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -87,7 +88,8 @@ export default function RegisterPage() {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
       const idToken = await result.user.getIdToken();
       
-      const regRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const regRes = await fetch(`${baseUrl}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +136,8 @@ export default function RegisterPage() {
       if (!currentUser) throw new Error("No user logged in");
       const idToken = await currentUser.getIdToken();
       
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + '/api/auth/upload-avatar', {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const res = await fetch(baseUrl + '/api/auth/upload-avatar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

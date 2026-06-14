@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +15,13 @@ import { auth as firebaseAuth, googleProvider } from "../../lib/firebase";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"user" | "driver">("user");
+
+  // Clear any existing admin session when accessing user/driver login
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("admin_token");
+    }
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +61,8 @@ export default function LoginPage() {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
       // We optionally try to register the user in case this is their first time logging in
       const idToken = await result.user.getIdToken();
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      await fetch(`${baseUrl}/api/auth/${mode === 'user' ? 'register-user' : 'register-driver'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

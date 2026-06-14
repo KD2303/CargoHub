@@ -71,7 +71,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
         // Fetch bookings
         const token = await auth.currentUser?.getIdToken();
         if (token) {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings?limit=50`, {
+          const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/bookings?limit=50`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data = await res.json();

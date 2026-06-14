@@ -246,6 +246,8 @@ export default function LandingPage() {
               alt="CargoHub Logo"
               width={48}
               height={48}
+              priority
+              style={{ width: "auto", height: "auto" }}
               className="object-contain flex-shrink-0"
             />
             <span className="font-sans text-[17px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
@@ -290,7 +292,7 @@ export default function LandingPage() {
                       style={{ borderColor: "var(--border-subtle)", zIndex: 100 }}
                     >
                       <Link 
-                        href="/dashboard/settings" 
+                        href="/dashboard/profile" 
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
                       >
                         <Settings className="w-4 h-4" />
@@ -318,11 +320,11 @@ export default function LandingPage() {
               </Link>
             )}
             <Link
-              href={user ? "/dashboard/book" : "/login"}
+              href={user ? "/dashboard" : "/login"}
               className="text-[13px] md:text-[14px] font-bold text-white px-4 md:px-5 py-2 md:py-2.5 shadow-sm transition-opacity hover:opacity-90 whitespace-nowrap"
               style={{ background: "var(--brand-primary)", borderRadius: "4px" }}
             >
-              Book Now
+              {user ? "Dashboard" : "Book Now"}
             </Link>
           </div>
         </div>
@@ -623,6 +625,7 @@ export default function LandingPage() {
                   alt="CargoHub Logo"
                   width={48}
                   height={48}
+                  style={{ width: "auto", height: "auto" }}
                   className="rounded-full object-cover flex-shrink-0 shadow-sm"
                 />
                 <span className="font-display text-xl font-bold">CargoHub</span>

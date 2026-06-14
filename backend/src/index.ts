@@ -102,11 +102,11 @@ app.use('/api/ai', aiRoutes);
 
 // ── 404 Handler ──────────────────────────────────────────────────────────────
 
-app.use((_req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     error: 'NOT_FOUND',
-    message: 'The requested endpoint does not exist.',
+    message: `The requested endpoint does not exist. (${req.method} ${req.originalUrl})`,
   });
 });
 

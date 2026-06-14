@@ -84,7 +84,8 @@ export default function B2BRegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      const regRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/register-b2b`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const regRes = await fetch(`${baseUrl}/api/auth/register-b2b`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -118,7 +119,8 @@ export default function B2BRegisterPage() {
       const result = await signInWithPopup(firebaseAuth, googleProvider);
       const idToken = await result.user.getIdToken();
       
-      const regRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/register-b2b`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '');
+      const regRes = await fetch(`${baseUrl}/api/auth/register-b2b`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

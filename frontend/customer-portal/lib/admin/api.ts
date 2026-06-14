@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const API_URL = ((process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')).replace(/\/api\/?$/, '');
 
 const _fetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
@@ -30,7 +30,7 @@ const _fetch = async (endpoint: string, options: RequestInit = {}) => {
   }
 
   if (!res.ok) {
-    throw new Error(data.message || data.error || typeof data === 'string' ? data : 'API Request Failed');
+    throw new Error(data.message || data.error || (typeof data === 'string' ? data : 'API Request Failed'));
   }
 
   return data;

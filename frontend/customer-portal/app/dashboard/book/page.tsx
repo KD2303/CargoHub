@@ -62,7 +62,7 @@ export default function BookingPage() {
     if (!pickup || !dropoff) return;
     setEstimating(true);
     try {
-      const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/fare/estimate", {
+      const res = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/fare/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,7 +108,7 @@ export default function BookingPage() {
     if (!pickup || !dropoff) return;
     
     try {
-      const response = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/payments/test-create-order", {
+      const response = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/payments/test-create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: Number(fareData?.total || 100) }),
@@ -148,7 +148,7 @@ export default function BookingPage() {
               weight: weight ? Number(weight) : undefined,
             };
 
-            const bookRes = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/bookings", {
+            const bookRes = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/bookings", {
               method: "POST",
               headers: { 
                 "Content-Type": "application/json",

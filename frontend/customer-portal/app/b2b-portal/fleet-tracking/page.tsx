@@ -20,7 +20,7 @@ export default function FleetTrackingPage() {
         if (!currentUser) return;
         const token = await currentUser.getIdToken();
         
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/fleet`, {
+        const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/fleet`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

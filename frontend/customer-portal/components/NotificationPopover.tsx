@@ -31,7 +31,7 @@ export function NotificationPopover() {
       try {
         const { auth } = await import('@/lib/firebase');
         const token = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/notifications`, {
+        const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/notifications`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -48,7 +48,7 @@ export function NotificationPopover() {
     // Listen to socket for new notifications
     let socket: any;
     import('socket.io-client').then(({ io }) => {
-      socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
+      socket = io((process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, ''), {
         auth: { token: user.firebaseUid } // or however auth is handled, but maybe just global for now
       });
       socket.on('notification', (newNotif: any) => {
@@ -84,7 +84,7 @@ export function NotificationPopover() {
       setNotifications(prev => prev.filter(n => n.id !== id));
       const { auth } = await import('@/lib/firebase');
       const token = await auth.currentUser?.getIdToken();
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/notifications/${id}/read`, {
+      await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/notifications/${id}/read`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` }
       });

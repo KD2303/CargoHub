@@ -93,6 +93,8 @@ export default function Sidebar() {
             alt="CargoHub Logo"
             width={48}
             height={48}
+            priority
+            style={{ width: "auto", height: "auto" }}
             className="object-contain flex-shrink-0"
           />
           {!isSidebarCollapsed && (
@@ -198,7 +200,7 @@ export default function Sidebar() {
                 style={{ borderColor: "var(--border-subtle)", zIndex: 100 }}
               >
                 <Link 
-                  href="/dashboard/settings" 
+                  href="/dashboard/profile" 
                   onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
                 >

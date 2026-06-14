@@ -23,18 +23,32 @@ export const authService = {
     
     const existing = await db.users.findByFirebaseUid(firebaseUid);
     if (existing) {
+      const updates: any = {};
+      let needsUpdate = false;
+
+      // Allow upgrading to B2B
+      if (data.accountType === 'B2B' && existing.accountType !== 'B2B') {
+        updates.accountType = 'B2B';
+        needsUpdate = true;
+      }
+
       // If user exists, we might just be completing their profile
       if (!existing.profileCompleted) {
-        const updated = await db.users.update(firebaseUid, {
-          name: data.name,
-          phone: data.phone,
-          gender: data.gender,
-          profilePhoto: data.profilePictureUrl,
-          profileCompleted: true,
-          updatedAt: new Date().toISOString()
-        });
+        updates.name = data.name;
+        updates.phone = data.phone;
+        updates.gender = data.gender;
+        updates.profilePhoto = data.profilePictureUrl;
+        updates.profileCompleted = true;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        updates.updatedAt = new Date().toISOString();
+        const updated = await db.users.update(firebaseUid, updates);
         
-        await analyticsService.trackEvent('profile_completed', updated.id, 'user', updated.id);
+        if (!existing.profileCompleted) {
+          await analyticsService.trackEvent('profile_completed', updated.id, 'user', updated.id);
+        }
         return updated;
       }
       return existing;

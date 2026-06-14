@@ -23,10 +23,10 @@ export default function DeveloperHubPage() {
       const token = await currentUser.getIdToken();
       
       const [keysRes, hooksRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/developer/keys`, {
+        fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/developer/keys`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/developer/webhooks`, {
+        fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/developer/webhooks`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -57,7 +57,7 @@ export default function DeveloperHubPage() {
       if (!currentUser) return;
       const token = await currentUser.getIdToken();
       
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/developer/keys`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/developer/keys`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export default function DeveloperHubPage() {
       if (!currentUser) return;
       const token = await currentUser.getIdToken();
       
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/developer/keys/${id}`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/developer/keys/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -102,7 +102,7 @@ export default function DeveloperHubPage() {
       if (!currentUser) return;
       const token = await currentUser.getIdToken();
       
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business/developer/webhooks`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/business/developer/webhooks`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

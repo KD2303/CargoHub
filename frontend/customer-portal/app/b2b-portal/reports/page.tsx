@@ -17,7 +17,7 @@ export default function B2BReportsPage() {
       if (!user || !firebaseAuth.currentUser) return;
       try {
         const token = await firebaseAuth.currentUser.getIdToken();
-        const res = await fetch((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`) + "/api/business/invoices", {
+        const res = await fetch((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`) + "/api/business/invoices", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const json = await res.json();

@@ -48,7 +48,7 @@ function TrackingContent() {
         }
 
         // Fetch booking
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings/${id}`, {
+        const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/bookings/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const json = await res.json();
@@ -67,7 +67,7 @@ function TrackingContent() {
           });
           
           // Connect to Socket.IO for real-time driver tracking
-          socket = io((`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}`));
+          socket = io((`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}`));
           socket.on("connect", () => {
             socket.emit("join:booking", { bookingId: id });
           });

@@ -22,7 +22,7 @@ export default function LiveAnalyticsPage() {
   const fetchSessions = async () => {
     if (!adminToken) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/live-sessions`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/admin/live-sessions`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       const data = await res.json();
@@ -44,7 +44,7 @@ export default function LiveAnalyticsPage() {
 
   const handleDisconnect = async (uid: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/live-sessions/${uid}`, {
+      await fetch(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/api\/?$/, '')}/api/admin/live-sessions/${uid}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${adminToken}` }
       });

@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="en" className="light" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="grain" suppressHydrationWarning>
         <Providers>
           <Toaster position="top-center" />

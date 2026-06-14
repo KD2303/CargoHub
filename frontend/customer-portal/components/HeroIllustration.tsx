@@ -86,7 +86,7 @@ function SceneElement({
   if (reducedMotion) {
     return (
       <div className={positionClass}>
-        <Image src={src} alt={alt} className={`w-full h-auto object-contain ${dropShadow}`} />
+        <Image src={src} alt={alt} className={`w-full h-auto object-contain ${dropShadow}`} priority={priority} />
       </div>
     );
   }
