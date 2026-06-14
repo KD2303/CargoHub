@@ -52,6 +52,17 @@ export const RegisterScreen = ({ route, navigation }: any) => {
       return; 
     }
     
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Weak Password', 'Password must be at least 6 characters long.');
+      return;
+    }
+
     if (selectedRole === 'DRIVER' && !vehicleNumber) {
       Alert.alert('Missing Fields', 'Please provide a vehicle number.');
       return;
@@ -120,8 +131,7 @@ export const RegisterScreen = ({ route, navigation }: any) => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const tokenKey = selectedRole === 'DRIVER' ? '@cargohub_driver_token' : '@cargohub_customer_token';
-      await AsyncStorage.setItem(tokenKey, token);
+      await AsyncStorage.setItem('@cargohub_auth_token', token);
 
       await login(token);
     } catch (error: any) { 
@@ -172,8 +182,7 @@ export const RegisterScreen = ({ route, navigation }: any) => {
         console.log("Backend sync status:", backendErr.response?.data || backendErr.message);
       }
 
-      const tokenKey = selectedRole === 'DRIVER' ? '@cargohub_driver_token' : '@cargohub_customer_token';
-      await AsyncStorage.setItem(tokenKey, token);
+      await AsyncStorage.setItem('@cargohub_auth_token', token);
       await login(token);
     } catch (error: any) {
       Alert.alert('Google Sign-In Error', error.message || 'Google Sign-In failed.');

@@ -78,16 +78,49 @@ const MOCK_CUSTOMER_NOTIFICATIONS = [
 export const NotificationCenterScreen = ({ navigation }: any) => {
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState('All');
-  
-  const initialNotifications = profile?.role === 'CUSTOMER' ? MOCK_CUSTOMER_NOTIFICATIONS : MOCK_DRIVER_NOTIFICATIONS;
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await api.get('/notifications');
+        if (response.data?.success) {
+          setNotifications(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
   const filteredNotifications = activeTab === 'All' 
     ? notifications 
     : notifications.filter(n => n.type === activeTab.toUpperCase() || (activeTab === 'System' && ['SYSTEM', 'RATING', 'KYC'].includes(n.type)));
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    // Real API integration would ideally have a mark-all-read or we map over them
+    try {
+      const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
+      await Promise.all(unreadIds.map(id => api.patch(`/notifications/${id}/read`)));
+    } catch(e) {
+      console.log('Error marking all as read', e);
+    }
+  };
+
+  const handleNotificationPress = async (notif: any) => {
+    if (!notif.isRead) {
+      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+      try {
+        await api.patch(`/notifications/${notif.id}/read`);
+      } catch (e) {
+        console.log('Failed to mark read', e);
+      }
+    }
   };
 
   const getIconForType = (type: string) => {
@@ -151,7 +184,12 @@ export const NotificationCenterScreen = ({ navigation }: any) => {
           </View>
         ) : (
           filteredNotifications.map((notif) => (
-            <TouchableOpacity key={notif.id} style={[styles.card, !notif.isRead && styles.unreadCard]} activeOpacity={0.7}>
+            <TouchableOpacity 
+              key={notif.id} 
+              style={[styles.card, !notif.isRead && styles.unreadCard]} 
+              activeOpacity={0.7}
+              onPress={() => handleNotificationPress(notif)}
+            >
               {!notif.isRead && <View style={styles.unreadBar} />}
               
               <View style={[styles.iconCircle, { backgroundColor: getIconColor(notif.type) }]}>

@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('[DEBUG] checkAuth started');
       try {
         console.log('[DEBUG] getting token from AsyncStorage');
-        const token = await AsyncStorage.getItem('@cargohub_driver_token');
+        const token = await AsyncStorage.getItem('@cargohub_auth_token');
         console.log('[DEBUG] Token:', token ? 'exists' : 'null');
         if (token) {
           console.log('[DEBUG] Fetching /auth/me');
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (token: string, fallbackProfile?: any) => {
-    await AsyncStorage.setItem('@cargohub_driver_token', token);
+    await AsyncStorage.setItem('@cargohub_auth_token', token);
     try {
       const response = await api.get('/auth/me');
       if (response.data?.data) {
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('@cargohub_driver_token');
+    await AsyncStorage.removeItem('@cargohub_auth_token');
     await AsyncStorage.removeItem('@cargohub_mock_uid');
     setUser(null);
   };

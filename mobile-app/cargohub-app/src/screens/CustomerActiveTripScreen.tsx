@@ -85,6 +85,21 @@ export const CustomerActiveTripScreen = ({ route, navigation }: any) => {
     }
   }, [bookingId, socket]);
 
+  const [isCancelling, setIsCancelling] = useState(false);
+  const handleCancelBooking = async () => {
+    setIsCancelling(true);
+    try {
+      await api.patch(`/bookings/${bookingId}/cancel`, {
+        reason: 'User requested cancellation via App'
+      });
+      setIsCancelling(false);
+      navigation.navigate('CustomerMain');
+    } catch (error) {
+      setIsCancelling(false);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  };
+
   if (!booking) {
     return (
       <View style={styles.loadingContainer}>
@@ -234,8 +249,8 @@ export const CustomerActiveTripScreen = ({ route, navigation }: any) => {
             </View>
 
             {(booking.status === 'PENDING' || booking.status === 'ACCEPTED' || booking.status === 'DRIVER_ARRIVING') && (
-              <TouchableOpacity style={styles.cancelBtn}>
-                <Text style={styles.cancelText}>Cancel Booking</Text>
+              <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelBooking} disabled={isCancelling}>
+                <Text style={styles.cancelText}>{isCancelling ? 'Cancelling...' : 'Cancel Booking'}</Text>
               </TouchableOpacity>
             )}
           </>

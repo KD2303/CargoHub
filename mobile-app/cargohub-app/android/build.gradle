@@ -39,9 +39,14 @@ allprojects {
 
 // FORCE PATCH FOR EXPO-TASK-MANAGER
 def applyExpoTaskPatch = {
-    def path = "D:/CargoHub/node_modules/expo-task-manager/android/src/main/java/expo/modules/taskManager/TaskManagerUtils.java"
-    def taskFile = file(path)
-    if (taskFile.exists()) {
+    def possiblePaths = [
+        new File(rootDir, "../node_modules/expo-task-manager/android/src/main/java/expo/modules/taskManager/TaskManagerUtils.java"),
+        new File(rootDir, "../../node_modules/expo-task-manager/android/src/main/java/expo/modules/taskManager/TaskManagerUtils.java")
+    ]
+    
+    def taskFile = possiblePaths.find { it.exists() }
+    
+    if (taskFile != null) {
         println "--------------------------------------------------------"
         println "PATCH_SYSTEM: Adding 'cancelScheduledJob' to TaskManagerUtils.java..."
         taskFile.text = """package expo.modules.taskManager;

@@ -5,17 +5,34 @@ import { Star } from 'lucide-react-native';
 import { GradientButton } from '../components/GradientButton';
 import { StatusBar } from 'expo-status-bar';
 
-export const RateDriverScreen = ({ navigation }: any) => {
+import { api } from '../services/api';
+
+export const RateDriverScreen = ({ route, navigation }: any) => {
+  const { bookingId } = route.params || {};
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!bookingId) {
+      navigation.navigate('CustomerMain');
+      return;
+    }
+    
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await api.post(`/ratings/${bookingId}`, { rating, comment });
       setLoading(false);
       navigation.navigate('CustomerMain');
-    }, 1000);
+    } catch (e: any) {
+      setLoading(false);
+      if (e.response?.data?.error === 'ALREADY_RATED') {
+        navigation.navigate('CustomerMain');
+      } else {
+        alert('Failed to submit rating. Please try again.');
+        console.error(e);
+      }
+    }
   };
 
   return (

@@ -1,10 +1,11 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert, ScrollView, ActivityIndicator, Animated, Easing } from 'react-native';
-import MapViewOriginal, { Marker as MarkerOriginal, UrlTile as UrlTileOriginal } from 'react-native-maps';
+import MapViewOriginal, { Marker as MarkerOriginal, UrlTile as UrlTileOriginal, Polyline as PolylineOriginal } from 'react-native-maps';
 const MapView = MapViewOriginal as any;
 const Marker = MarkerOriginal as any;
 const UrlTile = UrlTileOriginal as any;
+const Polyline = PolylineOriginal as any;
 
 import { MapPin as MapPinIcon, Navigation as NavigationIcon, ArrowLeft as ArrowLeftIcon, Weight as WeightIcon, Truck as TruckIcon, Package as PackageIcon, Users as UsersIcon, ChevronRight as ChevronRightIcon, Minus as MinusIcon, Plus as PlusIcon, IndianRupee as RupeeIcon, CheckCircle as CheckIcon, X as XIcon, Zap as ZapIcon, Home as HomeIcon, Briefcase as BriefcaseIcon } from 'lucide-react-native';
 const MapPin = MapPinIcon as any;
@@ -85,6 +86,8 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
   // Step 1: Locations
   const [pickup, setPickup] = useState('Current Location');
   const [dropoff, setDropoff] = useState('');
+  const [pickupCoords, setPickupCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{lat: number, lng: number} | null>(null);
 
   // Step 2: Weight → Vehicle → Load → Helpers
   const [weight, setWeight] = useState('');
@@ -120,6 +123,7 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
       }
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc);
+      setPickupCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
     })();
   }, []);
 
@@ -153,7 +157,7 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
       console.log('booking:accepted received:', data);
       setStep('LOCATIONS');
       Alert.alert('Driver Found! 🚛', `${data.driverName} is on the way!\nETA: ~${data.eta} mins`, [
-        { text: 'Track Now', onPress: () => navigation.navigate('TrackLive') }
+        { text: 'Track Now', onPress: () => navigation.navigate('CustomerActiveTrip', { bookingId: data.bookingId }) }
       ]);
     };
 
@@ -163,12 +167,35 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleNextToWeight = () => {
+  const handleNextToWeight = async () => {
     if (!dropoff.trim()) {
       Alert.alert('Missing Drop-off', 'Please enter a drop-off location');
       return;
     }
-    setStep('WEIGHT_VEHICLE');
+    
+    setBookingLoading(true);
+    try {
+      if (pickup !== 'Current Location') {
+         const pRes = await Location.geocodeAsync(pickup);
+         if (pRes.length > 0) {
+           setPickupCoords({ lat: pRes[0].latitude, lng: pRes[0].longitude });
+         }
+      }
+      const dRes = await Location.geocodeAsync(dropoff);
+      if (dRes.length > 0) {
+        setDropoffCoords({ lat: dRes[0].latitude, lng: dRes[0].longitude });
+        setStep('WEIGHT_VEHICLE');
+      } else {
+        Alert.alert('Location Not Found', 'Could not locate the drop-off address.');
+      }
+    } catch(e) {
+      console.log('Geocode error:', e);
+      // Fallback for mocked environment or if geocoding fails
+      setDropoffCoords({ lat: 26.8722, lng: 80.9908 });
+      setStep('WEIGHT_VEHICLE');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const calculateFare = () => {
@@ -198,11 +225,11 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
     setBookingLoading(true);
     try {
       const payload = {
-        pickupLat: location?.coords.latitude || 26.8467,
-        pickupLng: location?.coords.longitude || 80.9462,
+        pickupLat: pickupCoords?.lat || location?.coords.latitude || 26.8467,
+        pickupLng: pickupCoords?.lng || location?.coords.longitude || 80.9462,
         pickupAddress: pickup,
-        dropLat: 26.8722, // Mock — in production from geocoding
-        dropLng: 80.9908,
+        dropLat: dropoffCoords?.lat || 26.8722,
+        dropLng: dropoffCoords?.lng || 80.9908,
         dropAddress: dropoff,
         vehicleType: vehicle,
         loadType: loadType,
@@ -211,7 +238,7 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
       };
 
       const response = await api.post('/bookings', payload);
-      const booking = response.data?.data?.booking;
+      const booking = response.data?.data?.booking || response.data?.data;
 
       if (booking) {
         // Join booking socket room for live updates
@@ -268,6 +295,26 @@ export const CustomerHomeScreen = ({ navigation }: any) => {
               shouldReplaceMapContent={true}
             />
           ) : null}
+
+          {pickupCoords && (
+            <Marker coordinate={{ latitude: pickupCoords.lat, longitude: pickupCoords.lng }} title="Pickup" pinColor={theme.colors.brand.primary} />
+          )}
+
+          {dropoffCoords && (
+            <Marker coordinate={{ latitude: dropoffCoords.lat, longitude: dropoffCoords.lng }} title="Drop-off" pinColor={theme.colors.brand.secondary} />
+          )}
+
+          {pickupCoords && dropoffCoords && (
+            <Polyline 
+              coordinates={[
+                { latitude: pickupCoords.lat, longitude: pickupCoords.lng },
+                { latitude: dropoffCoords.lat, longitude: dropoffCoords.lng }
+              ]}
+              strokeColor={theme.colors.brand.primary}
+              strokeWidth={3}
+              lineDashPattern={[5, 5]}
+            />
+          )}
         </MapView>
       ) : (
         <View style={styles.mapPlaceholder}>

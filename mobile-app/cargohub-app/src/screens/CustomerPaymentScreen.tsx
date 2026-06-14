@@ -19,28 +19,46 @@ export const CustomerPaymentScreen = ({ route, navigation }: any) => {
   const handlePayment = async () => {
     setIsProcessing(true);
     
-    // Fallback for Expo Go where native module doesn't exist
-    if (!RazorpayCheckout) {
-      console.log('Running in Expo Go: Native Razorpay SDK not found. Using Mock Payment.');
-      setTimeout(async () => {
-        try {
-          await api.post(`/bookings/${bookingId}/pay`, { amount: 320 });
-        } catch (e) {}
-        setIsProcessing(false);
-        setPaymentSuccess(true);
-        setTimeout(() => navigation.navigate('RateDriver', { bookingId }), 1500);
-      }, 2000);
-      return;
-    }
-
     try {
+      // 1. Create Order on Backend
+      const orderResponse = await api.post('/payments/create-order', { bookingId });
+      const orderData = orderResponse.data?.data;
+      
+      if (!orderData) {
+        throw new Error('Failed to create payment order on server.');
+      }
+
+      // Fallback for Expo Go where native module doesn't exist
+      if (!RazorpayCheckout) {
+        console.log('Running in Expo Go: Native Razorpay SDK not found. Using Mock Payment Verify.');
+        // Still need to verify mock payment or we can just mock the verification
+        setTimeout(async () => {
+          try {
+            await api.post('/payments/verify', { 
+              razorpay_order_id: orderData.orderId,
+              razorpay_payment_id: 'pay_mock123456',
+              razorpay_signature: 'mock_signature_dev_only' 
+            });
+            setIsProcessing(false);
+            setPaymentSuccess(true);
+            setTimeout(() => navigation.navigate('RateDriver', { bookingId }), 1500);
+          } catch (e: any) {
+            setIsProcessing(false);
+            alert(`Payment verification failed: ${e.message}`);
+          }
+        }, 1500);
+        return;
+      }
+
+      // 2. Open Razorpay Checkout
       const options = {
         description: 'Cargo Delivery Payment',
         image: 'https://i.imgur.com/3g7nmJC.png',
-        currency: 'INR',
-        key: 'rzp_test_SzETI5YgX84RSu',
-        amount: 32000, // ₹320 in paise
+        currency: orderData.currency || 'INR',
+        key: 'rzp_test_SzETI5YgX84RSu', // Ideally this comes from backend or env
+        amount: orderData.amount, // from backend order
         name: 'CargoHub',
+        order_id: orderData.orderId, // Crucial for signature verification
         prefill: {
           email: 'test@cargohub.com',
           contact: '9999999999',
@@ -51,9 +69,11 @@ export const CustomerPaymentScreen = ({ route, navigation }: any) => {
 
       const data = await RazorpayCheckout.open(options);
       
-      await api.post(`/bookings/${bookingId}/pay`, { 
-        amount: 320,
-        paymentId: data.razorpay_payment_id
+      // 3. Verify Payment Signature on Backend
+      await api.post('/payments/verify', { 
+        razorpay_order_id: data.razorpay_order_id,
+        razorpay_payment_id: data.razorpay_payment_id,
+        razorpay_signature: data.razorpay_signature
       });
       
       setIsProcessing(false);
@@ -66,7 +86,10 @@ export const CustomerPaymentScreen = ({ route, navigation }: any) => {
     } catch (error: any) {
       setIsProcessing(false);
       console.log('Payment failed or cancelled', error);
-      alert(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
+      // Don't alert if user just cancelled
+      if (error.code !== 0 && error.code !== '0') {
+        alert(`Payment failed: ${error.description || error.message || 'Unknown error'}`);
+      }
     }
   };
 

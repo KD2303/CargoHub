@@ -45,6 +45,17 @@ export const LoginScreen = ({ route, navigation }: any) => {
       Alert.alert('Missing Fields', 'Please fill in all required fields.'); 
       return; 
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (isSignUp && password.length < 6) {
+      Alert.alert('Weak Password', 'Password must be at least 6 characters long.');
+      return;
+    }
     setLoading(true);
     try {
       if (isSignUp) {
@@ -87,8 +98,7 @@ export const LoginScreen = ({ route, navigation }: any) => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        const tokenKey = selectedRole === 'DRIVER' ? '@cargohub_driver_token' : '@cargohub_customer_token';
-        await AsyncStorage.setItem(tokenKey, token);
+        await AsyncStorage.setItem('@cargohub_auth_token', token);
 
         await login(token);
       } else {
@@ -96,8 +106,7 @@ export const LoginScreen = ({ route, navigation }: any) => {
         const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
         const token = await userCredential.user.getIdToken();
         
-        const tokenKey = selectedRole === 'DRIVER' ? '@cargohub_driver_token' : '@cargohub_customer_token';
-        await AsyncStorage.setItem(tokenKey, token);
+        await AsyncStorage.setItem('@cargohub_auth_token', token);
 
         try {
           await login(token);
@@ -162,8 +171,7 @@ export const LoginScreen = ({ route, navigation }: any) => {
         console.log("Backend sync status:", backendErr.response?.data || backendErr.message);
       }
 
-      const tokenKey = selectedRole === 'DRIVER' ? '@cargohub_driver_token' : '@cargohub_customer_token';
-      await AsyncStorage.setItem(tokenKey, token);
+      await AsyncStorage.setItem('@cargohub_auth_token', token);
       await login(token);
     } catch (error: any) {
       Alert.alert('Google Sign-In Error', error.message || 'Google Sign-In failed.');

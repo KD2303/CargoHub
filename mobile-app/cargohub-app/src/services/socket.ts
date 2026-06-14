@@ -2,16 +2,18 @@ import { io, Socket } from 'socket.io-client';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const SOCKET_URL = __DEV__
-  ? Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000'
-  : 'https://cargohub-roof.onrender.com';
+export const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL 
+  ? process.env.EXPO_PUBLIC_API_URL.replace('/api', '')
+  : (__DEV__
+    ? Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000'
+    : 'https://cargohub-roof.onrender.com');
 
 let socket: Socket | null = null;
 
 export const initSocket = async (): Promise<Socket> => {
   if (socket?.connected) return socket;
 
-  const token = await AsyncStorage.getItem('@cargohub_driver_token');
+  const token = await AsyncStorage.getItem('@cargohub_auth_token');
   
   socket = io(SOCKET_URL, {
     auth: {

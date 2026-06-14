@@ -20,7 +20,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const token = await AsyncStorage.getItem('@cargohub_driver_token');
+      const token = await AsyncStorage.getItem('@cargohub_auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
